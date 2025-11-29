@@ -191,7 +191,9 @@ RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
     && echo 'alias cat="bat --paging=never"' >> /etc/profile.d/04-aliases.sh
 
 RUN git lfs install \
-    && rm -rf /usr/share/doc/* /usr/share/man/*
+    && rm -rf /usr/share/doc/* /usr/share/man/* \
+    /usr/lib/cargo \
+    /root/.launchpadlib
 
 WORKDIR /workspace
 CMD ["/bin/bash"]

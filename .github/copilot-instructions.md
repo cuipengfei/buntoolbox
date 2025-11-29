@@ -68,7 +68,7 @@ bd sync  # Force immediate export/commit/push
 1. **Check ready work**: `bd ready --json`
 2. **Claim task**: `bd update <id> --status in_progress`
 3. **Work on it**: Implement, test, document
-4. **Discover new work?** `bd create "Found bug" -p 1 --deps discovered-from:<parent-id> --json`
+4. **Discover new work?** `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
 5. **Complete**: `bd close <id> --reason "Done" --json`
 6. **Sync**: `bd sync` (flushes changes to git immediately)
 

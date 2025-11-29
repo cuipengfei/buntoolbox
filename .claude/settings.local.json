@@ -36,7 +36,9 @@
       "WebFetch(domain:productionresultssa19.blob.core.windows.net)",
       "Bash(docker pull:*)",
       "Bash(docker history:*)",
-      "Bash(docker images:*)"
+      "Bash(docker images:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:api.github.com)"
     ],
     "deny": [],
     "ask": []

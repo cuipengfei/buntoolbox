@@ -18,6 +18,7 @@ ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.8
 ARG BEADS_VERSION=0.26.0
+ARG MIHOMO_VERSION=1.19.16
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -160,6 +161,11 @@ RUN curl -fsSL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXID
 # beads (bd - issue tracker)
 RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_VERSION}/beads_${BEADS_VERSION}_linux_amd64.tar.gz" \
     | tar -xz -C /usr/local/bin bd
+
+# mihomo (Clash.Meta)
+RUN curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/v${MIHOMO_VERSION}/mihomo-linux-amd64-v${MIHOMO_VERSION}.gz" \
+    | gunzip -c > /usr/local/bin/mihomo \
+    && chmod +x /usr/local/bin/mihomo
 
 # lazygit
 RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" \

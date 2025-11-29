@@ -71,6 +71,7 @@ check_version "eza" "$(get_current_version EZA_VERSION)" "$(get_latest_github_re
 check_version "delta" "$(get_current_version DELTA_VERSION)" "$(get_latest_github_release dandavison/delta)"
 check_version "zoxide" "$(get_current_version ZOXIDE_VERSION)" "$(get_latest_github_release ajeetdsouza/zoxide)"
 check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release steveyegge/beads)"
+check_version "mihomo" "$(get_current_version MIHOMO_VERSION)" "$(get_latest_github_release MetaCubeX/mihomo)"
 
 echo ""
 if [ $updates_available -eq 1 ]; then

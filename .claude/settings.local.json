@@ -48,7 +48,8 @@
       "Bash(snap list:*)",
       "Bash(apt-mark showmanual:*)",
       "Bash(bun pm ls:*)",
-      "Bash(bash -lc:*)"
+      "Bash(bash -lc:*)",
+      "Bash(./scripts/wait-and-test.sh:*)"
     ],
     "deny": [],
     "ask": []

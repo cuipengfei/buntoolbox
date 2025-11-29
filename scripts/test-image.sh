@@ -126,14 +126,20 @@ check "nano" "nano --version" "nano --version" "nano"
 check "helix" "hx --version" "hx --version" "helix"
 
 echo ""
-echo "=== TUI Tools ==="
+echo "=== TUI 工具 ==="
 check "lazygit" "lazygit --version" "lazygit --version" "version="
 check "bat" "bat --version" "printf 'line1\nline2' | bat -p --color=never" "line1"
 check "eza" "eza --version" "eza -1 /" "bin"
 check "delta" "delta --version" "delta --version" "delta"
 check "btop" "btop --version" "btop --version" "btop"
+
+echo ""
+echo "=== Shell 增强 ==="
 check "starship" "starship --version" "starship --version" "starship"
 check "zoxide" "zoxide --version" "zoxide --version" "zoxide"
+
+echo ""
+echo "=== 其他工具 ==="
 check "bd" "bd --help 2>&1 | head -1" "bd --help" "beads"
 check "mihomo" "mihomo -v" "mihomo -h" "Usage"
 

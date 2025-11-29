@@ -19,6 +19,9 @@ ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.8
 ARG BEADS_VERSION=0.26.0
 ARG MIHOMO_VERSION=1.19.16
+ARG BUN_VERSION=1.3.3
+ARG UV_VERSION=0.9.13
+ARG STARSHIP_VERSION=1.24.1
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -98,8 +101,8 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa \
 
 # Install uv first, then use uv to install pipx (avoids distutils issue with pip)
 ENV UV_INSTALL_DIR=/root/.local/bin
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && rm -rf /root/.cache/uv
+RUN curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
+    | tar -xz -C /root/.local/bin --strip-components=1
 ENV PATH="${UV_INSTALL_DIR}:${PATH}"
 
 RUN uv tool install pipx && pipx ensurepath \
@@ -128,8 +131,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 ENV BUN_INSTALL=/root/.bun
-RUN curl -fsSL https://bun.sh/install | bash \
-    && rm -rf /root/.bun/install/cache
+RUN mkdir -p /root/.bun/bin \
+    && curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip" -o /tmp/bun.zip \
+    && unzip -q /tmp/bun.zip -d /tmp \
+    && mv /tmp/bun-linux-x64/bun /root/.bun/bin/bun \
+    && chmod +x /root/.bun/bin/bun \
+    && rm -rf /tmp/bun.zip /tmp/bun-linux-x64
 ENV PATH="${BUN_INSTALL}/bin:${PATH}"
 
 # =============================================================================
@@ -178,8 +185,8 @@ RUN curl -fsSL "https://github.com/helix-editor/helix/releases/download/${HELIX_
 ENV HELIX_RUNTIME=/opt/helix-${HELIX_VERSION}-x86_64-linux/runtime
 
 # starship prompt
-RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y \
-    && rm -rf /tmp/*
+RUN curl -fsSL "https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-x86_64-unknown-linux-gnu.tar.gz" \
+    | tar -xz -C /usr/local/bin
 
 # =============================================================================
 # 9. Final Configuration (tiny, last)

@@ -52,7 +52,10 @@
       "Bash(./scripts/wait-and-test.sh:*)",
       "Bash(bash:*)",
       "Bash(pwd:*)",
-      "Bash(cygpath:*)"
+      "Bash(cygpath:*)",
+      "Bash(gh run list:*)",
+      "Bash(tar:*)",
+      "Bash(gh run:*)"
     ],
     "deny": [],
     "ask": []

@@ -5,7 +5,7 @@
 # Layer order optimized for minimal pull on updates:
 # Stable layers first, frequently updated layers last
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # =============================================================================
 # Version Configuration (run scripts/check-versions.sh to check for updates)

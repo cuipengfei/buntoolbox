@@ -6,16 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Buntoolbox 是一个多语言开发环境 Docker 镜像，基于 Ubuntu 22.04。通过 GitHub Actions 自动构建并推送到 Docker Hub（支持 amd64/arm64）。
+Buntoolbox 是一个多语言开发环境 Docker 镜像，基于 Ubuntu 24.04 LTS (Noble)。通过 GitHub Actions 自动构建并推送到 Docker Hub。
 
 ## 技术栈
 
 | 类别 | 组件 |
 |:-----|:-----|
-| 基础镜像 | Ubuntu 22.04 LTS |
+| 基础镜像 | Ubuntu 24.04 LTS (Noble) |
 | JDK | Azul Zulu 11, 17, 21 (默认 21) |
 | JS/TS | Node.js 24 LTS, Bun |
-| Python | 3.12 + uv/uvx + pipx |
+| Python | 3.12 + uv/uvx + pipx (uv 安装 pipx 避免 distutils 问题) |
 | Go | 1.25.4 |
 | Rust | rustup + rustfmt + clippy |
 | 构建工具 | Maven, Gradle 9.2.1 |
@@ -62,6 +62,6 @@ docker run -it -v $(pwd):/workspace buntoolbox
 
 GitHub Actions 自动构建（`.github/workflows/docker.yml`）：
 - 触发：push 到 master/main，创建 tag，手动触发
-- 平台：linux/amd64, linux/arm64
+- 平台：linux/amd64
 - 缓存：`type=gha,mode=max`（稳定层缓存，重建时只构建变化的层）
 - Secrets：`DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`

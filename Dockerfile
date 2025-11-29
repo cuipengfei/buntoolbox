@@ -1,5 +1,5 @@
 # Buntoolbox - Multi-language Development Environment
-# Base: Ubuntu 22.04 LTS
+# Base: Ubuntu 24.04 LTS (Noble)
 # Languages: JS/TS (Bun, Node.js), Python 3.12, Java (Zulu 11/17/21), Go, Rust
 #
 # Layer order optimized for minimal pull on updates:

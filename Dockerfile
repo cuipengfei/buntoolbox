@@ -185,6 +185,10 @@ RUN curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install
 # =============================================================================
 # 11. Final Configuration (tiny, last)
 # =============================================================================
+# Use C.UTF-8 locale (built-in to Ubuntu 24.04, no locales package needed)
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
 RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
     && echo 'eval "$(starship init bash)"' > /etc/profile.d/02-starship.sh \
     && echo 'eval "$(zoxide init bash)"' > /etc/profile.d/03-zoxide.sh \

@@ -1,31 +1,43 @@
-# GitHub Copilot Instructions for Buntoolbox
+# GitHub Copilot Instructions for Beads
 
 ## Project Overview
 
-Buntoolbox 是一个全能开发环境 Docker 镜像，基于 Ubuntu，集成多种运行时和开发工具。
+**beads** (command: `bd`) is a Git-backed issue tracker designed for AI-supervised coding workflows. We dogfood our own tool for all task tracking.
 
 **Key Features:**
-- 多 JDK 版本支持 (Azul Zulu 11, 17, 21)
-- 现代 JS 运行时 (Bun, Node.js)
-- Python 开发环境
-- 常用开发工具集
+- Dependency-aware issue tracking
+- Auto-sync with Git via JSONL
+- AI-optimized CLI with JSON output
+- Built-in daemon for background operations
+- MCP server integration for Claude and other AI assistants
 
 ## Tech Stack
 
-- **Base Image**: Ubuntu
-- **JDK**: Azul Zulu (11, 17, 21)
-- **JS Runtime**: Bun, Node.js
-- **Python**: Latest stable
+- **Language**: Go 1.21+
+- **Storage**: SQLite (internal/storage/sqlite/)
+- **CLI Framework**: Cobra
+- **Testing**: Go standard testing + table-driven tests
+- **CI/CD**: GitHub Actions
+- **MCP Server**: Python (integrations/beads-mcp/)
 
-## Build Commands
+## Coding Guidelines
 
-```bash
-# Build image
-docker build -t buntoolbox .
+### Testing
+- Always write tests for new features
+- Use `BEADS_DB=/tmp/test.db` to avoid polluting production database
+- Run `go test -short ./...` before committing
+- Never create test issues in production DB (use temporary DB)
 
-# Run container
-docker run -it buntoolbox
-```
+### Code Style
+- Run `golangci-lint run ./...` before committing
+- Follow existing patterns in `cmd/bd/` for new commands
+- Add `--json` flag to all commands for programmatic use
+- Update docs when changing behavior
+
+### Git Workflow
+- Always commit `.beads/issues.jsonl` with code changes
+- Run `bd sync` at end of work sessions
+- Install git hooks: `bd hooks install` (ensures DB ↔ JSONL consistency)
 
 ## Issue Tracking with bd
 
@@ -36,6 +48,7 @@ docker run -it buntoolbox
 ```bash
 # Find work
 bd ready --json                    # Unblocked issues
+bd stale --days 30 --json          # Forgotten issues
 
 # Create and manage
 bd create "Title" -t bug|feature|task -p 0-4 --json
@@ -45,6 +58,9 @@ bd close <id> --reason "Done" --json
 # Search
 bd list --status open --priority 1 --json
 bd show <id> --json
+
+# Sync (CRITICAL at end of session!)
+bd sync  # Force immediate export/commit/push
 ```
 
 ### Workflow
@@ -54,6 +70,7 @@ bd show <id> --json
 3. **Work on it**: Implement, test, document
 4. **Discover new work?** `bd create "Found bug" -p 1 --deps discovered-from:<parent-id> --json`
 5. **Complete**: `bd close <id> --reason "Done" --json`
+6. **Sync**: `bd sync` (flushes changes to git immediately)
 
 ### Priorities
 
@@ -66,22 +83,50 @@ bd show <id> --json
 ## Project Structure
 
 ```
-buntoolbox/
-├── Dockerfile           # Main build file
-├── .beads/
-│   └── issues.jsonl     # Git-synced issue storage
-├── CLAUDE.md            # Claude Code instructions
-├── AGENTS.md            # AI agent workflow guide
-└── README.md            # User documentation
+beads/
+├── cmd/bd/              # CLI commands (add new commands here)
+├── internal/
+│   ├── types/           # Core data types
+│   └── storage/         # Storage layer
+│       └── sqlite/      # SQLite implementation
+├── integrations/
+│   └── beads-mcp/       # MCP server (Python)
+├── examples/            # Integration examples
+├── docs/                # Documentation
+└── .beads/
+    ├── beads.db         # SQLite database (DO NOT COMMIT)
+    └── issues.jsonl     # Git-synced issue storage
 ```
+
+## Available Resources
+
+### MCP Server (Recommended)
+Use the beads MCP server for native function calls instead of shell commands:
+- Install: `pip install beads-mcp`
+- Functions: `mcp__beads__ready()`, `mcp__beads__create()`, etc.
+- See `integrations/beads-mcp/README.md`
+
+### Scripts
+- `./scripts/bump-version.sh <version> --commit` - Update all version files atomically
+- `./scripts/release.sh <version>` - Complete release workflow
+- `./scripts/update-homebrew.sh <version>` - Update Homebrew formula
+
+### Key Documentation
+- **AGENTS.md** - Comprehensive AI agent guide (detailed workflows, advanced features)
+- **AGENT_INSTRUCTIONS.md** - Development procedures, testing, releases
+- **README.md** - User-facing documentation
+- **docs/CLI_REFERENCE.md** - Complete command reference
 
 ## Important Rules
 
-- Use bd for ALL task tracking
-- Always use `--json` flag for programmatic use
-- Do NOT create markdown TODO lists
-- Commit `.beads/issues.jsonl` with code changes
+- ✅ Use bd for ALL task tracking
+- ✅ Always use `--json` flag for programmatic use
+- ✅ Run `bd sync` at end of sessions
+- ✅ Test with `BEADS_DB=/tmp/test.db`
+- ❌ Do NOT create markdown TODO lists
+- ❌ Do NOT create test issues in production DB
+- ❌ Do NOT commit `.beads/beads.db` (JSONL only)
 
 ---
 
-**For detailed workflows, see [AGENTS.md](../AGENTS.md)**
+**For detailed workflows and advanced features, see [AGENTS.md](../AGENTS.md)**

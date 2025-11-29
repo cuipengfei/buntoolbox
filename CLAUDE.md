@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Note**: This project uses [bd (beads)](https://github.com/steveyegge/beads) for issue tracking. Use `bd` commands instead of markdown TODOs.
+**Note**: This project uses [bd (beads)](https://github.com/steveyegge/beads) for issue tracking. Use `bd` commands instead of markdown TODOs. See AGENTS.md for workflow details.
 
 ## Project Overview
 
@@ -21,6 +21,7 @@ Buntoolbox 是一个多语言开发环境 Docker 镜像，基于 Ubuntu 24.04 LT
 | 构建工具 | Maven, Gradle 9.2.1 |
 | 开发工具 | git, gh, jq, ripgrep, fd, fzf, tmux, direnv |
 | TUI 工具 | lazygit, helix, btop, bat, eza, delta, starship, zoxide |
+| Locale | C.UTF-8 (内置，无需安装 locales 包) |
 
 ## 常用命令
 
@@ -33,6 +34,12 @@ docker run -it buntoolbox
 
 # 挂载当前目录
 docker run -it -v $(pwd):/workspace buntoolbox
+
+# 测试镜像（构建后运行 47 项检查）
+./scripts/test-image.sh
+
+# 测试已有镜像（不重新构建）
+./scripts/test-image.sh cuipengfei/buntoolbox:latest
 
 # 检查工具版本更新
 ./scripts/check-versions.sh

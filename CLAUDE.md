@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-**Note**: This project uses [bd (beads)](https://github.com/steveyegge/beads) for issue tracking. Use `bd` commands instead of markdown TODOs. See AGENTS.md for workflow details.
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+**Note**: This project uses [bd (beads)](https://github.com/steveyegge/beads) for issue tracking. Use `bd` commands instead of markdown TODOs.
 
 ## 项目概述
 
@@ -14,9 +14,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 docker build -t buntoolbox .              # 构建
-./scripts/test-image.sh                   # 构建并测试 (41 项检查)
+./scripts/test-image.sh                   # 构建并测试 (42 项检查)
 ./scripts/test-image.sh <image>           # 仅测试已有镜像
 ./scripts/check-versions.sh               # 检查工具版本更新
+./scripts/check-versions.sh -v            # 详细模式，显示所有可用下载变体
 ```
 
 ## 架构
@@ -42,9 +43,11 @@ docker build -t buntoolbox .              # 构建
 - **清理必须在同一 RUN 指令中** — Docker 层增量，后续删除无效
 - **JDK jmods/man 可删** — 仅用于 jlink，容器不需要
 - **测试 bd 用 `bd --help`** — `bd --version` 无数据库时返回非零
+- **测试 mihomo 用 `-v` 和 `-h`** — 不支持 `--version` / `--help`
 
 ## 已优化
 
 - JDK 11+17+21 → 仅 21 headless (节省 ~610MB)
-- 删除 jmods/man、`/usr/lib/cargo`、`/root/.launchpadlib`
+- 删除 jmods/man、`/root/.launchpadlib`
 - pipx 通过 uv 安装 (避免 Python 3.12 distutils 问题)
+- GitHub API 缓存 (5分钟) 避免速率限制

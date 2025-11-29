@@ -32,7 +32,11 @@
       "Bash(printf:*)",
       "Bash(docker build:*)",
       "Bash(docker run:*)",
-      "Bash(./scripts/test-image.sh:*)"
+      "Bash(./scripts/test-image.sh:*)",
+      "WebFetch(domain:productionresultssa19.blob.core.windows.net)",
+      "Bash(docker pull:*)",
+      "Bash(docker history:*)",
+      "Bash(docker images:*)"
     ],
     "deny": [],
     "ask": []

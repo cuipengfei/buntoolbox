@@ -69,10 +69,7 @@ echo "=== Languages ==="
 
 # Java - compile and run
 echo 'public class T{public static void main(String[]a){System.out.println(1+1);}}' > /tmp/T.java
-mkdir -p /tmp/j17 /tmp/j11
 check "Java 21" "java -version" "javac /tmp/T.java && java -cp /tmp T" "2"
-check "Java 17" "/usr/lib/jvm/zulu17/bin/java -version" "/usr/lib/jvm/zulu17/bin/javac /tmp/T.java -d /tmp/j17 && /usr/lib/jvm/zulu17/bin/java -cp /tmp/j17 T" "2"
-check "Java 11" "/usr/lib/jvm/zulu11/bin/java -version" "/usr/lib/jvm/zulu11/bin/javac /tmp/T.java -d /tmp/j11 && /usr/lib/jvm/zulu11/bin/java -cp /tmp/j11 T" "2"
 
 # Python
 check "Python" "python --version" "python -c 'import json; print(json.dumps({\"a\":1}))'" '{"a": 1}'
@@ -137,7 +134,7 @@ check "delta" "delta --version" "delta --version" "delta"
 check "btop" "btop --version" "btop --version" "btop"
 check "starship" "starship --version" "starship --version" "starship"
 check "zoxide" "zoxide --version" "zoxide --version" "zoxide"
-check "bd" "bd --version" "bd --version" "beads"
+check "bd" "bd --help 2>&1 | head -1" "bd --help" "beads"
 
 echo ""
 echo "=========================================="

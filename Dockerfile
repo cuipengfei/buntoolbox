@@ -71,17 +71,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ln -sf /usr/bin/batcat /usr/bin/bat
 
 # =============================================================================
-# 2. Azul Zulu JDK 11, 17, 21 (stable, large)
+# 2. Azul Zulu JDK 21 headless (stable, large)
 # =============================================================================
 RUN curl -fsSL https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" > /etc/apt/sources.list.d/zulu.list \
     && apt-get update && apt-get install -y --no-install-recommends \
-    zulu11-jdk \
-    zulu17-jdk \
-    zulu21-jdk \
-    && rm -rf /var/lib/apt/lists/*
+    zulu21-jdk-headless \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /usr/lib/jvm/*/jmods /usr/lib/jvm/*/man
 
-ENV JAVA_HOME=/usr/lib/jvm/zulu21
+ENV JAVA_HOME=/usr/lib/jvm/zulu21-ca-amd64
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # =============================================================================
@@ -103,7 +102,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
 ENV PATH="${UV_INSTALL_DIR}:${PATH}"
 
 RUN uv tool install pipx && pipx ensurepath \
-    && rm -rf /root/.cache/uv /root/.local/share/uv
+    && rm -rf /root/.cache/uv
 ENV PATH="/root/.local/bin:${PATH}"
 
 # =============================================================================

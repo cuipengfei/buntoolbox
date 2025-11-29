@@ -13,13 +13,11 @@ Buntoolbox 是一个多语言开发环境 Docker 镜像，基于 Ubuntu 24.04 LT
 | 类别 | 组件 |
 |:-----|:-----|
 | 基础镜像 | Ubuntu 24.04 LTS (Noble) |
-| JDK | Azul Zulu 11, 17, 21 (默认 21) |
+| JDK | Azul Zulu 21 headless |
 | JS/TS | Node.js 24 LTS, Bun |
 | Python | 3.12 + uv/uvx + pipx (uv 安装 pipx 避免 distutils 问题) |
-| Go | 1.25.4 |
-| Rust | rustup + rustfmt + clippy |
 | 构建工具 | Maven, Gradle 9.2.1 |
-| 开发工具 | git, gh, jq, ripgrep, fd, fzf, tmux, direnv |
+| 开发工具 | git, gh, jq, ripgrep, fd, fzf, tmux, direnv, bd (beads) |
 | TUI 工具 | lazygit, helix, btop, bat, eza, delta, starship, zoxide |
 | Locale | C.UTF-8 (内置，无需安装 locales 包) |
 
@@ -50,18 +48,21 @@ docker run -it -v $(pwd):/workspace buntoolbox
 层顺序已优化：稳定层在前，易变层在后。更新 TUI 工具版本时，用户只需拉取最后几层。
 
 ```
-稳定 ──────────────────────────────────────────────────────────► 易变
-1.系统  2.JDK  3.Python  4.Rust  5.Maven  6.gh  7.Node  8.Go  9.Gradle  10.TUI  11.配置
+稳定 ────────────────────────────────────────────────► 易变
+1.系统  2.JDK  3.Python  4.Maven  5.gh  6.Node/Bun  7.Gradle  8.TUI  9.配置
 ```
 
 ## 版本管理
 
 版本号集中在 Dockerfile 顶部 ARG 声明：
 - `NODE_MAJOR` - Node.js 主版本
-- `GO_VERSION` - Go 版本
 - `GRADLE_VERSION` - Gradle 版本
 - `LAZYGIT_VERSION` - lazygit 版本
 - `HELIX_VERSION` - helix 版本
+- `EZA_VERSION` - eza 版本
+- `DELTA_VERSION` - delta 版本
+- `ZOXIDE_VERSION` - zoxide 版本
+- `BEADS_VERSION` - beads (bd) 版本
 
 运行 `./scripts/check-versions.sh` 查询最新版本（需要 curl + jq）。
 

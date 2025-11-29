@@ -22,7 +22,7 @@ docker build -t buntoolbox .              # 构建
 
 ## 架构
 
-**Dockerfile 层顺序** (稳定→易变): 系统 → JDK → Python → Maven → gh → Node/Bun → Gradle → TUI → 配置
+**Dockerfile 层顺序** (稳定→易变): 系统 → JDK → Python → uv/pipx → Maven → gh → Node/Bun → Gradle → TUI → 配置
 
 **版本管理**: Dockerfile 顶部 ARG 声明 (`NODE_MAJOR`, `GRADLE_VERSION`, `*_VERSION`)
 
@@ -39,6 +39,7 @@ docker build -t buntoolbox .              # 构建
 
 ## 注意事项
 
+- **安装前先创建目标目录** — `mkdir -p /path` 在 tar 解压前，否则构建失败
 - **不要删除 `/root/.local/share/uv`** — pipx 依赖此目录
 - **清理必须在同一 RUN 指令中** — Docker 层增量，后续删除无效
 - **JDK jmods/man 可删** — 仅用于 jlink，容器不需要

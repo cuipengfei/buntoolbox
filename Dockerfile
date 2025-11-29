@@ -1,6 +1,6 @@
 # Buntoolbox - Multi-language Development Environment
 # Base: Ubuntu 24.04 LTS (Noble)
-# Languages: JS/TS (Bun, Node.js), Python 3.12, Java (Zulu 11/17/21), Go, Rust
+# Languages: JS/TS (Bun, Node.js), Python 3.12, Java (Zulu 11/17/21)
 #
 # Layer order optimized for minimal pull on updates:
 # Stable layers first, frequently updated layers last
@@ -11,13 +11,16 @@ FROM ubuntu:24.04
 # Version Configuration (run scripts/check-versions.sh to check for updates)
 # =============================================================================
 ARG NODE_MAJOR=24
-ARG GO_VERSION=1.25.4
 ARG GRADLE_VERSION=9.2.1
 ARG LAZYGIT_VERSION=0.56.0
 ARG HELIX_VERSION=25.07.1
+ARG EZA_VERSION=0.23.4
+ARG DELTA_VERSION=0.18.2
+ARG ZOXIDE_VERSION=0.9.8
+ARG BEADS_VERSION=0.26.0
 
 LABEL maintainer="buntoolbox"
-LABEL description="Multi-language development environment with Bun, Node.js, Python, Java, Go, and Rust"
+LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -95,31 +98,22 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa \
 
 # Install uv first, then use uv to install pipx (avoids distutils issue with pip)
 ENV UV_INSTALL_DIR=/root/.local/bin
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && rm -rf /root/.cache/uv
 ENV PATH="${UV_INSTALL_DIR}:${PATH}"
 
-RUN uv tool install pipx && pipx ensurepath
+RUN uv tool install pipx && pipx ensurepath \
+    && rm -rf /root/.cache/uv /root/.local/share/uv
 ENV PATH="/root/.local/bin:${PATH}"
 
 # =============================================================================
-# 4. Rust via rustup (stable, large)
-# =============================================================================
-ENV RUSTUP_HOME=/root/.rustup
-ENV CARGO_HOME=/root/.cargo
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
-    && . "${CARGO_HOME}/env" \
-    && rustup component add rustfmt clippy
-
-ENV PATH="${CARGO_HOME}/bin:${PATH}"
-
-# =============================================================================
-# 5. Maven (stable, from apt)
+# 4. Maven (stable, from apt)
 # =============================================================================
 RUN apt-get update && apt-get install -y --no-install-recommends maven \
     && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
-# 6. GitHub CLI (stable)
+# 5. GitHub CLI (stable)
 # =============================================================================
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
@@ -127,30 +121,19 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | g
     && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
-# 7. Node.js LTS + Bun (medium change frequency)
+# 6. Node.js LTS + Bun (medium change frequency)
 # =============================================================================
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 ENV BUN_INSTALL=/root/.bun
-RUN curl -fsSL https://bun.sh/install | bash
+RUN curl -fsSL https://bun.sh/install | bash \
+    && rm -rf /root/.bun/install/cache
 ENV PATH="${BUN_INSTALL}/bin:${PATH}"
 
 # =============================================================================
-# 8. Go (frequently updated, large)
-# =============================================================================
-RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -xz -C /usr/local
-
-ENV GOROOT=/usr/local/go
-ENV GOPATH=/go
-ENV GOBIN=/go/bin
-ENV PATH="${GOROOT}/bin:${GOBIN}:${PATH}"
-
-RUN mkdir -p "${GOPATH}/src" "${GOPATH}/bin"
-
-# =============================================================================
-# 9. Gradle (frequently updated)
+# 7. Gradle (frequently updated)
 # =============================================================================
 RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip \
     && unzip -q /tmp/gradle.zip -d /opt \
@@ -161,10 +144,23 @@ ENV GRADLE_HOME=/opt/gradle
 ENV PATH="${GRADLE_HOME}/bin:${PATH}"
 
 # =============================================================================
-# 10. TUI Tools (most frequently updated)
+# 8. TUI Tools (most frequently updated)
 # =============================================================================
-# eza and delta via cargo
-RUN cargo install eza git-delta
+# eza (ls replacement)
+RUN curl -fsSL "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz" \
+    | tar -xz -C /usr/local/bin
+
+# delta (git diff)
+RUN curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+    | tar -xz --strip-components=1 -C /usr/local/bin "delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu/delta"
+
+# zoxide (smart cd)
+RUN curl -fsSL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+    | tar -xz -C /usr/local/bin zoxide
+
+# beads (bd - issue tracker)
+RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_VERSION}/beads_${BEADS_VERSION}_linux_amd64.tar.gz" \
+    | tar -xz -C /usr/local/bin bd
 
 # lazygit
 RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" \
@@ -177,13 +173,11 @@ RUN curl -fsSL "https://github.com/helix-editor/helix/releases/download/${HELIX_
 ENV HELIX_RUNTIME=/opt/helix-${HELIX_VERSION}-x86_64-linux/runtime
 
 # starship prompt
-RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y
-
-# zoxide (smart cd)
-RUN curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y \
+    && rm -rf /tmp/*
 
 # =============================================================================
-# 11. Final Configuration (tiny, last)
+# 9. Final Configuration (tiny, last)
 # =============================================================================
 # Use C.UTF-8 locale (built-in to Ubuntu 24.04, no locales package needed)
 ENV LANG=C.UTF-8
@@ -197,7 +191,8 @@ RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
     && echo 'alias la="eza -la"' >> /etc/profile.d/04-aliases.sh \
     && echo 'alias cat="bat --paging=never"' >> /etc/profile.d/04-aliases.sh
 
-RUN git lfs install
+RUN git lfs install \
+    && rm -rf /usr/share/doc/* /usr/share/man/*
 
 WORKDIR /workspace
 CMD ["/bin/bash"]

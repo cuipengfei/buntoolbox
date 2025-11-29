@@ -30,10 +30,6 @@ get_current_version() {
 }
 
 # Get latest versions from APIs
-get_latest_go() {
-    curl -fsSL "https://go.dev/dl/?mode=json" | jq -r '.[0].version' | sed 's/^go//'
-}
-
 get_latest_gradle() {
     curl -fsSL "https://services.gradle.org/versions/current" | jq -r '.version'
 }
@@ -67,11 +63,14 @@ check_version() {
     fi
 }
 
-check_version "Go" "$(get_current_version GO_VERSION)" "$(get_latest_go)"
-check_version "Gradle" "$(get_current_version GRADLE_VERSION)" "$(get_latest_gradle)"
 check_version "Node.js" "$(get_current_version NODE_MAJOR)" "$(get_latest_node)"
+check_version "Gradle" "$(get_current_version GRADLE_VERSION)" "$(get_latest_gradle)"
 check_version "lazygit" "$(get_current_version LAZYGIT_VERSION)" "$(get_latest_github_release jesseduffield/lazygit)"
 check_version "helix" "$(get_current_version HELIX_VERSION)" "$(get_latest_github_release helix-editor/helix)"
+check_version "eza" "$(get_current_version EZA_VERSION)" "$(get_latest_github_release eza-community/eza)"
+check_version "delta" "$(get_current_version DELTA_VERSION)" "$(get_latest_github_release dandavison/delta)"
+check_version "zoxide" "$(get_current_version ZOXIDE_VERSION)" "$(get_latest_github_release ajeetdsouza/zoxide)"
+check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release steveyegge/beads)"
 
 echo ""
 if [ $updates_available -eq 1 ]; then

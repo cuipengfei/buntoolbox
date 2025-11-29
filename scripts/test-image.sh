@@ -83,17 +83,6 @@ check "Node.js" "node --version" "node -e 'console.log(JSON.stringify({a:1}))'" 
 # Bun
 check "Bun" "bun --version" "bun -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}'
 
-# Go
-echo 'package main; import "fmt"; func main(){fmt.Println(1+1)}' > /tmp/main.go
-check "Go" "go version" "go run /tmp/main.go" "2"
-
-# Rust
-echo 'fn main(){println!("{}",1+1);}' > /tmp/t.rs
-check "Rust" "rustc --version" "rustc /tmp/t.rs -o /tmp/t && /tmp/t" "2"
-check "Cargo" "cargo --version" "cargo --version" "cargo"
-check "rustfmt" "rustfmt --version" "echo 'fn main(){}' | rustfmt" ""
-check "clippy" "cargo clippy --version" "cargo clippy --version" "clippy"
-
 echo ""
 echo "=== Build Tools ==="
 check "Maven" "mvn --version" "mvn --version" "Apache Maven"
@@ -148,6 +137,7 @@ check "delta" "delta --version" "delta --version" "delta"
 check "btop" "btop --version" "btop --version" "btop"
 check "starship" "starship --version" "starship --version" "starship"
 check "zoxide" "zoxide --version" "zoxide --version" "zoxide"
+check "bd" "bd --version" "bd --version" "beads"
 
 echo ""
 echo "=========================================="

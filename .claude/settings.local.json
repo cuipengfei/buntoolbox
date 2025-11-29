@@ -26,7 +26,10 @@
       "Bash(chmod:*)",
       "Bash(./scripts/check-versions.sh:*)",
       "Bash(winget install:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "mcp__beads__set_context",
+      "Bash(bd ready:*)",
+      "Bash(printf:*)"
     ],
     "deny": [],
     "ask": []

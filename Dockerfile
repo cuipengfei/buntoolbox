@@ -4,6 +4,15 @@
 
 FROM ubuntu:22.04
 
+# =============================================================================
+# Version Configuration (run scripts/check-versions.sh to check for updates)
+# =============================================================================
+ARG GRADLE_VERSION=9.2.1
+ARG NODE_MAJOR=24
+ARG GO_VERSION=1.25.4
+ARG LAZYGIT_VERSION=0.56.0
+ARG HELIX_VERSION=25.07.1
+
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, Java, Go, and Rust"
 
@@ -76,7 +85,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends maven \
     && rm -rf /var/lib/apt/lists/*
 
 # Gradle (manual install for latest version)
-ARG GRADLE_VERSION=9.2.1
 RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip \
     && unzip -q /tmp/gradle.zip -d /opt \
     && ln -sf /opt/gradle-${GRADLE_VERSION} /opt/gradle \
@@ -89,7 +97,6 @@ ENV PATH="${GRADLE_HOME}/bin:${PATH}"
 # 4. Node.js LTS + Bun
 # =============================================================================
 # Node.js LTS via NodeSource
-ARG NODE_MAJOR=22
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
@@ -126,7 +133,6 @@ ENV PATH="${UV_INSTALL_DIR}:${PATH}"
 # =============================================================================
 # 6. Go (latest stable)
 # =============================================================================
-ARG GO_VERSION=1.25.4
 RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -xz -C /usr/local
 
 ENV GOROOT=/usr/local/go
@@ -168,12 +174,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends bat btop \
 RUN cargo install eza git-delta
 
 # lazygit (from GitHub releases)
-ARG LAZYGIT_VERSION=0.56.0
 RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" \
     | tar -xz -C /usr/local/bin lazygit
 
 # helix editor (from GitHub releases)
-ARG HELIX_VERSION=25.07.1
 RUN curl -fsSL "https://github.com/helix-editor/helix/releases/download/${HELIX_VERSION}/helix-${HELIX_VERSION}-x86_64-linux.tar.xz" \
     | tar -xJ -C /opt \
     && ln -sf /opt/helix-${HELIX_VERSION}-x86_64-linux/hx /usr/local/bin/hx

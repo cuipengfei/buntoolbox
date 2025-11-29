@@ -49,7 +49,10 @@
       "Bash(apt-mark showmanual:*)",
       "Bash(bun pm ls:*)",
       "Bash(bash -lc:*)",
-      "Bash(./scripts/wait-and-test.sh:*)"
+      "Bash(./scripts/wait-and-test.sh:*)",
+      "Bash(bash:*)",
+      "Bash(pwd:*)",
+      "Bash(cygpath:*)"
     ],
     "deny": [],
     "ask": []

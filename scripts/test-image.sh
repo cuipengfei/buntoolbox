@@ -135,7 +135,7 @@ check "btop" "btop --version" "btop --version" "btop"
 check "starship" "starship --version" "starship --version" "starship"
 check "zoxide" "zoxide --version" "zoxide --version" "zoxide"
 check "bd" "bd --help 2>&1 | head -1" "bd --help" "beads"
-check "mihomo" "mihomo --version" "mihomo --help" ""
+check "mihomo" "mihomo -v" "mihomo -h" "Usage"
 
 echo ""
 echo "=========================================="

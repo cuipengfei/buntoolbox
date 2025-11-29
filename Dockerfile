@@ -198,7 +198,6 @@ RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
 
 RUN git lfs install \
     && rm -rf /usr/share/doc/* /usr/share/man/* \
-    /usr/lib/cargo \
     /root/.launchpadlib
 
 WORKDIR /workspace

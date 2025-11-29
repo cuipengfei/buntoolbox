@@ -101,7 +101,8 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa \
 
 # Install uv first, then use uv to install pipx (avoids distutils issue with pip)
 ENV UV_INSTALL_DIR=/root/.local/bin
-RUN curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
+RUN mkdir -p /root/.local/bin \
+    && curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
     | tar -xz -C /root/.local/bin --strip-components=1
 ENV PATH="${UV_INSTALL_DIR}:${PATH}"
 

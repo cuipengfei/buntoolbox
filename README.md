@@ -7,13 +7,13 @@
 - **运行时**: Bun, Node.js 24, Python 3.12
 - **JDK**: Azul Zulu 21 headless
 - **基础镜像**: Ubuntu 24.04 LTS
-- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza 等
+- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo 等
 
 ## 使用方式
 
 ```bash
-docker pull yourname/buntoolbox:latest
-docker run -it yourname/buntoolbox
+docker pull cuipengfei/buntoolbox:latest
+docker run -it cuipengfei/buntoolbox
 ```
 
 ## 命名由来

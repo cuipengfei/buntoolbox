@@ -55,7 +55,8 @@
       "Bash(cygpath:*)",
       "Bash(gh run list:*)",
       "Bash(tar:*)",
-      "Bash(gh run:*)"
+      "Bash(gh run:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

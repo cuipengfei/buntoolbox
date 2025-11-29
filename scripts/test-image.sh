@@ -36,7 +36,7 @@ check() {
         FAILED=$((FAILED+1))
         return
     fi
-    version=$(echo "$output" | head -1 | cut -c1-50)
+    version=$(echo "$output" | grep -v '^$' | head -1 | cut -c1-50)
 
     if output=$(eval "$usage_cmd" 2>&1); then
         if [ -n "$expected" ]; then

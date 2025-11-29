@@ -89,17 +89,17 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa \
     python3.12 \
     python3.12-venv \
     python3.12-dev \
-    python3-pip \
     && rm -rf /var/lib/apt/lists/* \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
 
-RUN pip3 install --break-system-packages pipx \
-    && pipx ensurepath
-
+# Install uv first, then use uv to install pipx (avoids distutils issue with pip)
 ENV UV_INSTALL_DIR=/root/.local/bin
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="${UV_INSTALL_DIR}:${PATH}"
+
+RUN uv tool install pipx && pipx ensurepath
+ENV PATH="/root/.local/bin:${PATH}"
 
 # =============================================================================
 # 4. Rust via rustup (stable, large)

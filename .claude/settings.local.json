@@ -29,7 +29,9 @@
       "Bash(curl:*)",
       "mcp__beads__set_context",
       "Bash(bd ready:*)",
-      "Bash(printf:*)"
+      "Bash(printf:*)",
+      "Bash(docker build:*)",
+      "Bash(docker run:*)"
     ],
     "deny": [],
     "ask": []

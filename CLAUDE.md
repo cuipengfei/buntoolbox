@@ -17,7 +17,7 @@ Buntoolbox 是一个全能开发环境 Docker 镜像，基于 Ubuntu 22.04，支
 |:---|:---|
 | 基础镜像 | Ubuntu 22.04 LTS |
 | JDK | Azul Zulu 11, 17, 21 (默认 21) |
-| JS/TS | Node.js 22 LTS, Bun |
+| JS/TS | Node.js 24 LTS, Bun |
 | Python | 3.12 + uv/uvx + pipx |
 | Go | 1.25.4 |
 | Rust | rustup + rustfmt + clippy |
@@ -49,23 +49,26 @@ GitHub Actions 自动构建，需要设置以下 secrets：
 
 ## Dockerfile 结构
 
-按顺序安装（每个 section 独立的 RUN 层）：
-1. 系统基础 + 开发工具
-2. Azul Zulu JDK (多版本)
-3. Maven + Gradle
-4. Node.js + Bun
-5. Python + uv/uvx + pipx
-6. Go
-7. Rust
-8. GitHub CLI
-9. TUI 工具 (lazygit, helix, starship, zoxide, bat, eza, btop, delta)
-10. 最终配置 (shell hooks, aliases, git lfs)
+层顺序优化：稳定层在前，易变层在后（用户更新时拉取更少数据）：
+
+1. 系统基础 + 开发工具 (stable)
+2. Azul Zulu JDK (stable)
+3. Python + uv/uvx + pipx (stable)
+4. Rust (stable)
+5. Maven (stable)
+6. GitHub CLI (stable)
+7. Node.js + Bun (medium)
+8. Go (frequently updated)
+9. Gradle (frequently updated)
+10. TUI 工具 (most frequently updated)
+11. 最终配置 (tiny)
 
 ## 版本更新
 
-Dockerfile 中使用 ARG 定义版本号，便于更新：
-- `GRADLE_VERSION` - Gradle 版本
-- `NODE_MAJOR` - Node.js 主版本
-- `GO_VERSION` - Go 版本
-- `LAZYGIT_VERSION` - lazygit 版本
-- `HELIX_VERSION` - helix 版本
+版本号集中在 Dockerfile 顶部的 ARG 声明中。运行脚本检查最新版本：
+
+```bash
+./scripts/check-versions.sh
+```
+
+检查的工具：Go, Gradle, Node.js, lazygit, helix

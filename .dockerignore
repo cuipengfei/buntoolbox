@@ -1,0 +1,10 @@
+.git
+.github
+.beads
+.claude
+*.md
+!README.md
+.dockerignore
+.gitignore
+.gitattributes
+history/

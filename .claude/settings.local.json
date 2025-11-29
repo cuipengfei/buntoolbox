@@ -11,7 +11,17 @@
       "Bash(bd setup:*)",
       "Bash(bd :*::*)",
       "Bash(cd :* && bd :*::*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(bd create:*)",
+      "Bash(bd dep:*)",
+      "Bash(bd list:*)",
+      "Bash(bd update:*)",
+      "Bash(bd close:*)",
+      "Bash(bd stats:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__deepwiki__ask_question",
+      "mcp__context7__get-library-docs",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: add Dockerfile and GitHub Actions workflow\n\n- Multi-language dev environment (Ubuntu 22.04)\n- Azul Zulu JDK 11/17/21, Maven, Gradle 9.2.1\n- Node.js 22 LTS, Bun\n- Python 3.12, uv/uvx, pipx\n- Go 1.25.4\n- Rust (rustup + rustfmt + clippy)\n- Dev tools: git, gh, jq, ripgrep, fd, fzf, tmux, direnv\n- GitHub Actions for multi-arch build and Docker Hub push\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

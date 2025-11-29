@@ -9,6 +9,7 @@ DOCKERFILE="Dockerfile"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 VERBOSE=false
+CACHE_DIR="/tmp/check-versions-cache"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -35,6 +36,30 @@ if ! command -v jq &>/dev/null; then
     exit 1
 fi
 
+# Setup cache directory
+mkdir -p "$CACHE_DIR"
+
+# Fetch GitHub release data with caching (one request per repo)
+fetch_github_release() {
+    local repo="$1"
+    local cache_file="$CACHE_DIR/$(echo "$repo" | tr '/' '_').json"
+
+    # Use cache if exists and less than 5 minutes old
+    if [ -f "$cache_file" ] && [ $(($(date +%s) - $(stat -c %Y "$cache_file" 2>/dev/null || stat -f %m "$cache_file"))) -lt 300 ]; then
+        cat "$cache_file"
+        return
+    fi
+
+    # Fetch and cache
+    local data
+    if data=$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" 2>/dev/null); then
+        echo "$data" > "$cache_file"
+        echo "$data"
+    else
+        echo ""
+    fi
+}
+
 # Parse current version from Dockerfile
 get_current_version() {
     grep "^ARG ${1}=" "$PROJECT_ROOT/$DOCKERFILE" | cut -d'=' -f2
@@ -42,24 +67,26 @@ get_current_version() {
 
 # Get latest versions from APIs
 get_latest_gradle() {
-    curl -fsSL "https://services.gradle.org/versions/current" | jq -r '.version'
+    curl -fsSL "https://services.gradle.org/versions/current" 2>/dev/null | jq -r '.version'
 }
 
 get_latest_node() {
-    curl -fsSL "https://nodejs.org/dist/index.json" | jq -r '[.[] | select(.lts != false)][0].version' | sed 's/^v//' | cut -d'.' -f1
+    curl -fsSL "https://nodejs.org/dist/index.json" 2>/dev/null | jq -r '[.[] | select(.lts != false)][0].version' | sed 's/^v//' | cut -d'.' -f1
 }
 
 get_latest_github_release() {
-    curl -fsSL "https://api.github.com/repos/${1}/releases/latest" | jq -r '.tag_name' | sed 's/^v//'
+    fetch_github_release "$1" | jq -r '.tag_name // empty' | sed 's/^v//' | sed 's/^bun-v//'
 }
 
-# Get all linux x86_64 assets for a GitHub repo
+# Get linux x86_64 assets only (no arm, no windows, no macos, no other archs)
 get_linux_assets() {
     local repo="$1"
-    curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" | \
-        jq -r '.assets[].name' | \
-        grep -iE '(linux|x86_64|amd64)' | \
-        grep -vE '\.(sha256|sig|asc)$' | \
+    fetch_github_release "$repo" | \
+        jq -r '.assets[].name // empty' | \
+        grep -iE 'linux' | \
+        grep -iE '(x86_64|amd64|x64)' | \
+        grep -viE '(arm|aarch|mips|ppc|riscv|loong|s390|i686|386|32-bit)' | \
+        grep -vE '\.(sha256|sig|asc|zsync)$' | \
         sort
 }
 
@@ -85,16 +112,24 @@ check_version() {
 
     # Show available assets in verbose mode
     if [ "$VERBOSE" = true ] && [ -n "$repo" ]; then
-        echo -e "  ${DIM}使用: ${selected}${NC}"
-        echo -e "  ${DIM}可选:${NC}"
-        get_linux_assets "$repo" | while read -r asset; do
-            if [ "$asset" = "$selected" ] || [[ "$selected" == *"$asset"* ]]; then
-                echo -e "    ${GREEN}→ $asset${NC}"
-            else
-                echo -e "    ${DIM}  $asset${NC}"
-            fi
-        done
-        echo ""
+        local assets
+        assets=$(get_linux_assets "$repo")
+        local count
+        count=$(echo "$assets" | grep -c . || true)
+
+        if [ "$count" -ge 1 ]; then
+            echo -e "  ${DIM}使用: ${selected}${NC}"
+            echo -e "  ${DIM}可选:${NC}"
+            echo "$assets" | while read -r asset; do
+                # Simple exact match
+                if [ "$asset" = "$selected" ]; then
+                    echo -e "    ${GREEN}→ $asset${NC}"
+                else
+                    echo -e "    ${DIM}  $asset${NC}"
+                fi
+            done
+            echo ""
+        fi
     fi
 }
 
@@ -114,19 +149,19 @@ check_version "uv" "$(get_current_version UV_VERSION)" "$(get_latest_github_rele
 echo ""
 echo "=== Shell 增强 ==="
 check_version "starship" "$(get_current_version STARSHIP_VERSION)" "$(get_latest_github_release starship/starship)" "starship/starship" "starship-x86_64-unknown-linux-gnu.tar.gz"
-check_version "zoxide" "$(get_current_version ZOXIDE_VERSION)" "$(get_latest_github_release ajeetdsouza/zoxide)" "ajeetdsouza/zoxide" "zoxide-x86_64-unknown-linux-musl.tar.gz"
+check_version "zoxide" "$(get_current_version ZOXIDE_VERSION)" "$(get_latest_github_release ajeetdsouza/zoxide)" "ajeetdsouza/zoxide" "zoxide-$(get_current_version ZOXIDE_VERSION)-x86_64-unknown-linux-musl.tar.gz"
 
 echo ""
 echo "=== TUI 工具 ==="
-check_version "lazygit" "$(get_current_version LAZYGIT_VERSION)" "$(get_latest_github_release jesseduffield/lazygit)" "jesseduffield/lazygit" "lazygit_Linux_x86_64.tar.gz"
-check_version "helix" "$(get_current_version HELIX_VERSION)" "$(get_latest_github_release helix-editor/helix)" "helix-editor/helix" "helix-x86_64-linux.tar.xz"
+check_version "lazygit" "$(get_current_version LAZYGIT_VERSION)" "$(get_latest_github_release jesseduffield/lazygit)" "jesseduffield/lazygit" "lazygit_$(get_current_version LAZYGIT_VERSION)_linux_x86_64.tar.gz"
+check_version "helix" "$(get_current_version HELIX_VERSION)" "$(get_latest_github_release helix-editor/helix)" "helix-editor/helix" "helix-$(get_current_version HELIX_VERSION)-x86_64-linux.tar.xz"
 check_version "eza" "$(get_current_version EZA_VERSION)" "$(get_latest_github_release eza-community/eza)" "eza-community/eza" "eza_x86_64-unknown-linux-gnu.tar.gz"
-check_version "delta" "$(get_current_version DELTA_VERSION)" "$(get_latest_github_release dandavison/delta)" "dandavison/delta" "delta-x86_64-unknown-linux-gnu.tar.gz"
+check_version "delta" "$(get_current_version DELTA_VERSION)" "$(get_latest_github_release dandavison/delta)" "dandavison/delta" "delta-$(get_current_version DELTA_VERSION)-x86_64-unknown-linux-gnu.tar.gz"
 
 echo ""
 echo "=== 其他工具 ==="
-check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release steveyegge/beads)" "steveyegge/beads" "beads_linux_amd64.tar.gz"
-check_version "mihomo" "$(get_current_version MIHOMO_VERSION)" "$(get_latest_github_release MetaCubeX/mihomo)" "MetaCubeX/mihomo" "mihomo-linux-amd64"
+check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release steveyegge/beads)" "steveyegge/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
+check_version "mihomo" "$(get_current_version MIHOMO_VERSION)" "$(get_latest_github_release MetaCubeX/mihomo)" "MetaCubeX/mihomo" "mihomo-linux-amd64-v$(get_current_version MIHOMO_VERSION).gz"
 
 echo ""
 if [ $updates_available -eq 1 ]; then

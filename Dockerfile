@@ -175,7 +175,7 @@ RUN curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/v${MIHOMO_
     && chmod +x /usr/local/bin/mihomo
 
 # lazygit
-RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" \
+RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_linux_x86_64.tar.gz" \
     | tar -xz -C /usr/local/bin lazygit
 
 # helix editor

@@ -157,11 +157,46 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | g
     && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
-# 9. Final Configuration
+# 9. TUI Tools (lazygit, helix, starship, zoxide, bat, eza, btop, delta)
+# =============================================================================
+# bat and btop from apt
+RUN apt-get update && apt-get install -y --no-install-recommends bat btop \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/batcat /usr/bin/bat
+
+# eza and delta via cargo (Rust tools)
+RUN cargo install eza git-delta
+
+# lazygit (from GitHub releases)
+ARG LAZYGIT_VERSION=0.56.0
+RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" \
+    | tar -xz -C /usr/local/bin lazygit
+
+# helix editor (from GitHub releases)
+ARG HELIX_VERSION=25.07.1
+RUN curl -fsSL "https://github.com/helix-editor/helix/releases/download/${HELIX_VERSION}/helix-${HELIX_VERSION}-x86_64-linux.tar.xz" \
+    | tar -xJ -C /opt \
+    && ln -sf /opt/helix-${HELIX_VERSION}-x86_64-linux/hx /usr/local/bin/hx
+ENV HELIX_RUNTIME=/opt/helix-${HELIX_VERSION}-x86_64-linux/runtime
+
+# starship prompt
+RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y
+
+# zoxide (smart cd)
+RUN curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+
+# =============================================================================
+# 10. Final Configuration
 # =============================================================================
 
-# Setup direnv hook globally (survives user .bashrc mounts)
-RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/direnv.sh
+# Setup shell tools globally (survives user .bashrc mounts)
+RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
+    && echo 'eval "$(starship init bash)"' > /etc/profile.d/02-starship.sh \
+    && echo 'eval "$(zoxide init bash)"' > /etc/profile.d/03-zoxide.sh \
+    && echo 'alias ls="eza"' > /etc/profile.d/04-aliases.sh \
+    && echo 'alias ll="eza -l"' >> /etc/profile.d/04-aliases.sh \
+    && echo 'alias la="eza -la"' >> /etc/profile.d/04-aliases.sh \
+    && echo 'alias cat="bat --paging=never"' >> /etc/profile.d/04-aliases.sh
 
 # Git LFS setup
 RUN git lfs install

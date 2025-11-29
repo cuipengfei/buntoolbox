@@ -2,74 +2,47 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Note**: This project uses [bd (beads)](https://github.com/steveyegge/beads) for issue tracking. Use `bd` commands instead of markdown TODOs. See AGENTS.md for workflow details.
+## 项目概述
 
-## Project Overview
+多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，约 1.79GB。
 
-Buntoolbox 是一个多语言开发环境 Docker 镜像，基于 Ubuntu 24.04 LTS (Noble)。通过 GitHub Actions 自动构建并推送到 Docker Hub。
+**技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + uv/pipx | Maven + Gradle
 
-## 技术栈
-
-| 类别 | 组件 |
-|:-----|:-----|
-| 基础镜像 | Ubuntu 24.04 LTS (Noble) |
-| JDK | Azul Zulu 21 headless |
-| JS/TS | Node.js 24 LTS, Bun |
-| Python | 3.12 + uv/uvx + pipx (uv 安装 pipx 避免 distutils 问题) |
-| 构建工具 | Maven, Gradle 9.2.1 |
-| 开发工具 | git, gh, jq, ripgrep, fd, fzf, tmux, direnv, bd (beads) |
-| TUI 工具 | lazygit, helix, btop, bat, eza, delta, starship, zoxide |
-| Locale | C.UTF-8 (内置，无需安装 locales 包) |
-
-## 常用命令
+## 命令
 
 ```bash
-# 本地构建
-docker build -t buntoolbox .
-
-# 运行容器
-docker run -it buntoolbox
-
-# 挂载当前目录
-docker run -it -v $(pwd):/workspace buntoolbox
-
-# 测试镜像（构建后运行 47 项检查）
-./scripts/test-image.sh
-
-# 测试已有镜像（不重新构建）
-./scripts/test-image.sh cuipengfei/buntoolbox:latest
-
-# 检查工具版本更新
-./scripts/check-versions.sh
+docker build -t buntoolbox .              # 构建
+./scripts/test-image.sh                   # 构建并测试 (41 项检查)
+./scripts/test-image.sh <image>           # 仅测试已有镜像
+./scripts/check-versions.sh               # 检查工具版本更新
 ```
 
-## Dockerfile 层顺序
+## 架构
 
-层顺序已优化：稳定层在前，易变层在后。更新 TUI 工具版本时，用户只需拉取最后几层。
+**Dockerfile 层顺序** (稳定→易变): 系统 → JDK → Python → Maven → gh → Node/Bun → Gradle → TUI → 配置
 
-```
-稳定 ────────────────────────────────────────────────► 易变
-1.系统  2.JDK  3.Python  4.Maven  5.gh  6.Node/Bun  7.Gradle  8.TUI  9.配置
-```
+**版本管理**: Dockerfile 顶部 ARG 声明 (`NODE_MAJOR`, `GRADLE_VERSION`, `*_VERSION`)
 
-## 版本管理
+**CI/CD**: `.github/workflows/docker.yml` → Docker Hub (secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`)
 
-版本号集中在 Dockerfile 顶部 ARG 声明：
-- `NODE_MAJOR` - Node.js 主版本
-- `GRADLE_VERSION` - Gradle 版本
-- `LAZYGIT_VERSION` - lazygit 版本
-- `HELIX_VERSION` - helix 版本
-- `EZA_VERSION` - eza 版本
-- `DELTA_VERSION` - delta 版本
-- `ZOXIDE_VERSION` - zoxide 版本
-- `BEADS_VERSION` - beads (bd) 版本
+## 不要删除
 
-运行 `./scripts/check-versions.sh` 查询最新版本（需要 curl + jq）。
+| 组件 | 大小 | 原因 |
+|------|-----:|------|
+| `/usr/include/node` | 67MB | native 模块编译 |
+| cmake + ninja | 37MB | C/C++ 编译 |
+| vim + helix | 249MB | 保留两个编辑器 |
+| lto-dump, fonts, locale | ~70MB | 用户选择保留 |
 
-## CI/CD
+## 注意事项
 
-GitHub Actions 自动构建（`.github/workflows/docker.yml`）：
-- 触发：push 到 master/main，创建 tag，手动触发
-- 平台：linux/amd64
-- 缓存：`type=gha,mode=max`（稳定层缓存，重建时只构建变化的层）
-- Secrets：`DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
+- **不要删除 `/root/.local/share/uv`** — pipx 依赖此目录
+- **清理必须在同一 RUN 指令中** — Docker 层增量，后续删除无效
+- **JDK jmods/man 可删** — 仅用于 jlink，容器不需要
+- **测试 bd 用 `bd --help`** — `bd --version` 无数据库时返回非零
+
+## 已优化
+
+- JDK 11+17+21 → 仅 21 headless (节省 ~610MB)
+- 删除 jmods/man、`/usr/lib/cargo`、`/root/.launchpadlib`
+- pipx 通过 uv 安装 (避免 Python 3.12 distutils 问题)

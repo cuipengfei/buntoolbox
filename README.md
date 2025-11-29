@@ -4,10 +4,10 @@
 
 ## 包含组件
 
-- **运行时**: Bun, Node.js, Python
-- **JDK**: 11, 17, 21
-- **基础镜像**: Ubuntu
-- **常用工具**: 内置开发必备工具集
+- **运行时**: Bun, Node.js 24, Python 3.12
+- **JDK**: Azul Zulu 21 headless
+- **基础镜像**: Ubuntu 24.04 LTS
+- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza 等
 
 ## 使用方式
 

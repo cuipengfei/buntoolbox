@@ -52,6 +52,24 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 - **JDK jmods/man 可删** — 仅用于 jlink，容器不需要
 - **测试 bd 用 `bd --help`** — `bd --version` 无数据库时返回非零
 - **测试 mihomo 用 `-v` 和 `-h`** — 不支持 `--version` / `--help`
+- **网络/开发工具新增** — 镜像已预装 iputils-ping、iproute2(含 ip/ss)、dnsutils(dig/nslookup/host)、netcat-openbsd(nc)、traceroute、socat、openssh-client(ssh/scp/sftp)、file、lsof、psmisc(killall/fuser/pstree)、bc；telnet 为可选，仅兼容性测试用
+
+### 测试策略（scripts/test-image.sh）
+- 先做“存在性”检查（command -v/版本输出），再做“功能性”检查（loopback/example.com 等可预期目标）
+- ss：用 `ss -h` 或匹配表头（如“Netid/State”），避免空字符串作为通过条件（见 scripts/test-image.sh:152）
+- dig：用 `dig -v` 或 `dig +short example.com`，避免 `localhost` 解析导致的假阴性（见 scripts/test-image.sh:153）
+- ping：使用 `127.0.0.1`；某些环境缺 CAP_NET_RAW 时功能测试可能失败（见 scripts/test-image.sh:150）
+- 网络功能性测试失败标记为“可选”，不直接判定镜像失败
+
+### Windows 行尾（CRLF/LF）
+- 推荐：`git config --global core.autocrlf input`、`git config --global core.safecrlf true`
+- `.gitattributes` 建议：
+```
+* text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+```
+- 规范化索引：`git add --renormalize .` 后 `git status` 确认
 
 ## WSL 替代方案用法
 

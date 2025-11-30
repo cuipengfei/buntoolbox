@@ -56,7 +56,14 @@
       "Bash(gh run list:*)",
       "Bash(tar:*)",
       "Bash(gh run:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:popcon.ubuntu.com)",
+      "WebFetch(domain:popcon.debian.org)",
+      "Bash(gzip -dc:*)",
+      "Bash(xargs:*)",
+      "Bash(do sed:*)",
+      "Bash(dos2unix:*)"
     ],
     "deny": [],
     "ask": []

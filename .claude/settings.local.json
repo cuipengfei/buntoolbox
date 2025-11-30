@@ -63,7 +63,8 @@
       "Bash(gzip -dc:*)",
       "Bash(xargs:*)",
       "Bash(do sed:*)",
-      "Bash(dos2unix:*)"
+      "Bash(dos2unix:*)",
+      "Bash(bd sync:*)"
     ],
     "deny": [],
     "ask": []

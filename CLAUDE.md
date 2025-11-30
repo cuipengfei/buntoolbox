@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，约 1.85GB。专为被企业策略禁用 WSL 的 Windows 用户设计。
+多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)。专为被企业策略禁用 WSL 的 Windows 用户设计。
 
 **技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + uv/pipx | Maven + Gradle
 
@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
-./scripts/test-image.sh                   # 从 Docker Hub 拉取并测试 (66 项检查)
+./scripts/test-image.sh                   # 从 Docker Hub 拉取并测试
 ./scripts/test-image.sh <image>           # 测试指定镜像
 ./scripts/check-versions.sh               # 检查工具版本更新
 ./scripts/check-versions.sh -v            # 详细模式，显示所有可用下载变体
@@ -54,12 +54,17 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 - **测试 mihomo 用 `-v` 和 `-h`** — 不支持 `--version` / `--help`
 - **网络/开发工具新增** — 镜像已预装 iputils-ping、iproute2(含 ip/ss)、dnsutils(dig/nslookup/host)、netcat-openbsd(nc)、traceroute、socat、openssh-client(ssh/scp/sftp)、file、lsof、psmisc(killall/fuser/pstree)、bc；telnet 为可选，仅兼容性测试用
 
-### 测试策略（scripts/test-image.sh）
-- 先做“存在性”检查（command -v/版本输出），再做“功能性”检查（loopback/example.com 等可预期目标）
-- ss：用 `ss -h` 或匹配表头（如“Netid/State”），避免空字符串作为通过条件（见 scripts/test-image.sh:152）
-- dig：用 `dig -v` 或 `dig +short example.com`，避免 `localhost` 解析导致的假阴性（见 scripts/test-image.sh:153）
-- ping：使用 `127.0.0.1`；某些环境缺 CAP_NET_RAW 时功能测试可能失败（见 scripts/test-image.sh:150）
-- 网络功能性测试失败标记为“可选”，不直接判定镜像失败
+### 测试脚本架构（scripts/test-image.sh）
+
+测试使用 `check()` 函数，签名: `check <name> <version_cmd> <usage_cmd> <expected> <test_desc>`
+- 版本检查: `timeout 5` 秒
+- 功能测试: `timeout 10` 秒
+- 输出格式: 表格 (Tool | Version | Test | Result)
+
+测试策略:
+- 先做"存在性"检查（版本输出），再做"功能性"检查（loopback/可预期目标）
+- ping：使用 `127.0.0.1`；某些环境缺 CAP_NET_RAW 时功能测试可能失败
+- 网络功能性测试失败不直接判定镜像失败
 
 ### Windows 行尾（CRLF/LF）
 - 推荐：`git config --global core.autocrlf input`、`git config --global core.safecrlf true`
@@ -71,26 +76,9 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 ```
 - 规范化索引：`git add --renormalize .` 后 `git status` 确认
 
-## WSL 替代方案用法
+## 用法
 
-```powershell
-# 基本用法，挂载项目目录
-docker run -it -v ${PWD}:/workspace -w /workspace cuipengfei/buntoolbox:latest
-
-# 带 Git 凭证共享
-docker run -it -v ${PWD}:/workspace -w /workspace `
-  -v ${HOME}/.ssh:/root/.ssh:ro `
-  -v ${HOME}/.gitconfig:/root/.gitconfig:ro `
-  cuipengfei/buntoolbox:latest
-
-# 持久化命名容器
-docker create --name mydev -it -v ${PWD}:/workspace -w /workspace cuipengfei/buntoolbox:latest
-docker start -ai mydev
-```
-
-## Dev Containers
-
-VS Code 用户: 已提供 `.devcontainer/devcontainer.json`。使用命令面板 "Dev Containers: Reopen in Container"。
+详见 [README.md](README.md) 中的 Windows/Dev Containers 用法示例。
 
 ## 已优化
 

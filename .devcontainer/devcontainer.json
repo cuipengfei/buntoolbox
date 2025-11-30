@@ -22,10 +22,7 @@
       ]
     }
   },
-  "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/root/.ssh,type=bind,readonly",
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/root/.gitconfig,type=bind,readonly"
-  ],
+  "initializeCommand": "echo 'Note: SSH/Git credentials will be shared from host if available'",
   "containerEnv": {
     "SHELL": "/bin/bash"
   },

@@ -91,12 +91,14 @@ RUN apt-get install -y --no-install-recommends openssh-server \
 
 # Additional utilities
 RUN apt-get install -y --no-install-recommends \
-    socat \          # Socket utility
-    netcat-openbsd \ # Network diagnostics
-    dnsutils \       # DNS lookup tools
-    iproute2 \       # ip command
-    procps \         # ps, top, etc.
-    man-db           # Manual pages
+    socat \
+    netcat-openbsd \
+    dnsutils \
+    iproute2 \
+    procps \
+    man-db
+# Note: socat (socket utility), netcat (network diagnostics), 
+# dnsutils (DNS lookup), iproute2 (ip command), procps (ps, top), man-db (manual pages)
 ```
 
 ### Priority 2: Developer Experience
@@ -258,5 +260,5 @@ Buntoolbox is **well-positioned** to serve as a WSL replacement for enterprise W
 
 ---
 
-*Generated: 2024*
-*Version: Initial Review*
+*Last Updated: November 2024*
+*Version: 1.0 - Initial Review*

@@ -1,0 +1,32 @@
+{
+  "name": "Buntoolbox Development Environment",
+  "image": "cuipengfei/buntoolbox:latest",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "files.eol": "\n",
+        "git.autofetch": true
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "redhat.java",
+        "vscjava.vscode-java-pack",
+        "oven.bun-vscode",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens"
+      ]
+    }
+  },
+  "initializeCommand": "echo 'Note: SSH/Git credentials will be shared from host if available'",
+  "containerEnv": {
+    "SHELL": "/bin/bash"
+  },
+  "postCreateCommand": "echo 'Buntoolbox dev environment ready!'",
+  "remoteUser": "root",
+  "features": {}
+}

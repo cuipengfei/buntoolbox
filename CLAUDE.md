@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)。专为被企业策略禁用 WSL 的 Windows 用户设计。
+多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，镜像大小约 1.85GB。专为被企业策略禁用 WSL 的 Windows 用户设计。
 
 **技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + uv/pipx | Maven + Gradle
 
@@ -57,6 +57,12 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 ### 测试脚本架构（scripts/test-image.sh）
 
 测试使用 `check()` 函数，签名: `check <name> <version_cmd> <usage_cmd> <expected> <test_desc>`
+- 参数说明：
+  - `<name>`: 工具名称
+  - `<version_cmd>`: 版本检查命令（如 `git --version`）
+  - `<usage_cmd>`: 功能测试命令（如 `git status`）
+  - `<expected>`: 预期输出或结果（如版本号、功能性返回值等）
+  - `<test_desc>`: 测试描述（简要说明测试目的）
 - 版本检查: `timeout 5` 秒
 - 功能测试: `timeout 10` 秒
 - 输出格式: 表格 (Tool | Version | Test | Result)
@@ -72,8 +78,8 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 ```
 * text eol=lf
 *.bat text eol=crlf
-*.cmd text eol=crlf
-```
+### 基本用法示例（Windows/Dev Containers）
+
 - 规范化索引：`git add --renormalize .` 后 `git status` 确认
 
 ## 用法

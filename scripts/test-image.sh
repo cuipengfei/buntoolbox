@@ -1,20 +1,17 @@
 #!/bin/bash
-# Build and test Docker image locally
+# Test Docker image (pull from Docker Hub by default, no local build)
 # Usage: ./scripts/test-image.sh [image_name]
 # Example: ./scripts/test-image.sh cuipengfei/buntoolbox:latest
 
 set -e
 
-IMAGE_NAME="${1:-buntoolbox:test}"
+IMAGE_NAME="${1:-cuipengfei/buntoolbox:latest}"
 
-# If no argument provided, build the image first
-if [ -z "$1" ]; then
-    echo "=========================================="
-    echo "Building Docker image..."
-    echo "=========================================="
-    docker build -t "$IMAGE_NAME" .
-    echo ""
-fi
+echo "=========================================="
+echo "Pulling image: $IMAGE_NAME"
+echo "=========================================="
+docker pull "$IMAGE_NAME"
+echo ""
 
 echo "=========================================="
 echo "Testing image: $IMAGE_NAME"
@@ -88,6 +85,9 @@ printf 'test:\n\t@echo ok\n' > /tmp/Makefile
 check "make" "make --version" "make -f /tmp/Makefile test" "ok"
 check "cmake" "cmake --version" "cmake --version" "cmake"
 check "ninja" "ninja --version" "ninja --version" ""
+check "gcc" "gcc --version" "echo 'int main(){return 0;}' > /tmp/t.c && gcc /tmp/t.c -o /tmp/t && /tmp/t && echo ok" "ok"
+check "g++" "g++ --version" "echo 'int main(){return 0;}' > /tmp/t.cpp && g++ /tmp/t.cpp -o /tmp/t2 && /tmp/t2 && echo ok" "ok"
+check "pkg-config" "pkg-config --version" "pkg-config --version" ""
 
 echo ""
 echo "=== Package Managers ==="
@@ -142,6 +142,33 @@ echo ""
 echo "=== 其他工具 ==="
 check "bd" "bd --help 2>&1 | head -1" "bd --help" "beads"
 check "mihomo" "mihomo -v" "mihomo -h" "Usage"
+check "gpg" "gpg --version" "gpg --version" "GnuPG"
+check "lsb_release" "lsb_release -v 2>&1 | head -1" "lsb_release -a 2>&1" "Ubuntu"
+
+echo ""
+echo "=== 网络工具 ==="
+check "ping" "ping -V 2>&1 | head -1" "ping -c 1 127.0.0.1 2>&1" "1 packets"
+check "ip" "ip -V 2>&1 | head -1" "ip addr" "lo:"
+check "ss" "ss -V 2>&1 | head -1" "ss -tuln" ""
+check "dig" "dig -v 2>&1 | head -1" "dig +short localhost || true" ""
+check "nslookup" "nslookup -version 2>&1 | head -1" "nslookup localhost 2>&1 | head -1" ""
+check "host" "host -V 2>&1 | head -1" "host localhost 2>&1 | head -1" ""
+check "nc" "nc -h 2>&1 | head -1" "nc -h 2>&1 | head -1" ""
+check "traceroute" "traceroute --version 2>&1 | head -1" "traceroute --version 2>&1" "traceroute"
+check "socat" "socat -V 2>&1 | head -1" "socat -V 2>&1" "socat"
+check "ssh" "ssh -V 2>&1 | head -1" "ssh -V 2>&1" "OpenSSH"
+check "scp" "scp 2>&1 | head -1" "scp 2>&1 | head -1" ""
+check "sftp" "sftp 2>&1 | head -1" "sftp 2>&1 | head -1" ""
+check "telnet" "echo | telnet 2>&1 | head -1" "echo | telnet 2>&1" ""
+
+echo ""
+echo "=== 开发工具 ==="
+check "file" "file --version 2>&1 | head -1" "file /bin/bash" "ELF"
+check "lsof" "lsof -v 2>&1 | grep revision | head -1" "lsof -v 2>&1" "revision"
+check "killall" "killall -V 2>&1 | head -1" "killall -V 2>&1" "killall"
+check "fuser" "fuser -V 2>&1 | head -1" "fuser -V 2>&1" "PSmisc"
+check "pstree" "pstree -V 2>&1 | head -1" "pstree -V 2>&1" "pstree"
+check "bc" "bc --version 2>&1 | head -1" "echo '2+2' | bc" "4"
 
 echo ""
 echo "=========================================="

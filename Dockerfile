@@ -70,6 +70,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # TUI tools from apt
     bat \
     btop \
+    # Network diagnostics
+    iputils-ping \
+    iproute2 \
+    dnsutils \
+    netcat-openbsd \
+    traceroute \
+    socat \
+    openssh-client \
+    telnet \
+    # Development utilities
+    file \
+    lsof \
+    psmisc \
+    bc \
     && rm -rf /var/lib/apt/lists/* \
     && ln -sf /usr/bin/fdfind /usr/bin/fd \
     && ln -sf /usr/bin/batcat /usr/bin/bat

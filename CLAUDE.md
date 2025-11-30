@@ -2,18 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Note**: This project uses [bd (beads)](https://github.com/steveyegge/beads) for issue tracking. Use `bd` commands instead of markdown TODOs.
+**注意**: 本项目使用 [bd (beads)](https://github.com/steveyegge/beads) 进行 issue 追踪，请使用 `bd` 命令而非 markdown TODO。
 
 ## 项目概述
 
-多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，约 1.79GB。
+多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，约 1.79GB。专为被企业策略禁用 WSL 的 Windows 用户设计。
 
 **技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + uv/pipx | Maven + Gradle
 
-## 命令
+## 常用命令
 
 ```bash
-docker build -t buntoolbox .              # 构建
+docker build -t buntoolbox .              # 构建镜像
 ./scripts/test-image.sh                   # 构建并测试 (42 项检查)
 ./scripts/test-image.sh <image>           # 仅测试已有镜像
 ./scripts/check-versions.sh               # 检查工具版本更新
@@ -45,6 +45,27 @@ docker build -t buntoolbox .              # 构建
 - **JDK jmods/man 可删** — 仅用于 jlink，容器不需要
 - **测试 bd 用 `bd --help`** — `bd --version` 无数据库时返回非零
 - **测试 mihomo 用 `-v` 和 `-h`** — 不支持 `--version` / `--help`
+
+## WSL 替代方案用法
+
+```powershell
+# 基本用法，挂载项目目录
+docker run -it -v ${PWD}:/workspace -w /workspace cuipengfei/buntoolbox:latest
+
+# 带 Git 凭证共享
+docker run -it -v ${PWD}:/workspace -w /workspace `
+  -v ${HOME}/.ssh:/root/.ssh:ro `
+  -v ${HOME}/.gitconfig:/root/.gitconfig:ro `
+  cuipengfei/buntoolbox:latest
+
+# 持久化命名容器
+docker create --name mydev -it -v ${PWD}:/workspace -w /workspace cuipengfei/buntoolbox:latest
+docker start -ai mydev
+```
+
+## Dev Containers
+
+VS Code 用户: 已提供 `.devcontainer/devcontainer.json`。使用命令面板 "Dev Containers: Reopen in Container"。
 
 ## 已优化
 

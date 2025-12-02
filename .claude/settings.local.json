@@ -109,7 +109,8 @@
       "Bash(ip:*)",
       "Bash(nslookup:*)",
       "Bash(rm:*)",
-      "Bash(bd --help:*)"
+      "Bash(bd --help:*)",
+      "Bash(bd migrate:*)"
     ],
     "deny": [],
     "ask": []

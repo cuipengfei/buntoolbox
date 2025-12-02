@@ -115,7 +115,12 @@
       "WebSearch",
       "Bash(bun x:*)",
       "Bash(bunx --version:*)",
-      "Bash(bunx cowsay:*)"
+      "Bash(bunx cowsay:*)",
+      "Bash(powershell.exe -Command:*)",
+      "Bash(/mnt/c/Windows/System32/cmd.exe /c \"docker run --rm cuipengfei/buntoolbox:latest bash -c \"\"which bunx && bunx --version && which uvx && uvx --version\"\"\")",
+      "Bash(/Docker/host/bin/docker.exe run --rm cuipengfei/buntoolbox:latest bash -c \"which bunx && bunx --version && which uvx && uvx --version\")",
+      "Bash(/mnt/c/Windows/System32/cmd.exe:*)",
+      "mcp__deepwiki__read_wiki_contents"
     ],
     "deny": [],
     "ask": []

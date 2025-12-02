@@ -17,10 +17,10 @@ ARG HELIX_VERSION=25.07.1
 ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.8
-ARG BEADS_VERSION=0.27.0
-ARG MIHOMO_VERSION=1.19.16
+ARG BEADS_VERSION=0.28.0
+ARG MIHOMO_VERSION=1.19.17
 ARG BUN_VERSION=1.3.3
-ARG UV_VERSION=0.9.13
+ARG UV_VERSION=0.9.14
 ARG STARSHIP_VERSION=1.24.1
 
 LABEL maintainer="buntoolbox"
@@ -151,6 +151,7 @@ RUN mkdir -p /root/.bun/bin \
     && unzip -q /tmp/bun.zip -d /tmp \
     && mv /tmp/bun-linux-x64/bun /root/.bun/bin/bun \
     && chmod +x /root/.bun/bin/bun \
+    && ln -sf /root/.bun/bin/bun /root/.bun/bin/bunx \
     && rm -rf /tmp/bun.zip /tmp/bun-linux-x64
 ENV PATH="${BUN_INSTALL}/bin:${PATH}"
 

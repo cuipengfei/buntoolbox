@@ -110,7 +110,12 @@
       "Bash(nslookup:*)",
       "Bash(rm:*)",
       "Bash(bd --help:*)",
-      "Bash(bd migrate:*)"
+      "Bash(bd migrate:*)",
+      "Bash(unzip:*)",
+      "WebSearch",
+      "Bash(bun x:*)",
+      "Bash(bunx --version:*)",
+      "Bash(bunx cowsay:*)"
     ],
     "deny": [],
     "ask": []

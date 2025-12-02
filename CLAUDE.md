@@ -78,8 +78,7 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 ```
 * text eol=lf
 *.bat text eol=crlf
-### 基本用法示例（Windows/Dev Containers）
-
+```
 - 规范化索引：`git add --renormalize .` 后 `git status` 确认
 
 ## 用法

@@ -88,6 +88,7 @@ check "Python" "python --version" "python -c 'import json; print(json.dumps({\"a
 check "Node.js" "node --version" "node -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object"
 
 check "Bun" "bun --version" "bun -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object"
+check "bunx" "bunx --version" "bunx --help | head -1" "Usage" "Show help"
 
 echo ""
 echo "=== Build Tools ==="

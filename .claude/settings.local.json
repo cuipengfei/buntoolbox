@@ -125,7 +125,15 @@
       "Bash(sudo -S mv:*)",
       "Bash(yazi:*)",
       "WebFetch(domain:coder.com)",
-      "Bash(procs --version:*)"
+      "Bash(procs --version:*)",
+      "Bash(claude mcp remove:*)",
+      "mcp__firecrawl-mcp__firecrawl_scrape",
+      "mcp__firecrawl-mcp__firecrawl_search",
+      "mcp__exa__get_code_context_exa",
+      "mcp__exa__web_search_exa",
+      "mcp__firecrawl-mcp__firecrawl_map",
+      "mcp__firecrawl-mcp__firecrawl_extract",
+      "mcp__firecrawl-mcp__firecrawl_crawl"
     ],
     "deny": [],
     "ask": []

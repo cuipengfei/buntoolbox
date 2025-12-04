@@ -17,11 +17,12 @@ ARG HELIX_VERSION=25.07.1
 ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.8
-ARG BEADS_VERSION=0.28.0
+ARG BEADS_VERSION=0.29.0
 ARG MIHOMO_VERSION=1.19.17
 ARG BUN_VERSION=1.3.3
-ARG UV_VERSION=0.9.14
+ARG UV_VERSION=0.9.15
 ARG STARSHIP_VERSION=1.24.1
+ARG PROCS_VERSION=0.14.10
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -203,6 +204,12 @@ ENV HELIX_RUNTIME=/opt/helix-${HELIX_VERSION}-x86_64-linux/runtime
 # starship prompt
 RUN curl -fsSL "https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-x86_64-unknown-linux-gnu.tar.gz" \
     | tar -xz -C /usr/local/bin
+
+# procs (ps replacement)
+RUN curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VERSION}/procs-v${PROCS_VERSION}-x86_64-linux.zip" \
+    -o /tmp/procs.zip \
+    && unzip -q /tmp/procs.zip -d /usr/local/bin \
+    && rm /tmp/procs.zip
 
 # =============================================================================
 # 9. Final Configuration (tiny, last)

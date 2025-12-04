@@ -154,6 +154,7 @@ check "bat" "bat --version | grep -oE '[0-9.]+' | head -1" "printf 'line1\nline2
 check "eza" "eza --version | grep -oE 'v[0-9.]+'" "eza -1 /" "bin" "List directory"
 check "delta" "delta --version | grep -oE '[0-9.]+'" "echo -e 'a\nb' | delta" "a" "Format diff"
 check "btop" "btop --version | grep -oE '[0-9.]+'" "btop --version" "btop" "Verify installation"
+check "procs" "procs --version | grep -oE '[0-9.]+' | head -1" "procs 1" "PID" "List processes"
 
 echo ""
 echo "=== Shell Enhancements ==="

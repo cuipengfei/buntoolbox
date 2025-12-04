@@ -133,7 +133,17 @@
       "mcp__exa__web_search_exa",
       "mcp__firecrawl-mcp__firecrawl_map",
       "mcp__firecrawl-mcp__firecrawl_extract",
-      "mcp__firecrawl-mcp__firecrawl_crawl"
+      "mcp__firecrawl-mcp__firecrawl_crawl",
+      "mcp__serena__get_current_config",
+      "mcp__serena__activate_project",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__onboarding",
+      "mcp__serena__list_dir",
+      "mcp__serena__read_file",
+      "mcp__serena__write_memory",
+      "mcp__serena__list_memories",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__search_for_pattern"
     ],
     "deny": [],
     "ask": []

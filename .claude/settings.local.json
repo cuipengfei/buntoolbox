@@ -143,7 +143,11 @@
       "mcp__serena__write_memory",
       "mcp__serena__list_memories",
       "mcp__serena__get_symbols_overview",
-      "mcp__serena__search_for_pattern"
+      "mcp__serena__search_for_pattern",
+      "Bash(git push)",
+      "mcp__deepwiki__read_wiki_structure",
+      "mcp__serena__find_file",
+      "mcp__serena__replace_content"
     ],
     "deny": [],
     "ask": []

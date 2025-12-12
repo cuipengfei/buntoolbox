@@ -149,7 +149,11 @@
       "mcp__serena__find_file",
       "mcp__serena__replace_content",
       "Bash(bd config --help:*)",
-      "Bash(bd config:*)"
+      "Bash(bd config:*)",
+      "Bash(command -v:*)",
+      "Bash(\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" version)",
+      "Bash(\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" image inspect cuipengfei/buntoolbox:latest)",
+      "mcp__serena__think_about_task_adherence"
     ],
     "deny": [],
     "ask": []

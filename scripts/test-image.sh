@@ -5,12 +5,48 @@
 
 set -e
 
-IMAGE_NAME="${1:-cuipengfei/buntoolbox:latest}"
+# Options:
+#   -v, --verbose   Print full command outputs for each check
+#   --no-pull       Skip docker pull (useful when offline if image already exists)
+# Env:
+#   DOCKER_BIN      Override docker CLI (e.g. Windows Docker Desktop docker.exe)
+#   VERBOSE=1       Same as -v
+#   SKIP_PULL=1     Same as --no-pull
+
+DOCKER_BIN="${DOCKER_BIN:-docker}"
+VERBOSE="${VERBOSE:-0}"
+SKIP_PULL="${SKIP_PULL:-0}"
+IMAGE_NAME="cuipengfei/buntoolbox:latest"
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -v|--verbose)
+            VERBOSE=1
+            shift
+            ;;
+        --no-pull)
+            SKIP_PULL=1
+            shift
+            ;;
+        -i|--image)
+            IMAGE_NAME="$2"
+            shift 2
+            ;;
+        *)
+            IMAGE_NAME="$1"
+            shift
+            ;;
+    esac
+done
 
 echo "=========================================="
 echo "Pulling image: $IMAGE_NAME"
 echo "=========================================="
-docker pull "$IMAGE_NAME"
+if [ "$SKIP_PULL" = "1" ]; then
+  echo "(skip pull)"
+else
+  "$DOCKER_BIN" pull "$IMAGE_NAME"
+fi
 echo ""
 
 echo "=========================================="
@@ -39,31 +75,63 @@ check() {
     local expected="$4"
     local test_desc="$5"
 
+    local version_output
+    local version
+    local test_output
+    local test_status
+    local row_result
+
     # Get version (with timeout)
-    if ! output=$(timeout 5 bash -c "$version_cmd" 2>&1); then
+    version_output=$(timeout 5 bash -c "$version_cmd" 2>&1)
+    test_status=$?
+    if [ $test_status -ne 0 ]; then
         printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "-" "$test_desc" "✗ MISS"
         FAILED=$((FAILED+1))
+
+        if [ "${VERBOSE:-0}" = "1" ]; then
+            echo "---- ${name} (version_cmd failed) ----"
+            echo "\$ $version_cmd"
+            printf '%s\n' "$version_output"
+            echo "--------------------------------------"
+        fi
         return
     fi
-    version=$(echo "$output" | grep -v '^$' | head -1 | cut -c1-${COL_VER})
+
+    version=$(printf '%s\n' "$version_output" | grep -v '^$' | head -1 | cut -c1-${COL_VER})
 
     # Run functional test (with timeout)
-    if output=$(timeout 10 bash -c "$usage_cmd" 2>&1); then
+    test_output=$(timeout 10 bash -c "$usage_cmd" 2>&1)
+    test_status=$?
+
+    row_result="✓ PASS"
+
+    if [ $test_status -eq 0 ]; then
         if [ -n "$expected" ]; then
-            if echo "$output" | grep -qF "$expected"; then
-                printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "$version" "$test_desc" "✓ PASS"
+            if printf '%s\n' "$test_output" | grep -qF "$expected"; then
+                row_result="✓ PASS"
                 PASSED=$((PASSED+1))
             else
-                printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "$version" "$test_desc" "✗ FAIL"
+                row_result="✗ FAIL"
                 FAILED=$((FAILED+1))
             fi
         else
-            printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "$version" "$test_desc" "✓ PASS"
+            row_result="✓ PASS"
             PASSED=$((PASSED+1))
         fi
     else
-        printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "$version" "$test_desc" "✗ FAIL"
+        row_result="✗ FAIL"
         FAILED=$((FAILED+1))
+    fi
+
+    printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "$version" "$test_desc" "$row_result"
+
+    if [ "${VERBOSE:-0}" = "1" ]; then
+        echo "---- ${name} ----"
+        echo "\$ $version_cmd"
+        printf '%s\n' "$version_output"
+        echo "\$ $usage_cmd"
+        printf '%s\n' "$test_output"
+        echo "--------------"
     fi
 }
 
@@ -206,7 +274,7 @@ echo "=========================================="
 EOF
 )
 
-docker run --rm -t "$IMAGE_NAME" bash -c "$TEST_SCRIPT"
+"$DOCKER_BIN" run --rm -t -e VERBOSE="$VERBOSE" "$IMAGE_NAME" bash -c "$TEST_SCRIPT"
 
 echo ""
 echo "=========================================="

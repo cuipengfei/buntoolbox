@@ -153,7 +153,10 @@
       "Bash(command -v:*)",
       "Bash(\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" version)",
       "Bash(\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" image inspect cuipengfei/buntoolbox:latest)",
-      "mcp__serena__think_about_task_adherence"
+      "mcp__serena__think_about_task_adherence",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__duckduckgo__search",
+      "mcp__duckduckgo__fetch_content"
     ],
     "deny": [],
     "ask": []

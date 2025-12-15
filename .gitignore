@@ -1,0 +1,10 @@
+# Workspace - temporary files from skill demos
+workspace/
+
+# Demo outputs
+demo.pdf
+session-summary*.pptx
+session-summary*.pdf
+
+# Node
+node_modules/

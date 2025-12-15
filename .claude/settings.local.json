@@ -156,7 +156,17 @@
       "mcp__serena__think_about_task_adherence",
       "WebFetch(domain:raw.githubusercontent.com)",
       "mcp__duckduckgo__search",
-      "mcp__duckduckgo__fetch_content"
+      "mcp__duckduckgo__fetch_content",
+      "Bash(claude:*)",
+      "Bash(python3:*)",
+      "Bash(pip install:*)",
+      "Bash(~/.local/bin/uvx:*)",
+      "Skill(document-skills:pptx)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Skill(document-skills:frontend-design)",
+      "Bash(ls:*)",
+      "Bash(file:*)"
     ],
     "deny": [],
     "ask": []

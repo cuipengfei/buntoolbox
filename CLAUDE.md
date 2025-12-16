@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + uv/pipx | Maven + Gradle
 
-**常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, bd, mihomo 等（网络: ping, ip, ss, dig, nc, socat, ssh）
+**常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, bd, mihomo 等（网络: ping, ip, ss, dig, nc, socat, ssh, sshd）
 
 ## 常用命令
 

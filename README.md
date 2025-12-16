@@ -9,7 +9,7 @@
 - **运行时**: Bun, Node.js 24, Python 3.12
 - **JDK**: Azul Zulu 21 headless
 - **基础镜像**: Ubuntu 24.04 LTS
-- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo 等
+- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo, sshd 等
 
 ## 使用方式
 
@@ -49,6 +49,23 @@ docker start -ai mydev
 
 # Later, reconnect to same container with all your state preserved
 docker start -ai mydev
+```
+
+### SSH Access (Remote Development)
+
+```powershell
+# Run container with SSH port exposed (default password: root)
+docker run -d -p 2222:22 --name mydev-ssh cuipengfei/buntoolbox:latest /usr/sbin/sshd -D
+
+# Connect via SSH
+ssh -p 2222 root@localhost
+
+# Or use with VS Code Remote-SSH extension
+# Add to ~/.ssh/config:
+#   Host docker-dev
+#     HostName localhost
+#     Port 2222
+#     User root
 ```
 
 ## 命名由来

@@ -253,6 +253,7 @@ check "socat" "socat -V 2>&1 | grep -oE '[0-9.]+\\.[0-9.]+' | head -1" "echo tes
 check "ssh" "ssh -V 2>&1 | grep -oE '[0-9.]+p[0-9]' | head -1" "ssh -V 2>&1" "OpenSSH" "Verify installation"
 check "scp" "ssh -V 2>&1 | grep -oE '[0-9.]+p[0-9]' | head -1" "scp 2>&1 | head -1" "usage" "Show help"
 check "sftp" "ssh -V 2>&1 | grep -oE '[0-9.]+p[0-9]' | head -1" "sftp -h 2>&1 | head -1" "usage" "Show help"
+check "sshd" "sshd -V 2>&1 | grep -oE '[0-9.]+p[0-9]' | head -1" "sshd -t 2>&1; echo ok" "ok" "Validate config"
 check "telnet" "dpkg -l telnet | grep -oE '[0-9]+\\.[0-9]+' | head -1" "echo quit | telnet 2>&1 | head -1" "telnet" "Start client"
 
 echo ""

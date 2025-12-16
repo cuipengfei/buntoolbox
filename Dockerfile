@@ -79,6 +79,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     traceroute \
     socat \
     openssh-client \
+    openssh-server \
     telnet \
     # Development utilities
     file \
@@ -218,6 +219,12 @@ RUN curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VERS
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
+# SSH server configuration
+RUN mkdir -p /var/run/sshd \
+    && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
+    && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config \
+    && echo 'root:root' | chpasswd
+
 RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
     && echo 'eval "$(starship init bash)"' > /etc/profile.d/02-starship.sh \
     && echo 'eval "$(zoxide init bash)"' > /etc/profile.d/03-zoxide.sh \
@@ -229,6 +236,9 @@ RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
 RUN git lfs install \
     && rm -rf /usr/share/doc/* /usr/share/man/* \
     /root/.launchpadlib
+
+# Expose SSH port
+EXPOSE 22
 
 WORKDIR /workspace
 CMD ["/bin/bash"]

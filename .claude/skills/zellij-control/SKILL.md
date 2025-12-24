@@ -8,37 +8,38 @@ description: 使用 Zellij 终端复用器控制交互式 CLI 程序。当需要
 ## 核心命令
 
 ```bash
-SESSION="session-name"  # 从 zellij list-sessions 获取
+# 获取会话名
+zellij list-sessions
 
-# 发送文本和按键
-zellij -s $SESSION action write-chars 'command'
-zellij -s $SESSION action write-chars $'\n'     # Enter
-zellij -s $SESSION action write-chars $'\x1b'   # ESC
-zellij -s $SESSION action write-chars $'\x03'   # Ctrl+C
-zellij -s $SESSION action write-chars $'\x04'   # Ctrl+D
-zellij -s $SESSION action write-chars $'\t'     # Tab
-zellij -s $SESSION action write-chars $'\x7f'   # Backspace
+# 发送文本和按键（始终以 zellij 开头，便于批量授权）
+zellij -s SESSION_NAME action write-chars 'command'
+zellij -s SESSION_NAME action write-chars $'\n'     # Enter
+zellij -s SESSION_NAME action write-chars $'\x1b'   # ESC
+zellij -s SESSION_NAME action write-chars $'\x03'   # Ctrl+C
+zellij -s SESSION_NAME action write-chars $'\x04'   # Ctrl+D
+zellij -s SESSION_NAME action write-chars $'\t'     # Tab
+zellij -s SESSION_NAME action write-chars $'\x7f'   # Backspace
 
 # 方向键
-zellij -s $SESSION action write-chars $'\x1b[A'  # 上
-zellij -s $SESSION action write-chars $'\x1b[B'  # 下
-zellij -s $SESSION action write-chars $'\x1b[C'  # 右
-zellij -s $SESSION action write-chars $'\x1b[D'  # 左
+zellij -s SESSION_NAME action write-chars $'\x1b[A'  # 上
+zellij -s SESSION_NAME action write-chars $'\x1b[B'  # 下
+zellij -s SESSION_NAME action write-chars $'\x1b[C'  # 右
+zellij -s SESSION_NAME action write-chars $'\x1b[D'  # 左
 
 # 读取屏幕（用 /dev/shm 内存文件系统，不写磁盘）
-zellij -s $SESSION action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
-zellij -s $SESSION action dump-screen --full /dev/shm/zj.txt  # 含回滚历史
+zellij -s SESSION_NAME action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
+zellij -s SESSION_NAME action dump-screen --full /dev/shm/zj.txt  # 含回滚历史
 ```
 
 ## 窗格管理
 
 ```bash
-zellij -s $SESSION action new-pane              # 新窗格
-zellij -s $SESSION action new-pane -d right     # 向右
-zellij -s $SESSION action new-pane -d down      # 向下
-zellij -s $SESSION action close-pane            # 关闭当前窗格
-zellij -s $SESSION action focus-next-pane       # 下一窗格
-zellij -s $SESSION action move-focus right      # 向右移动焦点
+zellij -s SESSION_NAME action new-pane              # 新窗格
+zellij -s SESSION_NAME action new-pane -d right     # 向右
+zellij -s SESSION_NAME action new-pane -d down      # 向下
+zellij -s SESSION_NAME action close-pane            # 关闭当前窗格
+zellij -s SESSION_NAME action focus-next-pane       # 下一窗格
+zellij -s SESSION_NAME action move-focus right      # 向右移动焦点
 ```
 
 ## 常用工具退出方式
@@ -57,15 +58,15 @@ zellij -s $SESSION action move-focus right      # 向右移动焦点
 zellij list-sessions
 
 # 2. 运行交互式程序
-zellij -s $SESSION action write-chars 'htop'
-zellij -s $SESSION action write-chars $'\n'
+zellij -s SESSION_NAME action write-chars 'htop'
+zellij -s SESSION_NAME action write-chars $'\n'
 sleep 2
 
 # 3. 读取输出
-zellij -s $SESSION action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
+zellij -s SESSION_NAME action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
 
 # 4. 退出程序
-zellij -s $SESSION action write-chars 'q'
+zellij -s SESSION_NAME action write-chars 'q'
 ```
 
 ## 注意事项

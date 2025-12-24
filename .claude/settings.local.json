@@ -176,7 +176,10 @@
       "Bash(timeout 5 openssl s_client:*)",
       "Bash(timeout 10 nc:*)",
       "Bash(timeout:*)",
-      "Bash(zellij:*)"
+      "Bash(zellij:*)",
+      "Bash(SESSION=\"circular-apple\":*)",
+      "Bash(SESSION=\"circular-apple\" zellij:*)",
+      "Skill(document-skills:skill-creator)"
     ],
     "deny": [],
     "ask": []

@@ -268,6 +268,11 @@ check "pstree" "pstree -V 2>&1 | grep -oE '[0-9.]+'" "pstree 1 2>&1 | head -1" "
 check "bc" "bc --version 2>&1 | grep -oE '[0-9.]+' | head -1" "echo '2+2' | bc" "4" "Calculate 2+2=4"
 
 echo ""
+echo "=== Image Metadata ==="
+print_header
+check "image-release" "cat /etc/image-release | grep -c '^-' || echo 0" "cat /etc/image-release | grep -q 'buntoolbox' && echo ok" "ok" "Buntoolbox info present"
+
+echo ""
 echo "=========================================="
 echo "Results: $PASSED passed, $FAILED failed"
 echo "=========================================="

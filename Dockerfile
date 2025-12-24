@@ -242,6 +242,10 @@ RUN git lfs install \
     && rm -rf /usr/share/doc/* /usr/share/man/* \
     /root/.launchpadlib
 
+# Append buntoolbox info to /etc/image-release
+COPY image-release.txt /tmp/image-release.txt
+RUN cat /tmp/image-release.txt >> /etc/image-release && rm /tmp/image-release.txt
+
 # Expose SSH port
 EXPOSE 22
 

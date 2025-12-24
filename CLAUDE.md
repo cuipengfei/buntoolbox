@@ -32,6 +32,17 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 
 **CI/CD**: `.github/workflows/docker.yml` → Docker Hub (secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`)
 
+## 添加/更新工具时必须同步更新
+
+| 文件 | 更新内容 |
+|------|----------|
+| `Dockerfile` | ARG 版本声明 + 安装指令 |
+| `image-release.txt` | 工具列表（嵌入镜像 /etc/image-release） |
+| `scripts/check-versions.sh` | 版本检查 |
+| `scripts/test-image.sh` | 功能测试 |
+| `CLAUDE.md` | 常用工具列表 |
+| `README.md` | 包含组件列表 |
+
 ## 不要删除
 
 | 组件 | 大小 | 原因 |

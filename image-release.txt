@@ -1,0 +1,75 @@
+# =============================================================================
+# Buntoolbox - Multi-language Development Environment
+# =============================================================================
+# Repository: https://github.com/cuipengfei/buntoolbox
+# Base Image: Ubuntu 24.04 LTS (Noble)
+# =============================================================================
+
+# Languages & Runtimes
+- Java: Azul Zulu JDK 21 headless
+- Node.js: v24 LTS
+- Bun: JavaScript runtime & toolkit
+- Python: 3.12
+
+# Build Tools
+- Maven
+- Gradle
+- CMake
+- Ninja
+- GCC/G++
+- Make
+
+# Package Managers
+- npm
+- uv / uvx
+- pipx
+
+# Version Control
+- git
+- git-lfs
+- GitHub CLI (gh)
+- lazygit
+
+# Editors
+- vim
+- nano
+- helix (hx)
+
+# Terminal Multiplexers
+- tmux
+- zellij
+
+# TUI Tools
+- bat (syntax highlighting)
+- eza (ls replacement)
+- delta (git diff viewer)
+- btop (system monitor)
+- procs (ps replacement)
+- fzf (fuzzy finder)
+
+# Shell Enhancements
+- starship (prompt)
+- zoxide (smart cd)
+- direnv
+
+# Search Tools
+- ripgrep (rg)
+- fd (find replacement)
+
+# Network Tools
+- ping, ip, ss, dig
+- netcat (nc), socat
+- traceroute
+- curl, wget
+- ssh, scp, sftp
+- sshd (SSH server, port 22, root:root)
+- telnet
+
+# Other Tools
+- jq (JSON processor)
+- htop, tree, less
+- zip, unzip
+- file, lsof, bc
+- gpg
+- bd (beads issue tracker)
+- mihomo (Clash.Meta proxy)

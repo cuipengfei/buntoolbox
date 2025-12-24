@@ -9,7 +9,7 @@
 - **运行时**: Bun, Node.js 24, Python 3.12
 - **JDK**: Azul Zulu 21 headless
 - **基础镜像**: Ubuntu 24.04 LTS
-- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo, sshd 等
+- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo, sshd 等
 
 ## 使用方式
 

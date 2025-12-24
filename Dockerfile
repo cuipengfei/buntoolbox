@@ -23,6 +23,7 @@ ARG BUN_VERSION=1.3.5
 ARG UV_VERSION=0.9.18
 ARG STARSHIP_VERSION=1.24.1
 ARG PROCS_VERSION=0.14.10
+ARG ZELLIJ_VERSION=0.43.1
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -211,6 +212,10 @@ RUN curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VERS
     -o /tmp/procs.zip \
     && unzip -q /tmp/procs.zip -d /usr/local/bin \
     && rm /tmp/procs.zip
+
+# zellij (terminal multiplexer)
+RUN curl -fsSL "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz" \
+    | tar -xz -C /usr/local/bin
 
 # =============================================================================
 # 9. Final Configuration (tiny, last)

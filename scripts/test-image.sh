@@ -223,6 +223,7 @@ check "eza" "eza --version | grep -oE 'v[0-9.]+'" "eza -1 /" "bin" "List directo
 check "delta" "delta --version | grep -oE '[0-9.]+'" "echo -e 'a\nb' | delta" "a" "Format diff"
 check "btop" "btop --version | grep -oE '[0-9.]+'" "btop --version" "btop" "Verify installation"
 check "procs" "procs --version | grep -oE '[0-9.]+' | head -1" "procs 1" "PID" "List processes"
+check "zellij" "zellij --version | grep -oE '[0-9.]+'" "zellij setup --check 2>&1 | head -1" "" "Check setup"
 
 echo ""
 echo "=== Shell Enhancements ==="

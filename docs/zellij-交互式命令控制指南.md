@@ -68,8 +68,7 @@ zellij -s $SESSION action write-chars $'\n'
 sleep 2
 
 # 读取屏幕
-zellij -s $SESSION action dump-screen /tmp/output.txt
-cat /tmp/output.txt
+zellij -s $SESSION action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
 
 # 发送退出键
 zellij -s $SESSION action write-chars 'q'
@@ -118,14 +117,11 @@ zellij -s $SESSION action write-chars $'\x1b[D'  # 左
 ### 读取输出
 
 ```bash
-# 将当前屏幕转储到文件
-zellij -s $SESSION action dump-screen /tmp/screen.txt
+# 使用 /dev/shm 内存文件系统（不写磁盘，速度快）
+zellij -s $SESSION action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
 
 # 转储包含完整回滚历史
-zellij -s $SESSION action dump-screen --full /tmp/full.txt
-
-# 读取并显示
-cat /tmp/screen.txt
+zellij -s $SESSION action dump-screen --full /dev/shm/zj.txt
 ```
 
 ### 窗格管理
@@ -179,8 +175,7 @@ zellij -s $SESSION action write-chars $'\n'
 sleep 2
 
 # 读取进程列表
-zellij -s $SESSION action dump-screen /tmp/htop.txt
-cat /tmp/htop.txt
+zellij -s $SESSION action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
 
 # 过滤进程（按 F4 然后输入）
 zellij -s $SESSION action write-chars $'\x1b[14~'  # F4
@@ -206,8 +201,7 @@ zellij -s $SESSION action write-chars 'docker'
 sleep 0.5
 
 # 读取过滤结果
-zellij -s $SESSION action dump-screen /tmp/fzf.txt
-cat /tmp/fzf.txt
+zellij -s $SESSION action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
 
 # 使用 Enter 选择或使用 ESC 取消
 zellij -s $SESSION action write-chars $'\x1b'  # 取消
@@ -229,7 +223,7 @@ zellij -s $SESSION action write-chars 'j'
 zellij -s $SESSION action write-chars $'\n'  # Enter 展开
 
 # 读取屏幕
-zellij -s $SESSION action dump-screen /tmp/lazygit.txt
+zellij -s $SESSION action dump-screen /dev/shm/zj.txt
 
 # 退出
 zellij -s $SESSION action write-chars 'q'
@@ -255,8 +249,7 @@ zellij -s $SESSION action write-chars $'\n'
 sleep 0.5
 
 # 读取输出
-zellij -s $SESSION action dump-screen /tmp/python.txt
-cat /tmp/python.txt
+zellij -s $SESSION action dump-screen /dev/shm/zj.txt && cat /dev/shm/zj.txt
 
 # 退出 Python（Ctrl+D）
 zellij -s $SESSION action write-chars $'\x04'
@@ -346,7 +339,7 @@ case "$ACTION" in
     ;;
   read)
     # 读取屏幕: zj session read [file]
-    OUTPUT="${1:-/tmp/zj-output.txt}"
+    OUTPUT="${1:-/dev/shm/zj.txt}"
     zellij -s "$SESSION" action dump-screen "$OUTPUT"
     cat "$OUTPUT"
     ;;
@@ -392,8 +385,8 @@ sleep 2  # 给 htop 时间渲染
 
 ```bash
 # 检查程序是否就绪
-zellij -s $SESSION action dump-screen /tmp/check.txt
-if grep -q "pattern" /tmp/check.txt; then
+zellij -s $SESSION action dump-screen /dev/shm/zj.txt
+if grep -q "pattern" /dev/shm/zj.txt; then
   # 程序就绪，继续
 fi
 ```
@@ -411,9 +404,7 @@ zellij -s $SESSION action write-chars $'\x04'
 ### 4. 完成后清理
 
 ```bash
-# 删除临时文件
-rm -f /tmp/zj-*.txt
-
+# /dev/shm 是内存文件系统，无需清理
 # 如果创建了额外的窗格，则关闭它们
 zellij -s $SESSION action close-pane
 ```
@@ -465,7 +456,7 @@ zellij -s $SESSION action write-chars $'\n'  # 别忘了这个！
 sleep 2
 
 # 尝试完整回滚
-zellij -s $SESSION action dump-screen --full /tmp/out.txt
+zellij -s $SESSION action dump-screen --full /dev/shm/zj.txt
 ```
 
 ### 程序无响应

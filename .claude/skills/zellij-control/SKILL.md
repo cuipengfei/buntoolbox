@@ -76,3 +76,4 @@ zellij -s SESSION_NAME action write-chars 'q'
 - dump-screen 只支持文件路径，用 `/dev/shm/zj.txt` 避免写磁盘
 - 文件编辑用 Claude Code 的 Edit 工具，无需 zellij
 - 不确定时递归查看帮助：`zellij --help`、`zellij action --help`、`zellij action <cmd> --help`
+- **重要**：bash 命令必须以 `zellij` 开头，不要用注释或变量赋值开头，否则需要逐一授权

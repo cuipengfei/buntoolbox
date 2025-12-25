@@ -34,6 +34,7 @@
 - vim
 - nano
 - helix (hx)
+- openvscode-server (VS Code in browser)
 
 # Terminal Multiplexers
 - tmux

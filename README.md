@@ -9,7 +9,7 @@
 - **运行时**: Bun, Node.js 24, Python 3.12
 - **JDK**: Azul Zulu 21 headless
 - **基础镜像**: Ubuntu 24.04 LTS
-- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo, sshd 等
+- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo, sshd, openvscode-server 等
 
 ## 使用方式
 
@@ -66,6 +66,23 @@ ssh -p 2222 root@localhost
 #     HostName localhost
 #     Port 2222
 #     User root
+```
+
+### OpenVSCode Server (Browser-based VS Code)
+
+```powershell
+# Quick start (default port 3000, no authentication)
+docker run -d -p 3000:3000 --name mydev-web cuipengfei/buntoolbox:latest openvscode-start
+
+# Custom port
+docker run -d -p 8080:8080 --name mydev-web cuipengfei/buntoolbox:latest openvscode-start 8080
+
+# With connection token for security
+docker run -d -p 3000:3000 --name mydev-web cuipengfei/buntoolbox:latest \
+  openvscode-server --host 0.0.0.0 --port 3000 --connection-token mypassword
+
+# Visit http://localhost:3000 in your browser
+# Full VS Code experience in the browser, no installation needed!
 ```
 
 ## 命名由来

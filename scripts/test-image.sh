@@ -212,6 +212,7 @@ print_header
 check "vim" "vim --version | grep -oE 'Vi IMproved [0-9.]+' | grep -oE '[0-9.]+'" "vim --version | head -1" "VIM" "Verify installation"
 check "nano" "nano --version | grep -oE '[0-9.]+' | head -1" "nano --version" "nano" "Verify installation"
 check "helix" "hx --version | grep -oE '[0-9.]+' | head -1" "hx --health 2>&1 | head -1" "Config" "Health check"
+check "openvscode-server" "openvscode-server --version | head -1" "openvscode-server --help 2>&1 | head -1" "OpenVSCode Server" "Show help"
 
 echo ""
 echo "=== TUI Tools ==="

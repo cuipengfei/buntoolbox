@@ -182,7 +182,8 @@
       "Skill(document-skills:skill-creator)",
       "Bash(ln:*)",
       "Bash(openvscode-server:*)",
-      "Bash(ps:*)"
+      "Bash(ps:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

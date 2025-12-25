@@ -24,6 +24,7 @@ ARG UV_VERSION=0.9.18
 ARG STARSHIP_VERSION=1.24.1
 ARG PROCS_VERSION=0.14.10
 ARG ZELLIJ_VERSION=0.43.1
+ARG OPENVSCODE_VERSION=1.106.3
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -216,6 +217,15 @@ RUN curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VERS
 # zellij (terminal multiplexer)
 RUN curl -fsSL "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C /usr/local/bin
+
+# openvscode-server (VS Code in browser)
+RUN mkdir -p /opt \
+    && curl -fsSL "https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-v${OPENVSCODE_VERSION}/openvscode-server-v${OPENVSCODE_VERSION}-linux-x64.tar.gz" \
+    | tar -xz -C /opt \
+    && ln -sf /opt/openvscode-server-v${OPENVSCODE_VERSION}-linux-x64/bin/openvscode-server /usr/local/bin/openvscode-server
+
+COPY scripts/openvscode-start.sh /usr/local/bin/openvscode-start
+RUN chmod +x /usr/local/bin/openvscode-start
 
 # =============================================================================
 # 9. Final Configuration (tiny, last)

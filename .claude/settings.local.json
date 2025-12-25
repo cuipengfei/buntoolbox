@@ -179,7 +179,10 @@
       "Bash(zellij:*)",
       "Bash(SESSION=\"circular-apple\":*)",
       "Bash(SESSION=\"circular-apple\" zellij:*)",
-      "Skill(document-skills:skill-creator)"
+      "Skill(document-skills:skill-creator)",
+      "Bash(ln:*)",
+      "Bash(openvscode-server:*)",
+      "Bash(ps:*)"
     ],
     "deny": [],
     "ask": []

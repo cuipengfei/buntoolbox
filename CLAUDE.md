@@ -24,9 +24,11 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 
 ## 架构
 
-**Dockerfile 层顺序** (稳定→易变): 系统 → JDK → Python → uv/pipx → Maven → gh → Node/Bun → Gradle → TUI → 配置
+**Dockerfile 层顺序** (稳定→易变): 系统 → JDK → Python → uv/pipx → Maven → gh → Node/Bun → Gradle → TUI → beads (最后) → 配置
 
-**层优化策略**: 稳定的 apt 包放第一层，TUI 工具放最后。用户更新时只拉取变化的层。
+**TUI 工具层顺序**: eza, delta, zoxide, mihomo, lazygit, helix, starship, procs, zellij, openvscode-server, **beads** (最后，因为发布频繁)
+
+**层优化策略**: 稳定的 apt 包放第一层，频繁更新的工具（如 beads）放最后。用户更新时只拉取变化的层。
 
 **版本管理**: Dockerfile 顶部 ARG 声明 (`NODE_MAJOR`, `GRADLE_VERSION`, `*_VERSION`)
 
@@ -62,6 +64,13 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 - **JDK jmods/man 可删** — 仅用于 jlink，容器不需要
 - **测试 bd 用 `bd --help`** — `bd --version` 无数据库时返回非零
 - **测试 mihomo 用 `-v` 和 `-h`** — 不支持 `--version` / `--help`
+- **频繁更新的工具放最后** — beads 已移到最后一层，减少层重建影响
+
+### Helper 脚本
+
+- `scripts/openvscode-start.sh` — 快速启动 OpenVSCode Server，默认端口 3000，无认证
+  - 用法: `openvscode-start [port]`
+  - 安装到镜像: `/usr/local/bin/openvscode-start`
 
 ### 测试脚本（scripts/test-image.sh）
 

@@ -117,7 +117,7 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa \
     && rm -rf /var/lib/apt/lists/* \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 \
-    && python3.12 -m pip install --upgrade pip
+    && python3.12 -m pip install --upgrade --break-system-packages pip
 
 # =============================================================================
 # 4. Maven (stable, from apt)

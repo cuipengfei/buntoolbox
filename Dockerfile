@@ -17,7 +17,7 @@ ARG HELIX_VERSION=25.07.1
 ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.8
-ARG BEADS_VERSION=0.35.0
+ARG BEADS_VERSION=0.36.0
 ARG MIHOMO_VERSION=1.19.18
 ARG BUN_VERSION=1.3.5
 ARG UV_VERSION=0.9.18
@@ -185,10 +185,6 @@ RUN curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VE
 RUN curl -fsSL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C /usr/local/bin zoxide
 
-# beads (bd - issue tracker)
-RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_VERSION}/beads_${BEADS_VERSION}_linux_amd64.tar.gz" \
-    | tar -xz -C /usr/local/bin bd
-
 # mihomo (Clash.Meta)
 RUN curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/v${MIHOMO_VERSION}/mihomo-linux-amd64-v${MIHOMO_VERSION}.gz" \
     | gunzip -c > /usr/local/bin/mihomo \
@@ -226,6 +222,10 @@ RUN mkdir -p /opt \
 
 COPY scripts/openvscode-start.sh /usr/local/bin/openvscode-start
 RUN chmod +x /usr/local/bin/openvscode-start
+
+# beads (bd - issue tracker) - moved to last due to frequent releases
+RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_VERSION}/beads_${BEADS_VERSION}_linux_amd64.tar.gz" \
+    | tar -xz -C /usr/local/bin bd
 
 # =============================================================================
 # 9. Final Configuration (tiny, last)

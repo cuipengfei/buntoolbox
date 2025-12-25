@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，镜像约 1.8GB。专为被企业策略禁用 WSL 的 Windows 用户设计。
+多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，镜像约 2.0GB。专为被企业策略禁用 WSL 的 Windows 用户设计。
 
 **技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + pip/uv/pipx | Maven + Gradle
 
@@ -78,6 +78,21 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 - **测试 bd 用 `bd --help`** — `bd --version` 无数据库时返回非零
 - **测试 mihomo 用 `-v` 和 `-h`** — 不支持 `--version` / `--help`
 - **频繁更新的工具放最后** — beads 已移到最后一层，减少层重建影响
+- **pip 不要升级** — 使用 apt 安装的 pip 即可，尝试升级会因 PEP 668 和缺少 RECORD 文件失败
+
+### 镜像大小组成（2047 MB）
+
+| 组件类型 | 大小 | 占比 | 主要内容 |
+|---------|-----:|-----:|----------|
+| 系统基础 + Ubuntu | 704 MB | 34.4% | apt packages, build-essential, 网络工具 |
+| 语言运行时 | 583 MB | 28.5% | JDK 21 (227MB), Node.js (196MB), Bun (104MB), Python |
+| 编辑器/IDE | 440 MB | 21.5% | OpenVSCode (228MB), Helix (212MB) |
+| 构建工具 | 186 MB | 9.1% | Gradle (150MB), Maven (37MB) |
+| TUI/其他 | 134 MB | 6.5% | zellij, lazygit, mihomo, gh, starship, 等 |
+
+**优化记录**: 已通过层优化节省 ~385 MB（APT cache 20MB, JDK jmods/man 50MB, uv cache 10MB, 临时文件 300MB, 文档 5MB）
+
+**清理审计**: 99.6% 完成度，仅 1.5MB locale 文件未清理（系统依赖）
 
 ### Helper 脚本
 

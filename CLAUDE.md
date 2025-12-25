@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **注意**: 本项目使用 [bd (beads)](https://github.com/steveyegge/beads) 进行 issue 追踪，请使用 `bd` 命令而非 markdown TODO，完整流程请参见 AGENTS.md。
 
+**交流语言**: 与用户交流请主要使用中文；代码与命令以英文为主（与 `.github/copilot-instructions.md` 保持一致）。
+
 ## 项目概述
 
 多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，镜像约 2.0GB。专为被企业策略禁用 WSL 的 Windows 用户设计。
@@ -15,11 +17,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 常用命令
 
 ```bash
-docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
-./scripts/test-image.sh                   # 从 Docker Hub 拉取并测试
-./scripts/test-image.sh <image>           # 测试指定镜像
-./scripts/check-versions.sh               # 检查工具版本更新
-./scripts/check-versions.sh -v            # 详细模式，显示所有可用下载变体
+# 拉取与交互运行
+docker pull cuipengfei/buntoolbox:latest
+docker run -it cuipengfei/buntoolbox:latest
+
+# 本地构建（不推荐，慢）
+docker build -t buntoolbox .
+
+# 镜像端到端测试（默认从 Docker Hub 拉取）
+./scripts/test-image.sh
+./scripts/test-image.sh cuipengfei/buntoolbox:latest      # 指定镜像
+./scripts/test-image.sh --no-pull                         # 离线测试（镜像已存在）
+DOCKER_BIN="/Docker/host/bin/docker.exe" ./scripts/test-image.sh -v  # 指定宿主 docker 可执行 + 详细输出
+
+# 版本检查（用于更新 Dockerfile 顶部 ARG 值）
+./scripts/check-versions.sh
+./scripts/check-versions.sh -v                            # 显示 Linux x86_64 资产选项（便于选择）
+
+# 单项快速验证（最小化排障）
+docker run --rm cuipengfei/buntoolbox:latest java -version
+docker run --rm cuipengfei/buntoolbox:latest node --version
+docker run --rm cuipengfei/buntoolbox:latest bun --version
+docker run --rm cuipengfei/buntoolbox:latest python --version
+docker run --rm cuipengfei/buntoolbox:latest gh --version
+docker run --rm cuipengfei/buntoolbox:latest zellij --version
+docker run --rm cuipengfei/buntoolbox:latest uv --version
+
+# OpenVSCode Server 快速启动（浏览器 VS Code，默认端口 3000，无认证）
+docker run -d -p 3000:3000 cuipengfei/buntoolbox:latest openvscode-start
+# 自定义端口
+docker run -d -p 8080:8080 cuipengfei/buntoolbox:latest openvscode-start 8080
 ```
 
 ## 架构
@@ -47,6 +74,14 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 
 **CI/CD**: `.github/workflows/docker.yml` → Docker Hub (secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`)
 
+### CI/CD 行为说明
+- 触发条件：
+  - push 到 master/main 分支、打 `v*` 标签、PR 到 master/main、或手动 `workflow_dispatch`
+- 推送策略：
+  - 非 PR 事件才会 push 到 Docker Hub；标签由 `docker/metadata-action` 生成（分支、PR、semver 主/次版本、默认分支时 `latest`）
+- 构建平台与缓存：
+  - 仅 `linux/amd64`；启用 GitHub Actions 缓存（`cache-from/to: gha`）
+
 ## 添加/更新工具时必须同步更新
 
 | 文件 | 更新内容 |
@@ -57,6 +92,11 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 | `scripts/test-image.sh` | 功能测试 |
 | `CLAUDE.md` | 常用工具列表 |
 | `README.md` | 包含组件列表 |
+
+**版本更新流程建议**:
+- 先运行 `./scripts/check-versions.sh`（必要时 `-v` 查看 Linux x86_64 资产列表并选择正确资产）。
+- 根据检查结果修改 Dockerfile 顶部 ARG 值（Node 使用 LTS 主版本，脚本以官方 index.json 的 LTS 条目为准）。
+- 运行 `./scripts/test-image.sh` 进行端到端验证。
 
 ## 不要删除
 
@@ -79,6 +119,17 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 - **测试 mihomo 用 `-v` 和 `-h`** — 不支持 `--version` / `--help`
 - **频繁更新的工具放最后** — beads 已移到最后一层，减少层重建影响
 - **pip 不要升级** — 使用 apt 安装的 pip 即可，尝试升级会因 PEP 668 和缺少 RECORD 文件失败
+
+### 会话关闭协议（Hooks 提示）
+在宣称“完成”之前请执行：
+```
+[ ] 1. git status              (检查变更)
+[ ] 2. git add <files>         (暂存改动)
+[ ] 3. bd sync                 (同步 beads 变更)
+[ ] 4. git commit -m "..."     (提交代码)
+[ ] 5. bd sync                 (提交任何新增 beads 变更)
+[ ] 6. git push                (推送到远程)
+```
 
 ### 镜像大小组成（2047 MB）
 
@@ -105,6 +156,7 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 `check <name> <version_cmd> <usage_cmd> <expected> <test_desc>` — 版本检查 5s 超时，功能测试 10s
 - 输出格式: 表格 (Tool | Version | Test | Result)
 - 网络功能性测试失败不判定镜像失败（可能缺 CAP_NET_RAW）
+- 常用选项: `-v/--verbose` 输出命令与原始结果；`--no-pull` 离线测试；环境变量 `DOCKER_BIN` 可指定宿主 docker 可执行
 
 ### Windows 行尾（CRLF/LF）
 

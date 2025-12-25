@@ -106,27 +106,18 @@ ENV JAVA_HOME=/usr/lib/jvm/zulu21-ca-amd64
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # =============================================================================
-# 3. Python 3.12 + uv/uvx + pipx (stable)
+# 3. Python 3.12 + pip (stable)
 # =============================================================================
 RUN add-apt-repository -y ppa:deadsnakes/ppa \
     && apt-get update && apt-get install -y --no-install-recommends \
     python3.12 \
     python3.12-venv \
     python3.12-dev \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/* \
     && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
-    && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
-
-# Install uv first, then use uv to install pipx (avoids distutils issue with pip)
-ENV UV_INSTALL_DIR=/root/.local/bin
-RUN mkdir -p /root/.local/bin \
-    && curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
-    | tar -xz -C /root/.local/bin --strip-components=1
-ENV PATH="${UV_INSTALL_DIR}:${PATH}"
-
-RUN uv tool install pipx && pipx ensurepath \
-    && rm -rf /root/.cache/uv
-ENV PATH="/root/.local/bin:${PATH}"
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 \
+    && python3.12 -m pip install --upgrade pip
 
 # =============================================================================
 # 4. Maven (stable, from apt)
@@ -143,35 +134,14 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | g
     && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
-# 6. Node.js LTS + Bun (medium change frequency)
+# 6. Node.js LTS (stable)
 # =============================================================================
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-ENV BUN_INSTALL=/root/.bun
-RUN mkdir -p /root/.bun/bin \
-    && curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip" -o /tmp/bun.zip \
-    && unzip -q /tmp/bun.zip -d /tmp \
-    && mv /tmp/bun-linux-x64/bun /root/.bun/bin/bun \
-    && chmod +x /root/.bun/bin/bun \
-    && ln -sf /root/.bun/bin/bun /root/.bun/bin/bunx \
-    && rm -rf /tmp/bun.zip /tmp/bun-linux-x64
-ENV PATH="${BUN_INSTALL}/bin:${PATH}"
-
 # =============================================================================
-# 7. Gradle (frequently updated)
-# =============================================================================
-RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip \
-    && unzip -q /tmp/gradle.zip -d /opt \
-    && ln -sf /opt/gradle-${GRADLE_VERSION} /opt/gradle \
-    && rm /tmp/gradle.zip
-
-ENV GRADLE_HOME=/opt/gradle
-ENV PATH="${GRADLE_HOME}/bin:${PATH}"
-
-# =============================================================================
-# 8. TUI Tools (most frequently updated)
+# 7. Stable TUI Tools (low change frequency)
 # =============================================================================
 # eza (ls replacement)
 RUN curl -fsSL "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz" \
@@ -184,15 +154,6 @@ RUN curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VE
 # zoxide (smart cd)
 RUN curl -fsSL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C /usr/local/bin zoxide
-
-# mihomo (Clash.Meta)
-RUN curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/v${MIHOMO_VERSION}/mihomo-linux-amd64-v${MIHOMO_VERSION}.gz" \
-    | gunzip -c > /usr/local/bin/mihomo \
-    && chmod +x /usr/local/bin/mihomo
-
-# lazygit
-RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_linux_x86_64.tar.gz" \
-    | tar -xz -C /usr/local/bin lazygit
 
 # helix editor
 RUN curl -fsSL "https://github.com/helix-editor/helix/releases/download/${HELIX_VERSION}/helix-${HELIX_VERSION}-x86_64-linux.tar.xz" \
@@ -223,12 +184,62 @@ RUN mkdir -p /opt \
 COPY scripts/openvscode-start.sh /usr/local/bin/openvscode-start
 RUN chmod +x /usr/local/bin/openvscode-start
 
+# =============================================================================
+# 8. Medium-frequency tools (5 updates each)
+# =============================================================================
+# Gradle
+RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip \
+    && unzip -q /tmp/gradle.zip -d /opt \
+    && ln -sf /opt/gradle-${GRADLE_VERSION} /opt/gradle \
+    && rm /tmp/gradle.zip
+
+ENV GRADLE_HOME=/opt/gradle
+ENV PATH="${GRADLE_HOME}/bin:${PATH}"
+
+# Bun
+ENV BUN_INSTALL=/root/.bun
+RUN mkdir -p /root/.bun/bin \
+    && curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip" -o /tmp/bun.zip \
+    && unzip -q /tmp/bun.zip -d /tmp \
+    && mv /tmp/bun-linux-x64/bun /root/.bun/bin/bun \
+    && chmod +x /root/.bun/bin/bun \
+    && ln -sf /root/.bun/bin/bun /root/.bun/bin/bunx \
+    && rm -rf /tmp/bun.zip /tmp/bun-linux-x64
+ENV PATH="${BUN_INSTALL}/bin:${PATH}"
+
+# lazygit
+RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_linux_x86_64.tar.gz" \
+    | tar -xz -C /usr/local/bin lazygit
+
+# mihomo (Clash.Meta)
+RUN curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/v${MIHOMO_VERSION}/mihomo-linux-amd64-v${MIHOMO_VERSION}.gz" \
+    | gunzip -c > /usr/local/bin/mihomo \
+    && chmod +x /usr/local/bin/mihomo
+
+# =============================================================================
+# 9. High-frequency tools (9 updates)
+# =============================================================================
+# uv/uvx
+ENV UV_INSTALL_DIR=/root/.local/bin
+RUN mkdir -p /root/.local/bin \
+    && curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
+    | tar -xz -C /root/.local/bin --strip-components=1
+ENV PATH="${UV_INSTALL_DIR}:${PATH}"
+
+# pipx (depends on uv)
+RUN uv tool install pipx && pipx ensurepath \
+    && rm -rf /root/.cache/uv
+ENV PATH="/root/.local/bin:${PATH}"
+
+# =============================================================================
+# 10. beads - most frequent (13 updates)
+# =============================================================================
 # beads (bd - issue tracker) - moved to last due to frequent releases
 RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_VERSION}/beads_${BEADS_VERSION}_linux_amd64.tar.gz" \
     | tar -xz -C /usr/local/bin bd
 
 # =============================================================================
-# 9. Final Configuration (tiny, last)
+# 11. Final Configuration (tiny, last)
 # =============================================================================
 # Use C.UTF-8 locale (built-in to Ubuntu 24.04, no locales package needed)
 ENV LANG=C.UTF-8

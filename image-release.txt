@@ -21,6 +21,7 @@
 
 # Package Managers
 - npm
+- pip
 - uv / uvx
 - pipx
 

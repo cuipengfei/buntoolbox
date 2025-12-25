@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，镜像约 1.8GB。专为被企业策略禁用 WSL 的 Windows 用户设计。
 
-**技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + uv/pipx | Maven + Gradle
+**技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + pip/uv/pipx | Maven + Gradle
 
 **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, bd, mihomo, openvscode-server 等（网络: ping, ip, ss, dig, nc, socat, ssh, sshd）
 
@@ -24,11 +24,24 @@ docker build -t buntoolbox .              # 构建镜像 (本地，较慢)
 
 ## 架构
 
-**Dockerfile 层顺序** (稳定→易变): 系统 → JDK → Python → uv/pipx → Maven → gh → Node/Bun → Gradle → TUI → beads (最后) → 配置
+**Dockerfile 层顺序** (按更新频率优化):
+1. 系统基础 (apt packages) - 最稳定
+2. JDK 21 - 稳定
+3. Python 3.12 + pip - 稳定
+4. Maven - 稳定
+5. GitHub CLI - 稳定
+6. Node.js - 稳定
+7. 稳定 TUI 工具 (eza, delta, zoxide, helix, starship, procs, zellij, openvscode-server)
+8. 中频更新工具 (Gradle, Bun, lazygit, mihomo) - 5次更新
+9. 高频更新工具 (uv/pipx) - 9次更新
+10. beads - 最频繁 (13次更新)
+11. 最终配置
 
-**TUI 工具层顺序**: eza, delta, zoxide, mihomo, lazygit, helix, starship, procs, zellij, openvscode-server, **beads** (最后，因为发布频繁)
+**TUI 工具层**: eza, delta, zoxide, helix, starship, procs, zellij, openvscode-server
 
-**层优化策略**: 稳定的 apt 包放第一层，频繁更新的工具（如 beads）放最后。用户更新时只拉取变化的层。
+**中频更新工具层**: Gradle, Bun, lazygit, mihomo (各5次版本更新)
+
+**层优化策略**: 按版本变化频率排序，稳定工具在前，频繁更新工具在后，最小化层重建影响。uv 从第3层移到第9层，更新时影响的层数从6个减少到2个。
 
 **版本管理**: Dockerfile 顶部 ARG 声明 (`NODE_MAJOR`, `GRADLE_VERSION`, `*_VERSION`)
 

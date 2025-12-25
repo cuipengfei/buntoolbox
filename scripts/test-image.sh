@@ -152,6 +152,7 @@ echo 'public class T{public static void main(String[]a){System.out.println(1+1);
 check "Java" "java -version" "javac /tmp/T.java && java -cp /tmp T" "2" "Compile & run (1+1=2)"
 
 check "Python" "python --version" "python -c 'import json; print(json.dumps({\"a\":1}))'" '{"a": 1}' "JSON serialize dict"
+check "pip" "pip --version" "pip list --format=columns | head -1" "Package" "List packages"
 
 check "Node.js" "node --version" "node -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object"
 

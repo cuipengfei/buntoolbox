@@ -184,7 +184,8 @@
       "Bash(openvscode-server:*)",
       "Bash(ps:*)",
       "mcp__ide__getDiagnostics",
-      "Bash(sort:*)"
+      "Bash(sort:*)",
+      "Bash(paste:*)"
     ],
     "deny": [],
     "ask": []

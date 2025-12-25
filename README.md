@@ -6,7 +6,7 @@
 
 ## 包含组件
 
-- **运行时**: Bun, Node.js 24, Python 3.12
+- **运行时**: Bun, Node.js 24, Python 3.12 (pip/uv/pipx)
 - **JDK**: Azul Zulu 21 headless
 - **基础镜像**: Ubuntu 24.04 LTS
 - **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo, sshd, openvscode-server 等

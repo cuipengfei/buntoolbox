@@ -15,7 +15,7 @@
 ```bash
 bd ready --json
 ```
-
+    
 **Create new issues:**
 ```bash
 bd create "Issue title" -t bug|feature|task -p 0-4 --json

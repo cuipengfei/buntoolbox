@@ -185,7 +185,9 @@
       "Bash(ps:*)",
       "mcp__ide__getDiagnostics",
       "Bash(sort:*)",
-      "Bash(paste:*)"
+      "Bash(paste:*)",
+      "Bash(fresh:*)",
+      "Bash(procs fresh:*)"
     ],
     "deny": [],
     "ask": []

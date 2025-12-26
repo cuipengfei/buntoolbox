@@ -1,5 +1,5 @@
 # CLAUDE.md
-
+ 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **注意**: 本项目使用 [bd (beads)](https://github.com/steveyegge/beads) 进行 issue 追踪，请使用 `bd` 命令而非 markdown TODO，完整流程请参见 AGENTS.md。

@@ -187,7 +187,16 @@
       "Bash(sort:*)",
       "Bash(paste:*)",
       "Bash(fresh:*)",
-      "Bash(procs fresh:*)"
+      "Bash(procs fresh:*)",
+      "Bash(apt list:*)",
+      "Bash(procs:*)",
+      "Bash(systemctl list-unit-files:*)",
+      "Bash(sudo:*)",
+      "Bash(systemctl --user daemon-reload:*)",
+      "Bash(systemctl:*)",
+      "Bash(systemctl --user start:*)",
+      "Bash(systemctl --user status:*)",
+      "Bash(loginctl show-user:*)"
     ],
     "deny": [],
     "ask": []

@@ -75,3 +75,4 @@
 - gpg
 - bd (beads issue tracker)
 - mihomo (Clash.Meta proxy)
+- claude (Claude Code CLI)

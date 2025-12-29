@@ -17,7 +17,7 @@ ARG HELIX_VERSION=25.07.1
 ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.8
-ARG BEADS_VERSION=0.36.0
+ARG BEADS_VERSION=0.40.0
 ARG MIHOMO_VERSION=1.19.18
 ARG BUN_VERSION=1.3.5
 ARG UV_VERSION=0.9.18
@@ -238,7 +238,15 @@ RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_V
     | tar -xz -C /usr/local/bin bd
 
 # =============================================================================
-# 11. Final Configuration (tiny, last)
+# 11. Claude Code - frequent updates
+# =============================================================================
+# Claude Code CLI - official Anthropic CLI for Claude
+# Uses official installer which auto-detects platform and verifies checksums
+RUN curl -fsSL https://claude.ai/install.sh | bash \
+    && rm -rf /root/.claude/downloads
+
+# =============================================================================
+# 12. Final Configuration (tiny, last)
 # =============================================================================
 # Use C.UTF-8 locale (built-in to Ubuntu 24.04, no locales package needed)
 ENV LANG=C.UTF-8

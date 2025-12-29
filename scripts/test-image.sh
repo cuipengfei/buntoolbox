@@ -238,6 +238,7 @@ echo "=== Other Tools ==="
 print_header
 check "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help" "beads" "Show help"
 check "mihomo" "mihomo -v | grep -oE 'v[0-9.]+' | head -1" "mihomo -h" "Usage" "Show help"
+check "claude" "claude --version | head -1" "claude --help | head -1" "" "Show help"
 check "gpg" "gpg --version | grep -oE '[0-9.]+' | head -1" "echo test | gpg --symmetric --batch --passphrase test -o /tmp/test.gpg && echo ok" "ok" "Symmetric encrypt"
 check "lsb_release" "lsb_release -rs" "lsb_release -a 2>&1" "Ubuntu" "Show distro info"
 

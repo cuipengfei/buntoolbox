@@ -93,10 +93,27 @@ docker run -d -p 8080:8080 cuipengfei/buntoolbox:latest openvscode-start 8080
 | `CLAUDE.md` | 常用工具列表 |
 | `README.md` | 包含组件列表 |
 
-**版本更新流程建议**:
-- 先运行 `./scripts/check-versions.sh`（必要时 `-v` 查看 Linux x86_64 资产列表并选择正确资产）。
-- 根据检查结果修改 Dockerfile 顶部 ARG 值（Node 使用 LTS 主版本，脚本以官方 index.json 的 LTS 条目为准）。
-- 运行 `./scripts/test-image.sh` 进行端到端验证。
+**版本更新完整流程**:
+```bash
+# 1. 检查可用更新
+./scripts/check-versions.sh
+./scripts/check-versions.sh -v    # 查看 Linux x86_64 资产选项
+
+# 2. 更新 Dockerfile 顶部 ARG 值
+# Node 使用 LTS 主版本，脚本以官方 index.json 的 LTS 条目为准
+
+# 3. 提交并推送
+git add Dockerfile && git commit -m "chore: update tool versions" && git push
+
+# 4. 监控 GitHub Actions 构建（必须等待完成）
+gh run list --limit 1
+gh run watch <run_id>             # 实时监控，通常 3-6 分钟
+
+# 5. 构建成功后验证镜像
+./scripts/test-image.sh           # 会自动拉取最新镜像并测试
+```
+
+**重要**: push 后必须 watch GitHub Actions 构建完成，然后运行 test-image.sh 验证。不要跳过任何步骤。
 
 ## 不要删除
 

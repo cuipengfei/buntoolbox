@@ -202,7 +202,9 @@
       "mcp__memory__create_relations",
       "Skill(session-learn:learn)",
       "mcp__memory__read_graph",
-      "Bash(# 检查 oh-my-zsh lib 里的终端设置 grep -l \"\"2004\\\\|bracketed\\\\|paste\"\" ~/.oh-my-zsh/lib/*.zsh)"
+      "Bash(# 检查 oh-my-zsh lib 里的终端设置 grep -l \"\"2004\\\\|bracketed\\\\|paste\"\" ~/.oh-my-zsh/lib/*.zsh)",
+      "Bash(infocmp:*)",
+      "Skill(codex:codex-advisor)"
     ],
     "deny": [],
     "ask": [],

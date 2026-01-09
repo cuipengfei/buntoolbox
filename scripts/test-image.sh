@@ -53,6 +53,31 @@ echo "=========================================="
 echo "Testing image: $IMAGE_NAME"
 echo "=========================================="
 
+# Extract expected versions from Dockerfile for verification
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOCKERFILE="$SCRIPT_DIR/../Dockerfile"
+get_dockerfile_version() {
+    grep "^ARG ${1}=" "$DOCKERFILE" 2>/dev/null | cut -d'=' -f2
+}
+
+# Export versions as environment variables for container
+EXPECTED_VERSIONS=""
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BUN_VERSION=$(get_dockerfile_version BUN_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_GRADLE_VERSION=$(get_dockerfile_version GRADLE_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_UV_VERSION=$(get_dockerfile_version UV_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BEADS_VERSION=$(get_dockerfile_version BEADS_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_CLAUDE_VERSION=$(get_dockerfile_version CLAUDE_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_LAZYGIT_VERSION=$(get_dockerfile_version LAZYGIT_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_HELIX_VERSION=$(get_dockerfile_version HELIX_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_EZA_VERSION=$(get_dockerfile_version EZA_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_DELTA_VERSION=$(get_dockerfile_version DELTA_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_ZOXIDE_VERSION=$(get_dockerfile_version ZOXIDE_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_STARSHIP_VERSION=$(get_dockerfile_version STARSHIP_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_PROCS_VERSION=$(get_dockerfile_version PROCS_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_ZELLIJ_VERSION=$(get_dockerfile_version ZELLIJ_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_OPENVSCODE_VERSION=$(get_dockerfile_version OPENVSCODE_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_MIHOMO_VERSION=$(get_dockerfile_version MIHOMO_VERSION)"
+
 # Create test script
 TEST_SCRIPT=$(cat << 'EOF'
 PASSED=0
@@ -135,6 +160,82 @@ check() {
     fi
 }
 
+# check_ver: like check() but also verifies version matches expected from Dockerfile
+# Usage: check_ver <name> <version_cmd> <usage_cmd> <expected> <test_desc> <expect_env_var>
+check_ver() {
+    local name="$1"
+    local version_cmd="$2"
+    local usage_cmd="$3"
+    local expected="$4"
+    local test_desc="$5"
+    local expect_env_var="$6"
+
+    local version_output
+    local version
+    local test_output
+    local test_status
+    local row_result
+    local expected_version
+
+    # Get expected version from environment
+    expected_version="${!expect_env_var:-}"
+
+    # Get version (with timeout)
+    version_output=$(timeout 5 bash -c "$version_cmd" 2>&1)
+    test_status=$?
+    if [ $test_status -ne 0 ]; then
+        printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "-" "$test_desc" "✗ MISS"
+        FAILED=$((FAILED+1))
+        return
+    fi
+
+    version=$(printf '%s\n' "$version_output" | grep -v '^$' | head -1 | cut -c1-${COL_VER})
+
+    # Run functional test (with timeout)
+    test_output=$(timeout 10 bash -c "$usage_cmd" 2>&1)
+    test_status=$?
+
+    row_result="✓ PASS"
+
+    if [ $test_status -eq 0 ]; then
+        if [ -n "$expected" ]; then
+            if ! printf '%s\n' "$test_output" | grep -qF "$expected"; then
+                row_result="✗ FAIL"
+                FAILED=$((FAILED+1))
+                printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "$version" "$test_desc" "$row_result"
+                return
+            fi
+        fi
+        # Version verification
+        if [ -n "$expected_version" ]; then
+            if printf '%s\n' "$version_output" | grep -qF "$expected_version"; then
+                row_result="✓ PASS"
+                PASSED=$((PASSED+1))
+            else
+                row_result="✗ VER (expect $expected_version)"
+                FAILED=$((FAILED+1))
+            fi
+        else
+            PASSED=$((PASSED+1))
+        fi
+    else
+        row_result="✗ FAIL"
+        FAILED=$((FAILED+1))
+    fi
+
+    printf "%-${COL_NAME}s %-${COL_VER}s %-${COL_TEST}s %s\n" "$name" "$version" "$test_desc" "$row_result"
+
+    if [ "${VERBOSE:-0}" = "1" ]; then
+        echo "---- ${name} ----"
+        echo "\$ $version_cmd"
+        printf '%s\n' "$version_output"
+        echo "\$ $usage_cmd"
+        printf '%s\n' "$test_output"
+        [ -n "$expected_version" ] && echo "Expected version: $expected_version"
+        echo "--------------"
+    fi
+}
+
 echo "=== OS ==="
 . /etc/os-release && echo "$NAME $VERSION"
 
@@ -156,14 +257,14 @@ check "pip" "pip --version" "pip list --format=columns | head -1" "Package" "Lis
 
 check "Node.js" "node --version" "node -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object"
 
-check "Bun" "bun --version" "bun -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object"
+check_ver "Bun" "bun --version" "bun -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object" "EXPECT_BUN_VERSION"
 check "bunx" "bunx --version" "bunx --help | head -1" "Usage" "Show help"
 
 echo ""
 echo "=== Build Tools ==="
 print_header
 check "Maven" "mvn --version | grep -oE 'Maven [0-9.]+' | cut -d' ' -f2" "mvn --version" "Apache Maven" "Verify installation"
-check "Gradle" "gradle --version | grep -oE 'Gradle [0-9.]+' | cut -d' ' -f2" "gradle --version" "Gradle" "Verify installation"
+check_ver "Gradle" "gradle --version | grep -oE 'Gradle [0-9.]+' | cut -d' ' -f2" "gradle --version" "Gradle" "Verify installation" "EXPECT_GRADLE_VERSION"
 printf 'test:\n\t@echo ok\n' > /tmp/Makefile
 check "make" "make --version | grep -oE '[0-9.]+' | head -1" "make -f /tmp/Makefile test" "ok" "Run Makefile target"
 printf 'cmake_minimum_required(VERSION 3.10)\nproject(test)\n' > /tmp/CMakeLists.txt
@@ -177,7 +278,7 @@ check "pkg-config" "pkg-config --version" "pkg-config --modversion zlib 2>/dev/n
 echo ""
 echo "=== Package Managers ==="
 print_header
-check "uv" "uv --version" "uv venv --help | head -1" "Create" "Show venv help"
+check_ver "uv" "uv --version" "uv venv --help | head -1" "Create" "Show venv help" "EXPECT_UV_VERSION"
 check "uvx" "uvx --version" "uvx --help | head -3" "Run a command" "Show help"
 check "pipx" "pipx --version" "pipx list" "pipx" "List packages"
 check "npm" "npm --version" "npm config list" "node" "Show config"
@@ -212,33 +313,33 @@ echo "=== Editors ==="
 print_header
 check "vim" "vim --version | grep -oE 'Vi IMproved [0-9.]+' | grep -oE '[0-9.]+'" "vim --version | head -1" "VIM" "Verify installation"
 check "nano" "nano --version | grep -oE '[0-9.]+' | head -1" "nano --version" "nano" "Verify installation"
-check "helix" "hx --version | grep -oE '[0-9.]+' | head -1" "hx --health 2>&1 | head -1" "Config" "Health check"
-check "openvscode-server" "openvscode-server --version | head -1" "openvscode-server --help 2>&1 | head -1" "OpenVSCode Server" "Show help"
+check_ver "helix" "hx --version | grep -oE '[0-9.]+' | head -1" "hx --health 2>&1 | head -1" "Config" "Health check" "EXPECT_HELIX_VERSION"
+check_ver "openvscode-server" "openvscode-server --version | head -1" "openvscode-server --help 2>&1 | head -1" "OpenVSCode Server" "Show help" "EXPECT_OPENVSCODE_VERSION"
 
 echo ""
 echo "=== TUI Tools ==="
 print_header
 cd /tmp/test-repo 2>/dev/null || git init /tmp/test-repo >/dev/null
-check "lazygit" "lazygit --version | grep -oE 'version=[0-9.]+' | cut -d= -f2" "lazygit --version" "version" "Verify installation"
+check_ver "lazygit" "lazygit --version | grep -oE 'version=[0-9.]+' | cut -d= -f2" "lazygit --version" "version" "Verify installation" "EXPECT_LAZYGIT_VERSION"
 check "bat" "bat --version | grep -oE '[0-9.]+' | head -1" "printf 'line1\nline2' | bat -p --color=never" "line1" "Syntax highlight"
-check "eza" "eza --version | grep -oE 'v[0-9.]+'" "eza -1 /" "bin" "List directory"
-check "delta" "delta --version | grep -oE '[0-9.]+'" "echo -e 'a\nb' | delta" "a" "Format diff"
+check_ver "eza" "eza --version | grep -oE 'v[0-9.]+'" "eza -1 /" "bin" "List directory" "EXPECT_EZA_VERSION"
+check_ver "delta" "delta --version | grep -oE '[0-9.]+'" "echo -e 'a\nb' | delta" "a" "Format diff" "EXPECT_DELTA_VERSION"
 check "btop" "btop --version | grep -oE '[0-9.]+'" "btop --version" "btop" "Verify installation"
-check "procs" "procs --version | grep -oE '[0-9.]+' | head -1" "procs 1" "PID" "List processes"
-check "zellij" "zellij --version | grep -oE '[0-9.]+'" "zellij setup --check 2>&1 | head -1" "" "Check setup"
+check_ver "procs" "procs --version | grep -oE '[0-9.]+' | head -1" "procs 1" "PID" "List processes" "EXPECT_PROCS_VERSION"
+check_ver "zellij" "zellij --version | grep -oE '[0-9.]+'" "zellij setup --check 2>&1 | head -1" "" "Check setup" "EXPECT_ZELLIJ_VERSION"
 
 echo ""
 echo "=== Shell Enhancements ==="
 print_header
-check "starship" "starship --version | grep -oE '[0-9.]+'" "starship print-config 2>&1 | head -1" "" "Print config"
-check "zoxide" "zoxide --version | grep -oE '[0-9.]+'" "zoxide add /tmp && zoxide query tmp" "/tmp" "Add & query path"
+check_ver "starship" "starship --version | grep -oE '[0-9.]+'" "starship print-config 2>&1 | head -1" "" "Print config" "EXPECT_STARSHIP_VERSION"
+check_ver "zoxide" "zoxide --version | grep -oE '[0-9.]+'" "zoxide add /tmp && zoxide query tmp" "/tmp" "Add & query path" "EXPECT_ZOXIDE_VERSION"
 
 echo ""
 echo "=== Other Tools ==="
 print_header
-check "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help" "beads" "Show help"
-check "mihomo" "mihomo -v | grep -oE 'v[0-9.]+' | head -1" "mihomo -h" "Usage" "Show help"
-check "claude" "claude --version | head -1" "claude --help | head -1" "" "Show help"
+check_ver "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help" "beads" "Show help" "EXPECT_BEADS_VERSION"
+check_ver "mihomo" "mihomo -v | grep -oE 'v[0-9.]+' | head -1" "mihomo -h" "Usage" "Show help" "EXPECT_MIHOMO_VERSION"
+check_ver "claude" "claude --version | awk '{print \$1}'" "claude --help | head -1" "" "Show help" "EXPECT_CLAUDE_VERSION"
 check "gpg" "gpg --version | grep -oE '[0-9.]+' | head -1" "echo test | gpg --symmetric --batch --passphrase test -o /tmp/test.gpg && echo ok" "ok" "Symmetric encrypt"
 check "lsb_release" "lsb_release -rs" "lsb_release -a 2>&1" "Ubuntu" "Show distro info"
 
@@ -284,7 +385,7 @@ echo "=========================================="
 EOF
 )
 
-"$DOCKER_BIN" run --rm -t -e VERBOSE="$VERBOSE" "$IMAGE_NAME" bash -c "$TEST_SCRIPT"
+"$DOCKER_BIN" run --rm -t -e VERBOSE="$VERBOSE" $EXPECTED_VERSIONS "$IMAGE_NAME" bash -c "$TEST_SCRIPT"
 
 echo ""
 echo "=========================================="

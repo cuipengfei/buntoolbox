@@ -42,6 +42,7 @@ docker run --rm cuipengfei/buntoolbox:latest python --version
 docker run --rm cuipengfei/buntoolbox:latest gh --version
 docker run --rm cuipengfei/buntoolbox:latest zellij --version
 docker run --rm cuipengfei/buntoolbox:latest uv --version
+docker run --rm cuipengfei/buntoolbox:latest claude --version
 
 # OpenVSCode Server 快速启动（浏览器 VS Code，默认端口 3000，无认证）
 docker run -d -p 3000:3000 cuipengfei/buntoolbox:latest openvscode-start

@@ -78,6 +78,21 @@ get_latest_github_release() {
     fetch_github_release "$1" | jq -r '.tag_name // empty' | sed 's/^v//' | sed 's/^bun-v//'
 }
 
+get_latest_claude() {
+    curl -fsSL --max-time 5 "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/latest" 2>/dev/null
+}
+
+# Get current Ubuntu base image version from Dockerfile
+get_current_ubuntu() {
+    grep "^FROM ubuntu:" "$PROJECT_ROOT/$DOCKERFILE" | sed 's/FROM ubuntu://'
+}
+
+# Get latest Ubuntu LTS version from official Ubuntu meta-release
+get_latest_ubuntu_lts() {
+    curl -fsSL --max-time 5 "https://changelogs.ubuntu.com/meta-release-lts" 2>/dev/null | \
+        grep -E "^Version:" | tail -1 | grep -oE '[0-9]+\.[0-9]+' | head -1
+}
+
 # Get linux x86_64 assets only (no arm, no windows, no macos, no other archs)
 get_linux_assets() {
     local repo="$1"
@@ -134,6 +149,10 @@ check_version() {
 }
 
 echo ""
+echo "=== 基础镜像 ==="
+check_version "Ubuntu" "$(get_current_ubuntu)" "$(get_latest_ubuntu_lts)" "" ""
+
+echo ""
 echo "=== 语言运行时 ==="
 check_version "Node.js" "$(get_current_version NODE_MAJOR)" "$(get_latest_node)" "" ""
 check_version "Bun" "$(get_current_version BUN_VERSION)" "$(get_latest_github_release oven-sh/bun | sed 's/^bun-v//')" "oven-sh/bun" "bun-linux-x64.zip"
@@ -165,6 +184,7 @@ echo ""
 echo "=== 其他工具 ==="
 check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release steveyegge/beads)" "steveyegge/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
 check_version "mihomo" "$(get_current_version MIHOMO_VERSION)" "$(get_latest_github_release MetaCubeX/mihomo)" "MetaCubeX/mihomo" "mihomo-linux-amd64-v$(get_current_version MIHOMO_VERSION).gz"
+check_version "claude" "$(get_current_version CLAUDE_VERSION)" "$(get_latest_claude)" "" ""
 
 echo ""
 if [ $updates_available -eq 1 ]; then

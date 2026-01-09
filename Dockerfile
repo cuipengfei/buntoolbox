@@ -25,6 +25,7 @@ ARG STARSHIP_VERSION=1.24.2
 ARG PROCS_VERSION=0.14.10
 ARG ZELLIJ_VERSION=0.43.1
 ARG OPENVSCODE_VERSION=1.106.3
+ARG CLAUDE_VERSION=2.1.2
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -242,7 +243,8 @@ RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_V
 # =============================================================================
 # Claude Code CLI - official Anthropic CLI for Claude
 # Uses official installer which auto-detects platform and verifies checksums
-RUN curl -fsSL https://claude.ai/install.sh | bash \
+# Pass version to installer: bash -s -- <VERSION>
+RUN curl -fsSL https://claude.ai/install.sh | bash -s -- ${CLAUDE_VERSION} \
     && rm -rf /root/.claude/downloads
 
 # =============================================================================

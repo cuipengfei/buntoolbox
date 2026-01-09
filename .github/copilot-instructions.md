@@ -9,8 +9,8 @@
 **Buntoolbox** 是一个多语言开发环境 Docker 镜像 (基于 Ubuntu 24.04 LTS)，镜像大小约 1.79GB。
 
 **主要特性:**
-- **运行时**: Bun, Node.js 24, Python 3.12
-- **JDK**: Azul Zulu 21 headless
+- **运行时**: Bun, Node.js 24, Python 3.14
+- **JDK**: Azul Zulu 25 headless
 - **基础镜像**: Ubuntu 24.04 LTS
 - **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, lazygit, helix, bat, eza, delta, btop, starship, zoxide, bd, mihomo 等
 
@@ -18,9 +18,9 @@
 
 - **容器技术**: Docker
 - **基础系统**: Ubuntu 24.04 LTS (Noble)
-- **Java**: Azul Zulu JDK 21 headless
+- **Java**: Azul Zulu JDK 25 headless
 - **JavaScript/TypeScript**: Node.js 24, Bun
-- **Python**: Python 3.12 + uv/pipx
+- **Python**: Python 3.14 + uv/pipx
 - **构建工具**: Maven, Gradle
 - **CI/CD**: GitHub Actions
 
@@ -38,8 +38,8 @@ docker build -t buntoolbox .              # 构建镜像
 
 **Dockerfile 层顺序** (按稳定性排序，稳定→易变):
 1. 系统基础 + 必要工具
-2. Azul Zulu JDK 21
-3. Python 3.12 + uv/pipx
+2. Azul Zulu JDK 25
+3. Python 3.14 + uv/pipx
 4. Maven
 5. GitHub CLI
 6. Node.js + Bun

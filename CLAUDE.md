@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 多语言开发环境 Docker 镜像 (Ubuntu 24.04 LTS)，镜像约 2.0GB。专为被企业策略禁用 WSL 的 Windows 用户设计。
 
-**技术栈**: Zulu JDK 21 headless | Node.js 24 + Bun | Python 3.12 + pip/uv/pipx | Maven + Gradle
+**技术栈**: Zulu JDK 25 headless | Node.js 24 + Bun | Python 3.14 + pip/uv/pipx | Maven + Gradle
 
 **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, bd, mihomo, openvscode-server, claude 等（网络: ping, ip, ss, dig, nc, socat, ssh, sshd）
 
@@ -55,7 +55,7 @@ docker run -d -p 8080:8080 cuipengfei/buntoolbox:latest openvscode-start 8080
 **Dockerfile 层顺序** (按更新频率优化):
 1. 系统基础 (apt packages) - 最稳定
 2. JDK 21 - 稳定
-3. Python 3.12 + pip - 稳定
+3. Python 3.14 + pip - 稳定
 4. Maven - 稳定
 5. GitHub CLI - 稳定
 6. Node.js - 稳定
@@ -72,6 +72,8 @@ docker run -d -p 8080:8080 cuipengfei/buntoolbox:latest openvscode-start 8080
 **层优化策略**: 按版本变化频率排序，稳定工具在前，频繁更新工具在后，最小化层重建影响。uv 从第3层移到第9层，更新时影响的层数从6个减少到2个。
 
 **版本管理**: Dockerfile 顶部 ARG 声明 (`NODE_MAJOR`, `GRADLE_VERSION`, `*_VERSION`)
+
+**Claude Code 版本**: 使用 `ARG CLAUDE_VERSION` 固定版本，安装脚本支持 `bash -s -- <VERSION>` 传递版本号。版本检查使用官方 GCS bucket endpoint: `https://storage.googleapis.com/claude-code-dist-.../claude-code-releases/latest`
 
 **CI/CD**: `.github/workflows/docker.yml` → Docker Hub (secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`)
 

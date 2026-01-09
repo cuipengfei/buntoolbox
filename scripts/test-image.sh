@@ -60,10 +60,24 @@ get_dockerfile_version() {
     grep "^ARG ${1}=" "$DOCKERFILE" 2>/dev/null | cut -d'=' -f2
 }
 
+# Extract JDK major version from zulu<N>-jdk-headless
+get_dockerfile_jdk() {
+    grep "zulu.*-jdk-headless" "$DOCKERFILE" | grep -oE 'zulu[0-9]+' | sed 's/zulu//'
+}
+
+# Extract Python version from python3.XX
+get_dockerfile_python() {
+    grep "python3\.[0-9]" "$DOCKERFILE" | grep -oE 'python3\.[0-9]+' | head -1 | sed 's/python//'
+}
+
 # Export versions as environment variables for container
 EXPECTED_VERSIONS=""
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_JDK_MAJOR=$(get_dockerfile_jdk)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_PYTHON_VERSION=$(get_dockerfile_python)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BUN_VERSION=$(get_dockerfile_version BUN_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_NODE_MAJOR=$(get_dockerfile_version NODE_MAJOR)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_GRADLE_VERSION=$(get_dockerfile_version GRADLE_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_MAVEN_VERSION=$(get_dockerfile_version MAVEN_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_UV_VERSION=$(get_dockerfile_version UV_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BEADS_VERSION=$(get_dockerfile_version BEADS_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_CLAUDE_VERSION=$(get_dockerfile_version CLAUDE_VERSION)"
@@ -250,12 +264,12 @@ print_header
 
 # Java - compile and run
 echo 'public class T{public static void main(String[]a){System.out.println(1+1);}}' > /tmp/T.java
-check "Java" "java -version" "javac /tmp/T.java && java -cp /tmp T" "2" "Compile & run (1+1=2)"
+check_ver "Java" "java -version 2>&1 | grep -oE 'version \"[0-9]+' | grep -oE '[0-9]+'" "javac /tmp/T.java && java -cp /tmp T" "2" "Compile & run (1+1=2)" "EXPECT_JDK_MAJOR"
 
-check "Python" "python --version" "python -c 'import json; print(json.dumps({\"a\":1}))'" '{"a": 1}' "JSON serialize dict"
+check_ver "Python" "python --version | grep -oE '3\\.[0-9]+'" "python -c 'import json; print(json.dumps({\"a\":1}))'" '{"a": 1}' "JSON serialize dict" "EXPECT_PYTHON_VERSION"
 check "pip" "pip --version" "pip list --format=columns | head -1" "Package" "List packages"
 
-check "Node.js" "node --version" "node -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object"
+check_ver "Node.js" "node --version | grep -oE '[0-9]+' | head -1" "node -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object" "EXPECT_NODE_MAJOR"
 
 check_ver "Bun" "bun --version" "bun -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object" "EXPECT_BUN_VERSION"
 check "bunx" "bunx --version" "bunx --help | head -1" "Usage" "Show help"
@@ -263,7 +277,7 @@ check "bunx" "bunx --version" "bunx --help | head -1" "Usage" "Show help"
 echo ""
 echo "=== Build Tools ==="
 print_header
-check "Maven" "mvn --version | grep -oE 'Maven [0-9.]+' | cut -d' ' -f2" "mvn --version" "Apache Maven" "Verify installation"
+check_ver "Maven" "mvn --version | grep -oE 'Maven [0-9.]+' | cut -d' ' -f2" "mvn --version" "Apache Maven" "Verify installation" "EXPECT_MAVEN_VERSION"
 check_ver "Gradle" "gradle --version | grep -oE 'Gradle [0-9.]+' | cut -d' ' -f2" "gradle --version" "Gradle" "Verify installation" "EXPECT_GRADLE_VERSION"
 printf 'test:\n\t@echo ok\n' > /tmp/Makefile
 check "make" "make --version | grep -oE '[0-9.]+' | head -1" "make -f /tmp/Makefile test" "ok" "Run Makefile target"

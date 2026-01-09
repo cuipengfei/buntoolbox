@@ -6,10 +6,10 @@
 # =============================================================================
 
 # Languages & Runtimes
-- Java: Azul Zulu JDK 21 headless
+- Java: Azul Zulu JDK 25 headless
 - Node.js: v24 LTS
 - Bun: JavaScript runtime & toolkit
-- Python: 3.12
+- Python: 3.14
 
 # Build Tools
 - Maven

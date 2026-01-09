@@ -204,7 +204,16 @@
       "mcp__memory__read_graph",
       "Bash(# 检查 oh-my-zsh lib 里的终端设置 grep -l \"\"2004\\\\|bracketed\\\\|paste\"\" ~/.oh-my-zsh/lib/*.zsh)",
       "Bash(infocmp:*)",
-      "Skill(codex:codex-advisor)"
+      "Skill(codex:codex-advisor)",
+      "WebFetch(domain:claude.ai)",
+      "WebFetch(domain:web.archive.org)",
+      "Bash(npm view:*)",
+      "Skill(session-learn:auto-extract)",
+      "mcp__memory__delete_relations",
+      "mcp__memory__delete_observations",
+      "mcp__memory__add_observations",
+      "Bash(apt-cache search:*)",
+      "Bash(apt-cache show:*)"
     ],
     "deny": [],
     "ask": [],

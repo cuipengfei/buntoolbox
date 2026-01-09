@@ -1,6 +1,6 @@
 # Buntoolbox - Multi-language Development Environment
 # Base: Ubuntu 24.04 LTS (Noble)
-# Languages: JS/TS (Bun, Node.js), Python 3.12, Java (Zulu 11/17/21)
+# Languages: JS/TS (Bun, Node.js), Python 3.14, Java (Zulu 25)
 #
 # Layer order optimized for minimal pull on updates:
 # Stable layers first, frequently updated layers last
@@ -12,6 +12,7 @@ FROM ubuntu:24.04
 # =============================================================================
 ARG NODE_MAJOR=24
 ARG GRADLE_VERSION=9.2.1
+ARG MAVEN_VERSION=3.9.12
 ARG LAZYGIT_VERSION=0.58.0
 ARG HELIX_VERSION=25.07.1
 ARG EZA_VERSION=0.23.4
@@ -94,36 +95,40 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ln -sf /usr/bin/batcat /usr/bin/bat
 
 # =============================================================================
-# 2. Azul Zulu JDK 21 headless (stable, large)
+# 2. Azul Zulu JDK 25 headless (stable, large)
 # =============================================================================
 RUN curl -fsSL https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" > /etc/apt/sources.list.d/zulu.list \
     && apt-get update && apt-get install -y --no-install-recommends \
-    zulu21-jdk-headless \
+    zulu25-jdk-headless \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /usr/lib/jvm/*/jmods /usr/lib/jvm/*/man
 
-ENV JAVA_HOME=/usr/lib/jvm/zulu21-ca-amd64
+ENV JAVA_HOME=/usr/lib/jvm/zulu25-ca-amd64
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # =============================================================================
-# 3. Python 3.12 + pip (stable)
+# 3. Python 3.14 + pip (stable)
 # =============================================================================
 RUN add-apt-repository -y ppa:deadsnakes/ppa \
     && apt-get update && apt-get install -y --no-install-recommends \
-    python3.12 \
-    python3.12-venv \
-    python3.12-dev \
+    python3.14 \
+    python3.14-venv \
+    python3.14-dev \
     python3-pip \
     && rm -rf /var/lib/apt/lists/* \
-    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
-    && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.14 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.14 1
 
 # =============================================================================
-# 4. Maven (stable, from apt)
+# 4. Maven (manual install for version control)
 # =============================================================================
-RUN apt-get update && apt-get install -y --no-install-recommends maven \
-    && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
+    | tar -xz -C /opt \
+    && ln -sf /opt/apache-maven-${MAVEN_VERSION} /opt/maven
+
+ENV MAVEN_HOME=/opt/maven
+ENV PATH="${MAVEN_HOME}/bin:${PATH}"
 
 # =============================================================================
 # 5. GitHub CLI (stable)

@@ -93,6 +93,34 @@ get_latest_ubuntu_lts() {
         grep -E "^Version:" | tail -1 | grep -oE '[0-9]+\.[0-9]+' | head -1
 }
 
+# Get current JDK major version from Dockerfile (extracts number from zulu<N>-jdk-headless)
+get_current_jdk() {
+    grep "zulu.*-jdk-headless" "$PROJECT_ROOT/$DOCKERFILE" | grep -oE 'zulu[0-9]+' | sed 's/zulu//'
+}
+
+# Get latest Azul Zulu LTS version from endoflife.date API
+get_latest_jdk_lts() {
+    curl -fsSL --max-time 5 "https://endoflife.date/api/azul-zulu.json" 2>/dev/null | \
+        jq -r '[.[] | select(.lts == true)] | sort_by(.cycle | tonumber) | reverse | .[0].cycle'
+}
+
+# Get current Python major.minor version from Dockerfile (extracts from python3.XX)
+get_current_python() {
+    grep "python3\.[0-9]" "$PROJECT_ROOT/$DOCKERFILE" | grep -oE 'python3\.[0-9]+' | head -1 | sed 's/python//'
+}
+
+# Get latest Python stable version from endoflife.date API
+get_latest_python() {
+    curl -fsSL --max-time 5 "https://endoflife.date/api/python.json" 2>/dev/null | \
+        jq -r '.[0].cycle'
+}
+
+# Get latest Maven version from endoflife.date API
+get_latest_maven() {
+    curl -fsSL --max-time 5 "https://endoflife.date/api/maven.json" 2>/dev/null | \
+        jq -r '.[0].latest'
+}
+
 # Get linux x86_64 assets only (no arm, no windows, no macos, no other archs)
 get_linux_assets() {
     local repo="$1"
@@ -154,12 +182,15 @@ check_version "Ubuntu" "$(get_current_ubuntu)" "$(get_latest_ubuntu_lts)" "" ""
 
 echo ""
 echo "=== 语言运行时 ==="
+check_version "JDK" "$(get_current_jdk)" "$(get_latest_jdk_lts)" "" ""
+check_version "Python" "$(get_current_python)" "$(get_latest_python)" "" ""
 check_version "Node.js" "$(get_current_version NODE_MAJOR)" "$(get_latest_node)" "" ""
 check_version "Bun" "$(get_current_version BUN_VERSION)" "$(get_latest_github_release oven-sh/bun | sed 's/^bun-v//')" "oven-sh/bun" "bun-linux-x64.zip"
 
 echo ""
 echo "=== 构建工具 ==="
 check_version "Gradle" "$(get_current_version GRADLE_VERSION)" "$(get_latest_gradle)" "" ""
+check_version "Maven" "$(get_current_version MAVEN_VERSION)" "$(get_latest_maven)" "" ""
 
 echo ""
 echo "=== 包管理器 ==="

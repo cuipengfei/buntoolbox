@@ -5,9 +5,9 @@ Multi-language development environment Docker image (Ubuntu 24.04 LTS, ~1.8GB). 
 
 ## Tech Stack
 - **Base**: Ubuntu 24.04 LTS
-- **Java**: Azul Zulu JDK 21 headless
+- **Java**: Azul Zulu JDK 25 headless
 - **JavaScript**: Node.js 24 + Bun
-- **Python**: Python 3.12 + uv/pipx
+- **Python**: Python 3.14 + uv/pipx
 - **Build**: Maven + Gradle
 - **CI/CD**: GitHub Actions → Docker Hub
 

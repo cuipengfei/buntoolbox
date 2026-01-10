@@ -137,6 +137,8 @@ gh run watch <run_id>             # 实时监控，通常 3-6 分钟
 - **JDK jmods/man 可删** — 仅用于 jlink，容器不需要
 - **测试 bd 用 `bd --help`** — `bd --version` 无数据库时返回非零
 - **测试 mihomo 用 `-v` 和 `-h`** — 不支持 `--version` / `--help`
+- **测试 jdtls 用 jar 文件名** — 无 `--version` 命令，从 `plugins/org.eclipse.jdt.ls.core_*.jar` 提取版本
+- **jdtls 版本格式** — `version-timestamp`（如 `1.54.0-202511261751`），Dockerfile ARG 包含完整格式
 - **频繁更新的工具放最后** — beads 已移到最后一层，减少层重建影响
 - **pip 不要升级** — 使用 apt 安装的 pip 即可，尝试升级会因 PEP 668 和缺少 RECORD 文件失败
 

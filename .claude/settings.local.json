@@ -231,7 +231,13 @@
       "Bash(pstree:*)",
       "Bash(# 查看 Claude Code 进程 \\(344277\\) 的详细信息 procs 344277 || ps aux)",
       "Bash(tweakcc:*)",
-      "Bash(jdtls:*)"
+      "Bash(jdtls:*)",
+      "Bash(cmd.exe /c:*)",
+      "Bash(/mnt/wsl/docker-desktop/cli-tools/usr/bin/docker version:*)",
+      "Bash(# 列出 Docker Desktop 配置 ls \"\"/mnt/c/Users/\"\"*/AppData/Roaming/Docker/*.json)",
+      "Bash(DOCKER_BIN=\"cmd.exe /c docker\" ./scripts/test-image.sh:*)",
+      "Bash(DOCKER_BIN=\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" ./scripts/test-image.sh:*)",
+      "Bash(\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" run:*)"
     ],
     "deny": [],
     "ask": [],

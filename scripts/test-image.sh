@@ -342,7 +342,7 @@ check_ver "delta" "delta --version | grep -oE '[0-9.]+'" "echo -e 'a\nb' | delta
 check "btop" "btop --version | grep -oE '[0-9.]+'" "btop --version" "btop" "Verify installation"
 check_ver "procs" "procs --version | grep -oE '[0-9.]+' | head -1" "procs 1" "PID" "List processes" "EXPECT_PROCS_VERSION"
 check_ver "zellij" "zellij --version | grep -oE '[0-9.]+'" "zellij setup --check 2>&1 | head -1" "" "Check setup" "EXPECT_ZELLIJ_VERSION"
-check_ver "jdtls" "jdtls --version 2>&1 | grep -oE '[0-9.]+' | head -1" "jdtls --help 2>&1 | head -1" "jdtls" "Show help" "EXPECT_JDTLS_VERSION"
+check_ver "jdtls" "ls /opt/jdtls/plugins/org.eclipse.jdt.ls.core_*.jar 2>/dev/null | grep -oE '[0-9]+\\.[0-9]+\\.[0-9]+' | head -1" "jdtls --help 2>&1 | head -1" "usage" "Show help" "EXPECT_JDTLS_VERSION"
 
 echo ""
 echo "=== Shell Enhancements ==="

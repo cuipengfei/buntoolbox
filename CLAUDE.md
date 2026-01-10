@@ -54,7 +54,7 @@ docker run -d -p 8080:8080 cuipengfei/buntoolbox:latest openvscode-start 8080
 
 **Dockerfile 层顺序** (按更新频率优化):
 1. 系统基础 (apt packages) - 最稳定
-2. JDK 21 - 稳定
+2. JDK 25 - 稳定
 3. Python 3.14 + pip - 稳定
 4. Maven - 稳定
 5. GitHub CLI - 稳定
@@ -156,7 +156,7 @@ gh run watch <run_id>             # 实时监控，通常 3-6 分钟
 | 组件类型 | 大小 | 占比 | 主要内容 |
 |---------|-----:|-----:|----------|
 | 系统基础 + Ubuntu | 704 MB | 34.4% | apt packages, build-essential, 网络工具 |
-| 语言运行时 | 583 MB | 28.5% | JDK 21 (227MB), Node.js (196MB), Bun (104MB), Python |
+| 语言运行时 | 583 MB | 28.5% | JDK 25 (227MB), Node.js (196MB), Bun (104MB), Python |
 | 编辑器/IDE | 440 MB | 21.5% | OpenVSCode (228MB), Helix (212MB) |
 | 构建工具 | 186 MB | 9.1% | Gradle (150MB), Maven (37MB) |
 | TUI/其他 | 134 MB | 6.5% | zellij, lazygit, mihomo, gh, starship, 等 |

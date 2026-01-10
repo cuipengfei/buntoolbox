@@ -40,6 +40,7 @@ fi
 mkdir -p "$CACHE_DIR"
 
 # Fetch GitHub release data with caching (one request per repo)
+# Uses gh api if available (authenticated, no rate limit), falls back to curl
 fetch_github_release() {
     local repo="$1"
     local cache_file="$CACHE_DIR/$(echo "$repo" | tr '/' '_').json"
@@ -50,8 +51,16 @@ fetch_github_release() {
         return
     fi
 
-    # Fetch and cache
+    # Fetch and cache - prefer gh api (authenticated) over curl (rate limited)
     local data
+    if command -v gh &>/dev/null && gh auth status &>/dev/null; then
+        if data=$(gh api "repos/${repo}/releases/latest" 2>/dev/null); then
+            echo "$data" > "$cache_file"
+            echo "$data"
+            return
+        fi
+    fi
+    # Fallback to curl
     if data=$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" 2>/dev/null); then
         echo "$data" > "$cache_file"
         echo "$data"

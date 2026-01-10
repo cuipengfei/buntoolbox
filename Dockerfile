@@ -27,6 +27,7 @@ ARG PROCS_VERSION=0.14.10
 ARG ZELLIJ_VERSION=0.43.1
 ARG OPENVSCODE_VERSION=1.106.3
 ARG CLAUDE_VERSION=2.1.3
+ARG JDTLS_VERSION=1.54.0-202511261751
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -188,6 +189,13 @@ RUN mkdir -p /opt \
 
 COPY scripts/openvscode-start.sh /usr/local/bin/openvscode-start
 RUN chmod +x /usr/local/bin/openvscode-start
+
+# jdtls (Java Language Server for IDE features)
+# Note: Version includes build timestamp (e.g., 1.54.0-202511261751)
+RUN mkdir -p /opt/jdtls \
+    && curl -fsSL "https://download.eclipse.org/jdtls/milestones/${JDTLS_VERSION%%-*}/jdt-language-server-${JDTLS_VERSION}.tar.gz" \
+    | tar -xz -C /opt/jdtls \
+    && ln -sf /opt/jdtls/bin/jdtls /usr/local/bin/jdtls
 
 # =============================================================================
 # 8. Medium-frequency tools (5 updates each)

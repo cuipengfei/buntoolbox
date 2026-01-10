@@ -67,6 +67,9 @@
 - sshd (SSH server, port 22, root:root)
 - telnet
 
+# Language Servers
+- jdtls (Java LSP)
+
 # Other Tools
 - jq (JSON processor)
 - htop, tree, less

@@ -34,6 +34,9 @@ DOCKER_BIN="/Docker/host/bin/docker.exe" ./scripts/test-image.sh -v  # 指定宿
 ./scripts/check-versions.sh
 ./scripts/check-versions.sh -v                            # 显示 Linux x86_64 资产选项（便于选择）
 
+# WSL 本地环境版本检查（保持 WSL 与 Docker 镜像同步）
+./scripts/check-wsl-versions.sh
+
 # 单项快速验证（最小化排障）
 docker run --rm cuipengfei/buntoolbox:latest java -version
 docker run --rm cuipengfei/buntoolbox:latest node --version
@@ -92,6 +95,7 @@ docker run -d -p 8080:8080 cuipengfei/buntoolbox:latest openvscode-start 8080
 | `Dockerfile` | ARG 版本声明 + 安装指令 |
 | `image-release.txt` | 工具列表（嵌入镜像 /etc/image-release） |
 | `scripts/check-versions.sh` | 版本检查 |
+| `scripts/check-wsl-versions.sh` | WSL 本地版本检查 |
 | `scripts/test-image.sh` | 功能测试 |
 | `CLAUDE.md` | 常用工具列表 |
 | `README.md` | 包含组件列表 |

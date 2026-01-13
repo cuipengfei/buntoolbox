@@ -165,7 +165,7 @@ get_local_version() {
             delta --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
         procs)
-            procs --version 2>/dev/null | grep -oE '"[0-9]+\.[0-9]+\.[0-9]+' | sed 's/"//'
+            procs --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
             ;;
         zellij)
             zellij --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
@@ -244,7 +244,7 @@ check_tool() {
             status="${GREEN}up-to-date${NC}"
         else
             status="${YELLOW}update available${NC}"
-            updates_available=1
+            updates_available=$((updates_available + 1))
         fi
     else
         status="${DIM}not installed${NC}"
@@ -260,7 +260,7 @@ echo "=== 语言运行时 ==="
 check_tool "JDK" "java" "$(get_latest_jdk_lts)"
 check_tool "Python" "python3" "$(get_latest_python)"
 check_tool "Node.js" "node" "$(get_latest_node)"
-check_tool "Bun" "bun" "$(get_latest_github_release oven-sh/bun | sed 's/^bun-v//')"
+check_tool "Bun" "bun" "$(get_latest_github_release oven-sh/bun)"
 
 echo ""
 echo "=== 构建工具 ==="

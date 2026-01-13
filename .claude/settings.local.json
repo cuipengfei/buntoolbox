@@ -241,7 +241,12 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\ndocs: add jdtls version detection notes to CLAUDE.md\n\n- jdtls has no --version command, version extracted from jar filename\n- Version format: version-timestamp \\(e.g., 1.54.0-202511261751\\)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(pgrep:*)",
       "Bash(./scripts/check-wsl-versions.sh:*)",
-      "Bash(mihomo:*)"
+      "Bash(mihomo:*)",
+      "Bash(/mnt/c/Program\\\\ Files/Docker/Docker/resources/bin/docker.exe pull:*)",
+      "Bash(docker.exe pull:*)",
+      "Bash(/Docker/host/bin/docker.exe pull:*)",
+      "Bash(docker.exe run:*)",
+      "Bash(DOCKER_BIN=\"docker.exe\" ./scripts/test-image.sh:*)"
     ],
     "deny": [],
     "ask": [],

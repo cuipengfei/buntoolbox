@@ -237,12 +237,17 @@
       "Bash(# 列出 Docker Desktop 配置 ls \"\"/mnt/c/Users/\"\"*/AppData/Roaming/Docker/*.json)",
       "Bash(DOCKER_BIN=\"cmd.exe /c docker\" ./scripts/test-image.sh:*)",
       "Bash(DOCKER_BIN=\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" ./scripts/test-image.sh:*)",
-      "Bash(\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" run:*)"
+      "Bash(\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" run:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\ndocs: add jdtls version detection notes to CLAUDE.md\n\n- jdtls has no --version command, version extracted from jar filename\n- Version format: version-timestamp \\(e.g., 1.54.0-202511261751\\)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(pgrep:*)",
+      "Bash(./scripts/check-wsl-versions.sh:*)",
+      "Bash(mihomo:*)"
     ],
     "deny": [],
     "ask": [],
     "additionalDirectories": [
       "/mnt/d/code/prompts/"
     ]
-  }
+  },
+  "outputStyle": "default"
 }

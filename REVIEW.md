@@ -21,7 +21,7 @@ Buntoolbox is already well-designed for this exact use case. The image provides:
 
 | Category | Tools | Notes |
 |----------|-------|-------|
-| **Languages** | Java 21 (Zulu), Python 3.12, Node.js 24, Bun | Excellent coverage |
+| **Languages** | JDK 25 (Zulu), Python 3.14, Node.js 24, Bun | Excellent coverage |
 | **Build Tools** | Maven, Gradle 9.x, make, cmake, ninja | Complete JVM/C++ support |
 | **Package Managers** | npm, uv, uvx, pipx | Modern Python tooling with uv |
 | **Version Control** | git, git-lfs, gh, lazygit | Full Git workflow support |
@@ -35,8 +35,6 @@ Buntoolbox is already well-designed for this exact use case. The image provides:
 
 | Gap | Impact | Recommendation |
 |-----|--------|----------------|
-| **No SSH server** | Cannot connect remotely from IDE | Add OpenSSH server (optional) |
-| **No devcontainer.json** | VS Code integration not seamless | Add devcontainer support |
 | **Limited database clients** | Cannot interact with databases | Add common DB clients |
 | **No language servers** | IDE features limited | Document LSP installation |
 | **No code formatters** | Style enforcement manual | Add popular formatters |
@@ -260,5 +258,5 @@ Buntoolbox is **well-positioned** to serve as a WSL replacement for enterprise W
 
 ---
 
-*Last Updated: November 2024*
+*Last Updated: January 2025*
 *Version: 1.0 - Initial Review*

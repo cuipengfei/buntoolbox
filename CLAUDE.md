@@ -53,6 +53,14 @@ docker run -d -p 3000:3000 cuipengfei/buntoolbox:latest openvscode-start
 docker run -d -p 8080:8080 cuipengfei/buntoolbox:latest openvscode-start 8080
 ```
 
+### WSL 本地升级速记（最简）
+
+- 识别与复核：`./scripts/check-wsl-versions.sh`，目标 all up-to-date。
+- 安装策略：将可执行放到 `~/.local/bin`（或 `~/.local/opt` + symlink），避免依赖 nvm/sdkman 初始化。
+- jdtls 约定：完整解压到 `~/.local/share/jdtls` 并让 `~/jdtls` 指向之（脚本按此检测）。
+- Node 仅比较主版本（24）；bd 版本优先用 `bd --version`。
+
+如需详细步骤，请参考脚本注释或查看相关提交历史。
 ## 架构
 
 **Dockerfile 层顺序** (按更新频率优化):

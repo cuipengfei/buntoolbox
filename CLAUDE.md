@@ -134,6 +134,7 @@ gh run watch <run_id>             # 实时监控，通常 3-6 分钟
 
 ## 注意事项
 
+- **版本管理单一来源**: `Dockerfile` 中的 `ARG` 是版本号的唯一真实来源。`test-image.sh` 等脚本会动态读取这些值，因此更新版本时通常只需修改 `Dockerfile`。
 - **不要本地构建镜像** — 太慢且消耗 VPN 流量，推送后由 GitHub Actions 构建
 - **不要自动 git commit** — 等待用户明确指示后再提交
 - **安装前先创建目标目录** — `mkdir -p /path` 在 tar 解压前，否则构建失败
@@ -178,7 +179,6 @@ gh run watch <run_id>             # 实时监控，通常 3-6 分钟
   - 安装到镜像: `/usr/local/bin/openvscode-start`
 
 ### 测试脚本（scripts/test-image.sh）
-
 `check <name> <version_cmd> <usage_cmd> <expected> <test_desc>` — 版本检查 5s 超时，功能测试 10s
 - 输出格式: 表格 (Tool | Version | Test | Result)
 - 网络功能性测试失败不判定镜像失败（可能缺 CAP_NET_RAW）

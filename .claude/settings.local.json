@@ -246,7 +246,8 @@
       "Bash(docker.exe pull:*)",
       "Bash(/Docker/host/bin/docker.exe pull:*)",
       "Bash(docker.exe run:*)",
-      "Bash(DOCKER_BIN=\"docker.exe\" ./scripts/test-image.sh:*)"
+      "Bash(DOCKER_BIN=\"docker.exe\" ./scripts/test-image.sh:*)",
+      "Bash(/mnt/d/code/buntoolbox/scripts/check-versions.sh:*)"
     ],
     "deny": [],
     "ask": [],

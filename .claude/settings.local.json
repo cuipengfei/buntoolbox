@@ -247,7 +247,17 @@
       "Bash(/Docker/host/bin/docker.exe pull:*)",
       "Bash(docker.exe run:*)",
       "Bash(DOCKER_BIN=\"docker.exe\" ./scripts/test-image.sh:*)",
-      "Bash(/mnt/d/code/buntoolbox/scripts/check-versions.sh:*)"
+      "Bash(/mnt/d/code/buntoolbox/scripts/check-versions.sh:*)",
+      "Bash(sdk install gradle:*)",
+      "Bash(nvm install:*)",
+      "Bash(nvm use:*)",
+      "Bash(nvm alias:*)",
+      "Bash([:*)",
+      "Bash(.:*)",
+      "Bash(wget:*)",
+      "Bash(~/.zshrc:*)",
+      "Bash(uv self update:*)",
+      "Skill(commit-commands:commit)"
     ],
     "deny": [],
     "ask": [],

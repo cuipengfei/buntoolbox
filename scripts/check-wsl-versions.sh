@@ -171,7 +171,8 @@ get_local_version() {
             zellij --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
         bd)
-            bd --help 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true
+            bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \
+            bd --help 2>&1 | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
         mihomo)
             mihomo -v 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | sed 's/^v//'
@@ -289,7 +290,7 @@ check_tool "jdtls" "jdtls" "$(get_latest_jdtls)"
 
 echo ""
 echo "=== 其他工具 ==="
-check_tool "beads" "bd" "$(get_latest_github_release steveyegge/beads)"
+check_tool "beads (bd)" "bd" "$(get_latest_github_release steveyegge/beads)"
 # mihomo skipped for WSL (only used in Docker)
 check_tool "claude" "claude" "$(get_latest_claude)"
 

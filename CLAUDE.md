@@ -37,6 +37,12 @@ DOCKER_BIN="/Docker/host/bin/docker.exe" ./scripts/test-image.sh -v  # 指定宿
 # WSL 本地环境版本检查（保持 WSL 与 Docker 镜像同步）
 ./scripts/check-wsl-versions.sh
 
+> 建议在准备升级/对齐工具版本时，**同时运行**：
+> - `./scripts/check-versions.sh`（镜像内版本）
+> - `./scripts/check-wsl-versions.sh`（WSL 本地版本）
+> 
+> 目标：两边都显示 **all up-to-date**，确保本地与镜像一致。
+
 # 单项快速验证（最小化排障）
 docker run --rm cuipengfei/buntoolbox:latest java -version
 docker run --rm cuipengfei/buntoolbox:latest node --version

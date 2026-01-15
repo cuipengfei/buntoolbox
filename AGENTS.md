@@ -1,134 +1,156 @@
-## Issue Tracking with bd (beads)
+# AGENTS.md - AI Agent Instructions
 
-**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
+> 给在此仓库工作的 AI 编程 agent 的指南。
 
-### Why bd?
+## 项目概述
 
-- Dependency-aware: Track blockers and relationships between issues
-- Git-friendly: Auto-syncs to JSONL for version control
-- Agent-optimized: JSON output, ready work detection, discovered-from links
-- Prevents duplicate tracking systems and confusion
+**Buntoolbox** 是一个多语言开发环境 Docker 镜像（Ubuntu 24.04 LTS，约 2GB）。
 
-### Quick Start
+**技术栈**: Dockerfile + Bash 脚本 | 无应用代码，纯基础设施项目
 
-**Check for ready work:**
-```bash
-bd ready --json
-```
-    
-**Create new issues:**
-```bash
-bd create "Issue title" -t bug|feature|task -p 0-4 --json
-bd create "Issue title" -p 1 --deps discovered-from:bd-123 --json
-```
+**语言偏好**: 与用户交流用**中文**，代码/命令用英文
 
-**Claim and update:**
-```bash
-bd update bd-42 --status in_progress --json
-bd update bd-42 --priority 1 --json
-```
+---
 
-**Complete work:**
-```bash
-bd close bd-42 --reason "Completed" --json
-```
+## Build / Test / Lint 命令
 
-### Issue Types
-
-- `bug` - Something broken
-- `feature` - New functionality
-- `task` - Work item (tests, docs, refactoring)
-- `epic` - Large feature with subtasks
-- `chore` - Maintenance (dependencies, tooling)
-
-### Priorities
-
-- `0` - Critical (security, data loss, broken builds)
-- `1` - High (major features, important bugs)
-- `2` - Medium (default, nice-to-have)
-- `3` - Low (polish, optimization)
-- `4` - Backlog (future ideas)
-
-### Workflow for AI Agents
-
-1. **Check ready work**: `bd ready` shows unblocked issues
-2. **Claim your task**: `bd update <id> --status in_progress`
-3. **Work on it**: Implement, test, document
-4. **Discover new work?** Create linked issue:
-   - `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
-5. **Complete**: `bd close <id> --reason "Done"`
-6. **Commit together**: Always commit the `.beads/issues.jsonl` file together with the code changes so issue state stays in sync with code state
-
-### Auto-Sync
-
-bd automatically syncs with git:
-- Exports to `.beads/issues.jsonl` after changes (5s debounce)
-- Imports from JSONL when newer (e.g., after `git pull`)
-- No manual export/import needed!
-
-### GitHub Copilot Integration
-
-If using GitHub Copilot, also create `.github/copilot-instructions.md` for automatic instruction loading.
-Run `bd onboard` to get the content, or see step 2 of the onboard instructions.
-
-### MCP Server (Recommended)
-
-If using Claude or MCP-compatible clients, install the beads MCP server:
+### 核心命令
 
 ```bash
-pip install beads-mcp
+# 检查工具版本更新（更新前必须运行）
+./scripts/check-versions.sh
+./scripts/check-versions.sh -v    # 显示 Linux x86_64 资产选项
+
+# 测试镜像（从 Docker Hub 拉取并测试，42 项检查）
+./scripts/test-image.sh
+./scripts/test-image.sh --no-pull              # 离线测试（已有镜像）
+./scripts/test-image.sh cuipengfei/buntoolbox:v1.0.0  # 指定镜像
+
+# WSL 本地环境版本检查
+./scripts/check-wsl-versions.sh
 ```
 
-Add to MCP config (e.g., `~/.config/claude/config.json`):
-```json
-{
-  "beads": {
-    "command": "beads-mcp",
-    "args": []
-  }
+### 单项快速验证
+
+```bash
+docker run --rm cuipengfei/buntoolbox:latest java -version
+docker run --rm cuipengfei/buntoolbox:latest bun --version
+```
+
+### 本地构建（不推荐，慢）
+
+```bash
+docker build -t buntoolbox .
+```
+
+---
+
+## 代码风格指南
+
+### Bash 脚本规范
+
+```bash
+#!/bin/bash
+# 文件描述（必须）
+# Usage: ./scripts/xxx.sh [options]
+
+set -e  # 出错即停
+
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+# 参数解析
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -v|--verbose) VERBOSE=true; shift ;;
+        *) shift ;;
+    esac
+done
+
+# 函数命名: snake_case
+get_current_version() {
+    grep "^ARG ${1}=" "$DOCKERFILE" | cut -d'=' -f2
 }
 ```
 
-Then use `mcp__beads__*` functions instead of CLI commands.
+**命名约定**: 变量 `UPPER_SNAKE_CASE`（全局）/ `lower_snake_case`（局部）| 函数 `snake_case` | 文件 `kebab-case.sh`
 
-### Managing AI-Generated Planning Documents
+**错误处理**: `set -e` 出错即停 | 可选命令用 `|| true` | 检查依赖用 `command -v`
 
-AI assistants often create planning and design documents during development:
-- PLAN.md, IMPLEMENTATION.md, ARCHITECTURE.md
-- DESIGN.md, CODEBASE_SUMMARY.md, INTEGRATION_PLAN.md
-- TESTING_GUIDE.md, TECHNICAL_DESIGN.md, and similar files
+### Dockerfile 规范
 
-**Best Practice: Use a dedicated directory for these ephemeral files**
+```dockerfile
+# 版本声明在顶部
+ARG TOOL_VERSION=1.0.0
 
-**Recommended approach:**
-- Create a `history/` directory in the project root
-- Store ALL AI-generated planning/design docs in `history/`
-- Keep the repository root clean and focused on permanent project files
-- Only access `history/` when explicitly asked to review past planning
+# 层按更新频率排序（稳定→易变）
+# 清理必须在同一 RUN 指令中
+RUN apt-get update && apt-get install -y pkg \
+    && rm -rf /var/lib/apt/lists/*
 
-**Example .gitignore entry (optional):**
-```
-# AI planning documents (ephemeral)
-history/
+# 安装前先创建目标目录
+RUN mkdir -p /opt/tool \
+    && tar -xzf tool.tar.gz -C /opt/tool
 ```
 
-**Benefits:**
-- ✅ Clean repository root
-- ✅ Clear separation between ephemeral and permanent documentation
-- ✅ Easy to exclude from version control if desired
-- ✅ Preserves planning history for archeological research
-- ✅ Reduces noise when browsing the project
+---
 
-### Important Rules
+## Issue 追踪 (bd/beads)
 
-- ✅ Use bd for ALL task tracking
-- ✅ Always use `--json` flag for programmatic use
-- ✅ Link discovered work with `discovered-from` dependencies
-- ✅ Check `bd ready` before asking "what should I work on?"
-- ✅ Store AI planning docs in `history/` directory
-- ❌ Do NOT create markdown TODO lists
-- ❌ Do NOT use external issue trackers
-- ❌ Do NOT duplicate tracking systems
-- ❌ Do NOT clutter repo root with planning documents
+**重要**: 使用 `bd` 命令，不要用 markdown TODO 列表。
 
-For more details, see README.md and QUICKSTART.md.
+```bash
+bd ready --json                              # 查看待办
+bd create "标题" -t bug -p 1 --json          # 创建 issue
+bd update bd-42 --status in_progress --json  # 认领
+bd close bd-42 --reason "Done" --json        # 完成
+```
+
+**类型**: `bug` | `feature` | `task` | `chore` | **优先级**: `0`(紧急) → `4`(backlog)
+
+## 版本更新流程
+
+1. `./scripts/check-versions.sh` 检查更新
+2. 修改 `Dockerfile` 顶部 ARG 值
+3. 同步更新: `image-release.txt`, `scripts/*.sh`, `CLAUDE.md`, `README.md`
+4. `git commit && git push`
+5. `gh run watch` 等待 CI 完成
+6. `./scripts/test-image.sh` 验证
+
+## 重要约束
+
+### 必须做
+
+- ✅ 修改后运行 `./scripts/test-image.sh` 验证
+- ✅ 更新版本前运行 `./scripts/check-versions.sh`
+- ✅ 使用 bd 追踪任务
+- ✅ 安装前 `mkdir -p` 创建目标目录
+- ✅ 清理操作与安装在同一 RUN 指令
+
+### 禁止做
+
+- ❌ 本地构建镜像（用 CI）
+- ❌ 删除 `/root/.local/share/uv`（pipx 依赖）
+- ❌ 删除 `/usr/include/node`（native 编译需要）
+- ❌ 创建 markdown TODO 列表
+- ❌ 未经确认自动 git commit
+
+### 测试特殊命令
+
+| 工具 | 正确测试方式 | 原因 |
+|------|-------------|------|
+| bd | `bd --help` | `--version` 无数据库时返回非零 |
+| mihomo | `mihomo -v` | 不支持 `--version` |
+| jdtls | 检查 jar 文件名 | 无 `--version` 命令 |
+
+## 文件同步清单
+
+添加/更新工具时必须同步: `Dockerfile`, `image-release.txt`, `scripts/*.sh`, `CLAUDE.md`, `README.md`
+
+## 参考
+
+- [CLAUDE.md](CLAUDE.md) - 详细项目说明
+- [README.md](README.md) - 用户文档
+- [.github/copilot-instructions.md](.github/copilot-instructions.md) - Copilot 规则

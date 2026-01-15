@@ -257,7 +257,11 @@
       "Bash(wget:*)",
       "Bash(~/.zshrc:*)",
       "Bash(uv self update:*)",
-      "Skill(commit-commands:commit)"
+      "Skill(commit-commands:commit)",
+      "Bash(timedatectl status:*)",
+      "Bash(openssl s_client:*)",
+      "Bash(openssl x509:*)",
+      "Bash(env:*)"
     ],
     "deny": [],
     "ask": [],

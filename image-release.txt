@@ -48,6 +48,7 @@
 - btop (system monitor)
 - procs (ps replacement)
 - fzf (fuzzy finder)
+- duf (disk usage utility)
 
 # Shell Enhancements
 - starship (prompt)

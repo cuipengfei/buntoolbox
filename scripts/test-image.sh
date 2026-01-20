@@ -88,6 +88,7 @@ EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_ZOXIDE_VERSION=$(get_dockerfile_
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_STARSHIP_VERSION=$(get_dockerfile_version STARSHIP_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_PROCS_VERSION=$(get_dockerfile_version PROCS_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_ZELLIJ_VERSION=$(get_dockerfile_version ZELLIJ_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_DUF_VERSION=$(get_dockerfile_version DUF_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_OPENVSCODE_VERSION=$(get_dockerfile_version OPENVSCODE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_MIHOMO_VERSION=$(get_dockerfile_version MIHOMO_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_JDTLS_VERSION=$(get_dockerfile_version JDTLS_VERSION | cut -d'-' -f1)"
@@ -341,6 +342,7 @@ check_ver "delta" "delta --version | grep -oE '[0-9.]+'" "echo -e 'a\nb' | delta
 check "btop" "btop --version | grep -oE '[0-9.]+'" "btop --version" "btop" "Verify installation"
 check_ver "procs" "procs --version | grep -oE '[0-9.]+' | head -1" "procs 1" "PID" "List processes" "EXPECT_PROCS_VERSION"
 check_ver "zellij" "zellij --version | grep -oE '[0-9.]+'" "zellij setup --check 2>&1 | head -1" "" "Check setup" "EXPECT_ZELLIJ_VERSION"
+check_ver "duf" "duf --version | grep -oE '[0-9.]+' | head -1" "duf --help" "Usage" "Show help" "EXPECT_DUF_VERSION"
 check_ver "jdtls" "ls /opt/jdtls/plugins/org.eclipse.jdt.ls.core_*.jar 2>/dev/null | grep -oE '[0-9]+\\.[0-9]+\\.[0-9]+' | head -1" "jdtls --help 2>&1 | head -1" "usage" "Show help" "EXPECT_JDTLS_VERSION"
 
 echo ""

@@ -18,6 +18,7 @@ ARG HELIX_VERSION=25.07.1
 ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.8
+ARG DUF_VERSION=0.9.1
 ARG BEADS_VERSION=0.47.1
 ARG MIHOMO_VERSION=1.19.19
 ARG BUN_VERSION=1.3.6
@@ -159,6 +160,12 @@ RUN curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VE
 # zoxide (smart cd)
 RUN curl -fsSL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C /usr/local/bin zoxide
+
+# duf (disk usage utility)
+RUN curl -fsSL "https://github.com/muesli/duf/releases/download/v${DUF_VERSION}/duf_${DUF_VERSION}_linux_amd64.deb" -o /tmp/duf.deb \
+    && apt-get install -y /tmp/duf.deb \
+    && rm /tmp/duf.deb
+
 
 # helix editor
 RUN curl -fsSL "https://github.com/helix-editor/helix/releases/download/${HELIX_VERSION}/helix-${HELIX_VERSION}-x86_64-linux.tar.xz" \

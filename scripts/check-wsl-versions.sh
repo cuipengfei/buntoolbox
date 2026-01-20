@@ -170,6 +170,9 @@ get_local_version() {
         zellij)
             zellij --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
+        duf)
+            duf --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
+            ;;
         bd)
             bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \
             bd --help 2>&1 | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+'
@@ -285,6 +288,7 @@ check_tool "eza" "eza" "$(get_latest_github_release eza-community/eza)"
 check_tool "delta" "delta" "$(get_latest_github_release dandavison/delta)"
 check_tool "procs" "procs" "$(get_latest_github_release dalance/procs)"
 check_tool "zellij" "zellij" "$(get_latest_github_release zellij-org/zellij)"
+check_tool "duf" "duf" "$(get_latest_github_release muesli/duf)"
 check_tool "openvscode" "openvscode-server" "$(get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')"
 check_tool "jdtls" "jdtls" "$(get_latest_jdtls)"
 

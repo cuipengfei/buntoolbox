@@ -87,9 +87,6 @@ get_latest_github_release() {
     fetch_github_release "$1" | jq -r '.tag_name // empty' | sed 's/^v//' | sed 's/^bun-v//'
 }
 
-get_latest_claude() {
-    curl -fsSL --max-time 5 "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/latest" 2>/dev/null
-}
 
 # Get current Ubuntu base image version from Dockerfile
 get_current_ubuntu() {
@@ -242,7 +239,6 @@ echo ""
 echo "=== 其他工具 ==="
 check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release steveyegge/beads)" "steveyegge/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
 check_version "mihomo" "$(get_current_version MIHOMO_VERSION)" "$(get_latest_github_release MetaCubeX/mihomo)" "MetaCubeX/mihomo" "mihomo-linux-amd64-v$(get_current_version MIHOMO_VERSION).gz"
-check_version "claude" "$(get_current_version CLAUDE_VERSION)" "$(get_latest_claude)" "" ""
 
 echo ""
 if [ $updates_available -eq 1 ]; then

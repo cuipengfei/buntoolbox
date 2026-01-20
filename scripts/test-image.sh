@@ -80,7 +80,6 @@ EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_GRADLE_VERSION=$(get_dockerfile_
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_MAVEN_VERSION=$(get_dockerfile_version MAVEN_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_UV_VERSION=$(get_dockerfile_version UV_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BEADS_VERSION=$(get_dockerfile_version BEADS_VERSION)"
-EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_CLAUDE_VERSION=$(get_dockerfile_version CLAUDE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_LAZYGIT_VERSION=$(get_dockerfile_version LAZYGIT_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_HELIX_VERSION=$(get_dockerfile_version HELIX_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_EZA_VERSION=$(get_dockerfile_version EZA_VERSION)"
@@ -355,7 +354,6 @@ echo "=== Other Tools ==="
 print_header
 check_ver "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help" "beads" "Show help" "EXPECT_BEADS_VERSION"
 check_ver "mihomo" "mihomo -v | grep -oE 'v[0-9.]+' | head -1" "mihomo -h" "Usage" "Show help" "EXPECT_MIHOMO_VERSION"
-check_ver "claude" "claude --version | awk '{print \$1}'" "claude --help | head -1" "" "Show help" "EXPECT_CLAUDE_VERSION"
 check "gpg" "gpg --version | grep -oE '[0-9.]+' | head -1" "echo test | gpg --symmetric --batch --passphrase test -o /tmp/test.gpg && echo ok" "ok" "Symmetric encrypt"
 check "lsb_release" "lsb_release -rs" "lsb_release -a 2>&1" "Ubuntu" "Show distro info"
 

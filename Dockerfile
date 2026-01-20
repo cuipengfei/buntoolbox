@@ -11,7 +11,7 @@ FROM ubuntu:24.04
 # Version Configuration (run scripts/check-versions.sh to check for updates)
 # =============================================================================
 ARG NODE_MAJOR=24
-ARG GRADLE_VERSION=9.2.1
+ARG GRADLE_VERSION=9.3.0
 ARG MAVEN_VERSION=3.9.12
 ARG LAZYGIT_VERSION=0.58.1
 ARG HELIX_VERSION=25.07.1
@@ -19,14 +19,13 @@ ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.8
 ARG BEADS_VERSION=0.47.1
-ARG MIHOMO_VERSION=1.19.18
+ARG MIHOMO_VERSION=1.19.19
 ARG BUN_VERSION=1.3.6
-ARG UV_VERSION=0.9.25
+ARG UV_VERSION=0.9.26
 ARG STARSHIP_VERSION=1.24.2
 ARG PROCS_VERSION=0.14.10
 ARG ZELLIJ_VERSION=0.43.1
 ARG OPENVSCODE_VERSION=1.106.3
-ARG CLAUDE_VERSION=2.1.7
 ARG JDTLS_VERSION=1.55.0-202601131729
 
 LABEL maintainer="buntoolbox"
@@ -252,16 +251,7 @@ RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_V
     | tar -xz -C /usr/local/bin bd
 
 # =============================================================================
-# 11. Claude Code - frequent updates
-# =============================================================================
-# Claude Code CLI - official Anthropic CLI for Claude
-# Uses official installer which auto-detects platform and verifies checksums
-# Pass version to installer: bash -s -- <VERSION>
-RUN curl -fsSL https://claude.ai/install.sh | bash -s -- ${CLAUDE_VERSION} \
-    && rm -rf /root/.claude/downloads
-
-# =============================================================================
-# 12. Final Configuration (tiny, last)
+# 11. Final Configuration (tiny, last)
 # =============================================================================
 # Use C.UTF-8 locale (built-in to Ubuntu 24.04, no locales package needed)
 ENV LANG=C.UTF-8

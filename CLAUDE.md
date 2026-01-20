@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **技术栈**: Zulu JDK 25 headless | Node.js 24 + Bun | Python 3.14 + pip/uv/pipx | Maven + Gradle
 
-**常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, bd, mihomo, openvscode-server, claude, jdtls 等（网络: ping, ip, ss, dig, nc, socat, ssh, sshd）
+**常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, bd, mihomo, openvscode-server, jdtls 等（网络: ping, ip, ss, dig, nc, socat, ssh, sshd）
 
 ## 常用命令
 
@@ -51,7 +51,6 @@ docker run --rm cuipengfei/buntoolbox:latest python --version
 docker run --rm cuipengfei/buntoolbox:latest gh --version
 docker run --rm cuipengfei/buntoolbox:latest zellij --version
 docker run --rm cuipengfei/buntoolbox:latest uv --version
-docker run --rm cuipengfei/buntoolbox:latest claude --version
 
 # OpenVSCode Server 快速启动（浏览器 VS Code，默认端口 3000，无认证）
 docker run -d -p 3000:3000 cuipengfei/buntoolbox:latest openvscode-start
@@ -90,7 +89,6 @@ docker run -d -p 8080:8080 cuipengfei/buntoolbox:latest openvscode-start 8080
 
 **版本管理**: Dockerfile 顶部 ARG 声明 (`NODE_MAJOR`, `GRADLE_VERSION`, `*_VERSION`)
 
-**Claude Code 版本**: 使用 `ARG CLAUDE_VERSION` 固定版本，安装脚本支持 `bash -s -- <VERSION>` 传递版本号。版本检查使用官方 GCS bucket endpoint: `https://storage.googleapis.com/claude-code-dist-.../claude-code-releases/latest`
 
 **CI/CD**: `.github/workflows/docker.yml` → Docker Hub (secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`)
 

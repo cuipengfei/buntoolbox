@@ -261,7 +261,8 @@
       "Bash(timedatectl status:*)",
       "Bash(openssl s_client:*)",
       "Bash(openssl x509:*)",
-      "Bash(env:*)"
+      "Bash(env:*)",
+      "Bash(duf:*)"
     ],
     "deny": [],
     "ask": [],

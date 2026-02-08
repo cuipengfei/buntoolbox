@@ -262,7 +262,30 @@
       "Bash(openssl s_client:*)",
       "Bash(openssl x509:*)",
       "Bash(env:*)",
-      "Bash(duf:*)"
+      "Bash(duf:*)",
+      "Skill(superpowers:brainstorming)",
+      "mcp__tavily__tavily_search",
+      "Bash(/tmp/ecapture-v1.5.2-linux-amd64/ecapture:*)",
+      "Bash(ecapture tls:*)",
+      "Bash(bun -e:*)",
+      "Bash(pip index versions:*)",
+      "Bash(uv pip:*)",
+      "Bash(ecapture gotls:*)",
+      "Bash(# 检查 ecapture 所有模块\necapture --help 2>&1 | grep -A 20 \"\"COMMANDS\"\")",
+      "Bash(# 检查 python 用的 libssl\nldd $\\(which python3\\) 2>/dev/null | grep -i ssl || python3 -c \"\"import ssl; print\\(ssl._ssl.__file__\\)\"\")",
+      "Bash(# 检查 node 用的 SSL\nldd $\\(which node\\) 2>/dev/null | grep -i ssl)",
+      "Bash(# 检查 bun 用的 SSL\nldd $\\(which bun\\) 2>/dev/null | grep -i ssl)",
+      "Bash(# 检查 python _ssl 模块链接的库\nldd /usr/lib/python3.14/lib-dynload/_ssl.cpython-314-x86_64-linux-gnu.so 2>/dev/null | grep -i ssl)",
+      "Bash(# 用 strace 看 python 是否调用了 libssl 的函数\ntimeout 5 strace -f -e trace=openat python3 -c \"\"import urllib.request; urllib.request.urlopen\\(''https://httpbin.org/ip''\\)\"\" 2>&1 | grep -i ssl)",
+      "Bash(# 检查 python ssl 模块是否真的调用了 SSL_read/SSL_write\nltrace -e SSL_read,SSL_write python3 -c \"\"import urllib.request; urllib.request.urlopen\\(''https://httpbin.org/ip''\\)\"\" 2>&1 | head -20)",
+      "Bash(# 检查 Python _ssl 模块的符号表，看看它调用的是哪些 OpenSSL 函数\nnm -D /usr/lib/python3.14/lib-dynload/_ssl.cpython-314-x86_64-linux-gnu.so 2>/dev/null | grep -i \"\"SSL_\"\" | head -20)",
+      "Bash(# 专门看 SSL_read 和 SSL_write\nnm -D /usr/lib/python3.14/lib-dynload/_ssl.cpython-314-x86_64-linux-gnu.so 2>/dev/null | grep -E \"\"SSL_\\(read|write\\)\"\")",
+      "Bash(# 对比 curl 的符号\nnm -D $\\(which curl\\) 2>/dev/null | grep -E \"\"SSL_\\(read|write\\)\"\" || ldd $\\(which curl\\) | grep ssl)",
+      "Bash(# 检查 libssl.so 中是否有这两套函数\nnm -D /lib/x86_64-linux-gnu/libssl.so.3 | grep -E \"\"SSL_\\(read|write\\)\"\" | head -10)",
+      "Bash(# 检查 curl 用的是哪个版本\nnm -D /lib/x86_64-linux-gnu/libcurl.so.4 2>/dev/null | grep -E \"\"SSL_\\(read|write\\)\"\" || echo \"\"curl 不直接调用 SSL_read/write\"\")",
+      "Bash(# 检查 node 的 TLS 实现\nldd $\\(which node\\) 2>/dev/null | grep -iE \"\"\\(ssl|crypto|tls\\)\"\" || echo \"\"node 没有动态链接 ssl\"\"\nstrings $\\(which node\\) 2>/dev/null | grep -iE \"\"openssl|boringssl\"\" | head -5)",
+      "Bash(# 检查 bun 的 TLS 实现\nldd $\\(which bun\\) 2>/dev/null | grep -iE \"\"\\(ssl|crypto|tls\\)\"\" || echo \"\"bun 没有动态链接 ssl\"\"\nstrings $\\(which bun\\) 2>/dev/null | grep -iE \"\"openssl|boringssl\"\" | head -5)",
+      "WebFetch(domain:icepanel.medium.com)"
     ],
     "deny": [],
     "ask": [],
@@ -270,5 +293,5 @@
       "/mnt/d/code/prompts/"
     ]
   },
-  "outputStyle": "default"
+  "outputStyle": "natural-writing:natural-writing"
 }

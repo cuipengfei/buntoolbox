@@ -4,13 +4,11 @@ on:
   push:
     branches:
       - master
-      - main
     tags:
       - 'v*'
   pull_request:
     branches:
       - master
-      - main
   workflow_dispatch:
 
 env:
@@ -19,11 +17,11 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
 
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout repository
@@ -47,7 +45,6 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}

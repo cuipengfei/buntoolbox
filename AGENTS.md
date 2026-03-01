@@ -92,9 +92,13 @@ bd close bd-42 --reason "Done" --json
    - 镜像验证：`./scripts/test-image.sh`。
    - 说明：若远端 `latest` 尚未由 CI 重建，`test-image.sh` 可能出现预期版本差异，属正常现象。
 
-7. **CI 收口**
-   - 推送后等待 GitHub Actions 构建并发布新镜像。
-   - CI 完成后再次执行 `./scripts/test-image.sh`，确保版本与功能检查全绿。
+7. **提交与推送**
+   - `git add` 相关文件 → `git commit` → `git push`。
+   - 提交信息遵循 conventional commits 格式（`feat:` / `fix:` / `chore:` 等）。
+
+8. **CI 收口**
+   - `gh run watch` 监视 GitHub Actions 构建进度。
+   - 构建完成后执行 `./scripts/test-image.sh`，确保版本与功能检查全绿。
 
 ## NOTES
 - **jdtls 安装约定**: 版本含有时间戳 (`1.56.0-202601291528`)。完整解压在 `~/.local/share/jdtls`，依靠 `~/jdtls` 的软连接暴露环境。

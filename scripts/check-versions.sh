@@ -74,16 +74,6 @@ get_current_version() {
     grep "^ARG ${1}=" "$PROJECT_ROOT/$DOCKERFILE" | cut -d'=' -f2
 }
 
-get_current_blesh_channel() {
-    grep -oE 'releases/download/[^/]+/ble-nightly\.tar\.xz' "$PROJECT_ROOT/$DOCKERFILE" | \
-        head -1 | sed 's#releases/download/##;s#/ble-nightly.tar.xz##'
-}
-
-get_latest_blesh_channel() {
-    # ble.sh in Dockerfile tracks release channel, not fixed semantic version
-    echo "nightly"
-}
-
 # Get latest versions from APIs
 get_latest_gradle() {
     curl -fsSL "https://services.gradle.org/versions/current" 2>/dev/null | jq -r '.version'
@@ -233,7 +223,6 @@ echo ""
 echo "=== Shell 增强 ==="
 check_version "starship" "$(get_current_version STARSHIP_VERSION)" "$(get_latest_github_release starship/starship)" "starship/starship" "starship-x86_64-unknown-linux-gnu.tar.gz"
 check_version "zoxide" "$(get_current_version ZOXIDE_VERSION)" "$(get_latest_github_release ajeetdsouza/zoxide)" "ajeetdsouza/zoxide" "zoxide-$(get_current_version ZOXIDE_VERSION)-x86_64-unknown-linux-musl.tar.gz"
-check_version "ble.sh" "$(get_current_blesh_channel)" "$(get_latest_blesh_channel)" "akinomyoga/ble.sh" "ble-nightly.tar.xz"
 
 echo ""
 echo "=== TUI 工具 ==="

@@ -41,7 +41,7 @@ buntoolbox/
 - ❌ **本地构建镜像**: 禁止在本地执行耗时、消耗流量的 `docker build`。让 GitHub Actions 去做。
 
 ## UNIQUE STYLES
-- **TUI 优先环境**: 环境深度集成诸多现代终端工具（zellij, lazygit, helix, eza, delta, btop, procs, ble.sh, gawk），鼓励全程键盘操作。
+- **TUI 优先环境**: 环境深度集成诸多现代终端工具（zellij, lazygit, helix, eza, delta, btop, procs），鼓励全程键盘操作。
 - **全平台 VS Code 接入**: 预置 `openvscode-start.sh`，默认映射 3000 端口提供无验证、浏览器内的完整 VS Code 体验。
 - **特定工具检测绕过**: `bd` 没有数据库时 `--version` 会异常退出（请用 `--help`），`mihomo` 无版检参数（请用 `-v`），`jdtls` 依靠 jar 文件名而非命令。
 
@@ -74,7 +74,7 @@ bd close bd-42 --reason "Done" --json
 3. **落地到 Dockerfile**
    - 按构建分层原则放置到合适层（稳定层在前，高频更新层在后）。
    - 安装与清理放在同一 `RUN` 中，避免镜像层膨胀。
-   - 如需 shell 自动加载（如 ble.sh），在最终配置区写入对应 profile/bashrc 初始化。
+   - 如需 shell 自动加载，在最终配置区写入对应 profile/bashrc 初始化。
 
 4. **同步更新脚本（必须）**
    - `scripts/check-versions.sh`：支持新工具/新版本对齐检查。

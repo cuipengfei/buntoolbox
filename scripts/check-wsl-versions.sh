@@ -103,11 +103,6 @@ get_latest_apt_candidate() {
     apt-cache policy "$pkg" 2>/dev/null | awk '/Candidate:/ {print $2; exit}' | sed 's/^[0-9]\+://; s/-.*$//'
 }
 
-get_latest_blesh_channel() {
-    # Local installation follows nightly channel by default
-    echo "nightly"
-}
-
 get_latest_jdtls() {
     local version timestamp
     version=$(curl -fsSL --max-time 5 "https://download.eclipse.org/jdtls/milestones/" 2>/dev/null | \
@@ -132,7 +127,7 @@ get_local_version() {
     local cmd="$1"
     local version_flag="${2:---version}"
 
-    if [ "$cmd" != "blesh" ] && ! command -v "$cmd" &>/dev/null; then
+    if ! command -v "$cmd" &>/dev/null; then
         echo ""
         return
     fi
@@ -181,9 +176,6 @@ get_local_version() {
         procs)
             procs --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
             ;;
-        gawk)
-            gawk --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
-            ;;
         zellij)
             zellij --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
@@ -199,12 +191,6 @@ get_local_version() {
             ;;
         claude)
             claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
-            ;;
-        blesh)
-            local blesh_file="${version_flag:-$HOME/.local/share/blesh/ble.sh}"
-            if [ -f "$blesh_file" ]; then
-                grep -m1 '_ble_init_version=' "$blesh_file" | cut -d'=' -f2
-            fi
             ;;
         jdtls)
             # Check for jdtls jar in common locations
@@ -258,14 +244,7 @@ check_tool() {
     local local_ver="-"
     local status=""
 
-    if [ "$cmd" = "blesh" ]; then
-        local blesh_file="$HOME/.local/share/blesh/ble.sh"
-        if [ -f "$blesh_file" ]; then
-            installed="✓"
-            local_ver=$(get_local_version "$cmd" "$blesh_file")
-            [ -z "$local_ver" ] && local_ver="?"
-        fi
-    elif command -v "$cmd" &>/dev/null; then
+    if command -v "$cmd" &>/dev/null; then
         installed="✓"
         local_ver=$(get_local_version "$cmd")
         [ -z "$local_ver" ] && local_ver="?"
@@ -311,7 +290,6 @@ echo ""
 echo "=== Shell 增强 ==="
 check_tool "starship" "starship" "$(get_latest_github_release starship/starship)"
 check_tool "zoxide" "zoxide" "$(get_latest_github_release ajeetdsouza/zoxide)"
-check_tool "ble.sh" "blesh" "$(get_latest_blesh_channel)"
 
 echo ""
 echo "=== TUI 工具 ==="
@@ -328,7 +306,6 @@ check_tool "jdtls" "jdtls" "$(get_latest_jdtls)"
 echo ""
 echo "=== 其他工具 ==="
 check_tool "beads (bd)" "bd" "$(get_latest_github_release steveyegge/beads)"
-check_tool "gawk" "gawk" "$(get_latest_apt_candidate gawk)"
 # mihomo skipped for WSL (only used in Docker)
 check_tool "claude" "claude" "$(get_latest_claude)"
 

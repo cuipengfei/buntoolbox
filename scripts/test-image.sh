@@ -309,7 +309,6 @@ echo ""
 echo "=== Dev Tools ==="
 print_header
 check "jq" "jq --version | grep -oE '[0-9.]+'" "echo '{\"a\":1,\"b\":2}' | jq '.a + .b'" "3" "Parse JSON (1+2=3)"
-check "gawk" "gawk --version | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'" "echo 'hello world' | gawk '{print toupper(\$0)}'" "HELLO WORLD" "Uppercase transform"
 check "ripgrep" "rg --version | grep -oE '[0-9.]+' | head -1" "printf 'foo\nbar\nbaz' | rg -n bar" "2:bar" "Search text"
 check "fd" "fd --version | grep -oE '[0-9.]+'" "fd --type f . /etc 2>/dev/null | head -1" "/" "Find files in /etc"
 check "fzf" "fzf --version | grep -oE '[0-9.]+' | head -1" "printf 'a\nb' | fzf --filter=a" "a" "Filter list"
@@ -351,8 +350,6 @@ echo "=== Shell Enhancements ==="
 print_header
 check_ver "starship" "starship --version | grep -oE '[0-9.]+'" "starship print-config 2>&1 | head -1" "" "Print config" "EXPECT_STARSHIP_VERSION"
 check_ver "zoxide" "zoxide --version | grep -oE '[0-9.]+'" "zoxide add /tmp && zoxide query tmp" "/tmp" "Add & query path" "EXPECT_ZOXIDE_VERSION"
-check "ble.sh" "grep -m1 '_ble_init_version=' /root/.local/share/blesh/ble.sh | cut -d'=' -f2" "test -f /root/.local/share/blesh/ble.sh && grep -q '_ble_init_version=' /root/.local/share/blesh/ble.sh && echo ok" "ok" "Installed and versioned"
-check "ble-init" "grep -c 'source -- /root/.local/share/blesh/ble.sh' /root/.bashrc" "grep -q 'source -- /root/.local/share/blesh/ble.sh' /root/.bashrc && echo ok" "ok" "Auto-load in bashrc"
 
 echo ""
 echo "=== Other Tools ==="

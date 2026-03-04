@@ -54,7 +54,6 @@
 - starship (prompt)
 - zoxide (smart cd)
 - direnv
-- ble.sh (bash line editor)
 
 # Search Tools
 - ripgrep (rg)
@@ -74,7 +73,6 @@
 
 # Other Tools
 - jq (JSON processor)
-- gawk (GNU awk)
 - htop, tree, less
 - zip, unzip
 - file, lsof, bc

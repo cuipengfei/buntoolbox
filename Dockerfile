@@ -62,7 +62,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ninja-build \
     # Utilities
     jq \
-    gawk \
     htop \
     tree \
     zip \
@@ -179,11 +178,6 @@ ENV HELIX_RUNTIME=/opt/helix-${HELIX_VERSION}-x86_64-linux/runtime
 RUN curl -fsSL "https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-x86_64-unknown-linux-gnu.tar.gz" \
     | tar -xz -C /usr/local/bin
 
-# ble.sh (Bash Line Editor - syntax highlighting & auto-complete)
-RUN curl -fsSL "https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz" \
-    | tar -xJ \
-    && bash ble-nightly/ble.sh --install /root/.local/share \
-    && rm -rf ble-nightly
 # procs (ps replacement)
 RUN curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VERSION}/procs-v${PROCS_VERSION}-x86_64-linux.zip" \
     -o /tmp/procs.zip \
@@ -283,8 +277,7 @@ RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
     && echo 'alias ls="eza"' > /etc/profile.d/04-aliases.sh \
     && echo 'alias ll="eza -l"' >> /etc/profile.d/04-aliases.sh \
     && echo 'alias la="eza -la"' >> /etc/profile.d/04-aliases.sh \
-    && echo 'alias cat="bat --paging=never"' >> /etc/profile.d/04-aliases.sh \
-    && echo 'source -- /root/.local/share/blesh/ble.sh' >> /root/.bashrc
+    && echo 'alias cat="bat --paging=never"' >> /etc/profile.d/04-aliases.sh
 
 RUN git lfs install \
     && rm -rf /usr/share/doc/* /usr/share/man/* \

@@ -70,6 +70,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     less \
     tmux \
     direnv \
+    zsh \
     # Modern CLI tools
     ripgrep \
     fd-find \
@@ -278,6 +279,29 @@ RUN echo 'eval "$(direnv hook bash)"' > /etc/profile.d/01-direnv.sh \
     && echo 'alias ll="eza -l"' >> /etc/profile.d/04-aliases.sh \
     && echo 'alias la="eza -la"' >> /etc/profile.d/04-aliases.sh \
     && echo 'alias cat="bat --paging=never"' >> /etc/profile.d/04-aliases.sh
+
+# oh-my-zsh + zsh-autosuggestions (zsh optional shell, bash remains default)
+RUN RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
+    && git clone https://github.com/zsh-users/zsh-autosuggestions \
+       /root/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+# zsh configuration (.zshrc)
+RUN cat <<'ZSHRC' > /root/.zshrc
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME=""
+plugins=(git zsh-autosuggestions)
+source $ZSH/oh-my-zsh.sh
+
+# Tool integrations (same as bash profile.d)
+eval "$(direnv hook zsh)"
+eval "$(starship init zsh)"
+eval "$(zoxide init zsh)"
+alias ls="eza"
+alias ll="eza -l"
+alias la="eza -la"
+alias cat="bat --paging=never"
+ZSHRC
 
 RUN git lfs install \
     && rm -rf /usr/share/doc/* /usr/share/man/* \

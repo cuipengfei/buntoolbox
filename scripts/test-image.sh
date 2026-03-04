@@ -350,6 +350,10 @@ echo "=== Shell Enhancements ==="
 print_header
 check_ver "starship" "starship --version | grep -oE '[0-9.]+'" "starship print-config 2>&1 | head -1" "" "Print config" "EXPECT_STARSHIP_VERSION"
 check_ver "zoxide" "zoxide --version | grep -oE '[0-9.]+'" "zoxide add /tmp && zoxide query tmp" "/tmp" "Add & query path" "EXPECT_ZOXIDE_VERSION"
+check "zsh" "zsh --version | grep -oE '[0-9.]+' | head -1" "zsh -c 'echo ok'" "ok" "Run zsh command"
+check "oh-my-zsh" "ls /root/.oh-my-zsh/oh-my-zsh.sh >/dev/null 2>&1 && echo installed" "test -d /root/.oh-my-zsh && echo ok" "ok" "Directory exists"
+check "zsh-autosuggestions" "ls /root/.oh-my-zsh/custom/plugins/zsh-autosuggestions >/dev/null 2>&1 && echo installed" "grep -q zsh-autosuggestions /root/.zshrc && echo ok" "ok" "Plugin enabled in zshrc"
+check "zshrc" "test -f /root/.zshrc && echo exists" "grep -q 'ZSH_THEME' /root/.zshrc && echo ok" "ok" "Config file exists"
 
 echo ""
 echo "=== Other Tools ==="

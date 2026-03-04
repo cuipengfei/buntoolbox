@@ -176,6 +176,9 @@ get_local_version() {
         procs)
             procs --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
             ;;
+        zsh)
+            zsh --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1
+            ;;
         zellij)
             zellij --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
@@ -290,6 +293,7 @@ echo ""
 echo "=== Shell 增强 ==="
 check_tool "starship" "starship" "$(get_latest_github_release starship/starship)"
 check_tool "zoxide" "zoxide" "$(get_latest_github_release ajeetdsouza/zoxide)"
+check_tool "zsh" "zsh" "$(get_latest_apt_candidate zsh)"
 
 echo ""
 echo "=== TUI 工具 ==="

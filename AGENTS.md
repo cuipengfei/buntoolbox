@@ -42,6 +42,7 @@ buntoolbox/
 
 ## UNIQUE STYLES
 - **TUI 优先环境**: 环境深度集成诸多现代终端工具（zellij, lazygit, helix, eza, delta, btop, procs），鼓励全程键盘操作。
+- **双 Shell 支持**: 默认 bash，预装 zsh + oh-my-zsh + zsh-autosuggestions，用户可随时 `zsh` 切换。starship/zoxide/direnv/aliases 在两种 shell 中均已配置。
 - **全平台 VS Code 接入**: 预置 `openvscode-start.sh`，默认映射 3000 端口提供无验证、浏览器内的完整 VS Code 体验。
 - **特定工具检测绕过**: `bd` 没有数据库时 `--version` 会异常退出（请用 `--help`），`mihomo` 无版检参数（请用 `-v`），`jdtls` 依靠 jar 文件名而非命令。
 

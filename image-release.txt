@@ -54,6 +54,7 @@
 - starship (prompt)
 - zoxide (smart cd)
 - direnv
+- zsh (oh-my-zsh + zsh-autosuggestions)
 
 # Search Tools
 - ripgrep (rg)

@@ -72,7 +72,9 @@ get_latest_gradle() {
 }
 
 get_latest_node() {
-    curl -fsSL "https://nodejs.org/dist/index.json" 2>/dev/null | jq -r '[.[] | select(.lts != false)][0].version' | sed 's/^v//' | cut -d'.' -f1
+    local major
+    major=$(node --version 2>/dev/null | sed 's/^v//' | cut -d'.' -f1)
+    curl -fsSL "https://nodejs.org/dist/index.json" 2>/dev/null | jq -r --arg v "$major" '[.[] | select(.version | startswith("v" + $v + "."))][0].version' | sed 's/^v//'
 }
 
 get_latest_claude() {
@@ -141,7 +143,7 @@ get_local_version() {
             python3 --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1
             ;;
         node)
-            node --version 2>/dev/null | sed 's/^v//' | cut -d'.' -f1
+            node --version 2>/dev/null | sed 's/^v//'
             ;;
         bun)
             bun --version 2>/dev/null

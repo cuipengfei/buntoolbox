@@ -80,7 +80,9 @@ get_latest_gradle() {
 }
 
 get_latest_node() {
-    curl -fsSL "https://nodejs.org/dist/index.json" 2>/dev/null | jq -r '[.[] | select(.lts != false)][0].version' | sed 's/^v//' | cut -d'.' -f1
+    local major
+    major=$(get_current_version NODE_VERSION | cut -d'.' -f1)
+    curl -fsSL "https://nodejs.org/dist/index.json" 2>/dev/null | jq -r --arg v "$major" '[.[] | select(.version | startswith("v" + $v + "."))][0].version' | sed 's/^v//'
 }
 
 get_latest_github_release() {
@@ -207,7 +209,7 @@ echo ""
 echo "=== 语言运行时 ==="
 check_version "JDK" "$(get_current_jdk)" "$(get_latest_jdk_lts)" "" ""
 check_version "Python" "$(get_current_python)" "$(get_latest_python)" "" ""
-check_version "Node.js" "$(get_current_version NODE_MAJOR)" "$(get_latest_node)" "" ""
+check_version "Node.js" "$(get_current_version NODE_VERSION)" "$(get_latest_node)" "" ""
 check_version "Bun" "$(get_current_version BUN_VERSION)" "$(get_latest_github_release oven-sh/bun | sed 's/^bun-v//')" "oven-sh/bun" "bun-linux-x64.zip"
 
 echo ""

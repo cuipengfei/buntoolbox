@@ -75,7 +75,7 @@ EXPECTED_VERSIONS=""
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_JDK_MAJOR=$(get_dockerfile_jdk)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_PYTHON_VERSION=$(get_dockerfile_python)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BUN_VERSION=$(get_dockerfile_version BUN_VERSION)"
-EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_NODE_MAJOR=$(get_dockerfile_version NODE_MAJOR)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_NODE_VERSION=$(get_dockerfile_version NODE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_GRADLE_VERSION=$(get_dockerfile_version GRADLE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_MAVEN_VERSION=$(get_dockerfile_version MAVEN_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_UV_VERSION=$(get_dockerfile_version UV_VERSION)"
@@ -270,7 +270,7 @@ check_ver "Java" "java -version 2>&1 | grep -oE 'version \"[0-9]+' | grep -oE '[
 check_ver "Python" "python --version | grep -oE '3\\.[0-9]+'" "python -c 'import json; print(json.dumps({\"a\":1}))'" '{"a": 1}' "JSON serialize dict" "EXPECT_PYTHON_VERSION"
 check "pip" "pip --version" "pip list --format=columns | head -1" "Package" "List packages"
 
-check_ver "Node.js" "node --version | grep -oE '[0-9]+' | head -1" "node -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object" "EXPECT_NODE_MAJOR"
+check_ver "Node.js" "node --version | sed 's/^v//'" "node -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object" "EXPECT_NODE_VERSION"
 
 check_ver "Bun" "bun --version" "bun -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object" "EXPECT_BUN_VERSION"
 check "bunx" "bunx --version" "bunx --help | head -1" "Usage" "Show help"

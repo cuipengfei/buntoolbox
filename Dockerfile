@@ -10,8 +10,8 @@ FROM ubuntu:24.04
 # =============================================================================
 # Version Configuration (run scripts/check-versions.sh to check for updates)
 # =============================================================================
-ARG NODE_MAJOR=24
-ARG GRADLE_VERSION=9.3.1
+ARG NODE_VERSION=24.14.0
+ARG GRADLE_VERSION=9.4.0
 ARG MAVEN_VERSION=3.9.12
 ARG LAZYGIT_VERSION=0.59.0
 ARG HELIX_VERSION=25.07.1
@@ -19,10 +19,10 @@ ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.18.2
 ARG ZOXIDE_VERSION=0.9.9
 ARG DUF_VERSION=0.9.1
-ARG BEADS_VERSION=0.57.0
+ARG BEADS_VERSION=0.59.0
 ARG MIHOMO_VERSION=1.19.20
 ARG BUN_VERSION=1.3.10
-ARG UV_VERSION=0.10.7
+ARG UV_VERSION=0.10.9
 ARG STARSHIP_VERSION=1.24.2
 ARG PROCS_VERSION=0.14.11
 ARG ZELLIJ_VERSION=0.43.1
@@ -144,9 +144,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | g
 # =============================================================================
 # 6. Node.js LTS (stable)
 # =============================================================================
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
+    | tar -xJ --strip-components=1 -C /usr/local
 
 # =============================================================================
 # 7. Stable TUI Tools (low change frequency)

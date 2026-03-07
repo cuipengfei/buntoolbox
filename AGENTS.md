@@ -103,6 +103,6 @@ bd close bd-42 --reason "Done" --json
 
 ## NOTES
 - **jdtls 安装约定**: 版本含有时间戳 (`1.56.0-202601291528`)。完整解压在 `~/.local/share/jdtls`，依靠 `~/jdtls` 的软连接暴露环境。
-- **Node.js 对齐**: 仅比较主干版本号（如 24）。
+- **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.14.0`），安装方式为官方 tarball。
 - **WSL 目录约定**: 本地二进制安装优先放到 `~/.local/bin`，避开 nvm/sdkman 初始化带来的额外复杂度。
 - **会话关闭协议**: 宣称完成工作前：`git status` -> `git add` -> `bd sync` -> `git commit` -> `bd sync` -> `git push`。

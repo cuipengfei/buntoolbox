@@ -28,6 +28,7 @@ ARG PROCS_VERSION=0.14.11
 ARG ZELLIJ_VERSION=0.43.1
 ARG OPENVSCODE_VERSION=1.109.5
 ARG JDTLS_VERSION=1.57.0-202602261110
+ARG TTYD_VERSION=1.7.7
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -197,6 +198,14 @@ RUN mkdir -p /opt \
 COPY scripts/openvscode-start.sh /usr/local/bin/openvscode-start
 RUN chmod +x /usr/local/bin/openvscode-start
 
+# ttyd (web terminal)
+RUN curl -fsSL "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.x86_64" \
+    -o /usr/local/bin/ttyd \
+    && chmod +x /usr/local/bin/ttyd
+
+COPY scripts/ttyd-start.sh /usr/local/bin/ttyd-start
+RUN chmod +x /usr/local/bin/ttyd-start
+
 # jdtls (Java Language Server for IDE features)
 # Note: Version includes build timestamp (e.g., 1.54.0-202511261751)
 RUN mkdir -p /opt/jdtls \
@@ -310,8 +319,8 @@ RUN git lfs install \
 COPY image-release.txt /tmp/image-release.txt
 RUN cat /tmp/image-release.txt >> /etc/image-release && rm /tmp/image-release.txt
 
-# Expose SSH port
-EXPOSE 22
+# Expose SSH and ttyd ports
+EXPOSE 22 7681
 
 WORKDIR /workspace
 CMD ["/bin/bash"]

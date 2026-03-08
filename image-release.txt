@@ -36,6 +36,7 @@
 - nano
 - helix (hx)
 - openvscode-server (VS Code in browser)
+- ttyd (web terminal)
 
 # Terminal Multiplexers
 - tmux

@@ -236,6 +236,7 @@ check_version "procs" "$(get_current_version PROCS_VERSION)" "$(get_latest_githu
 check_version "zellij" "$(get_current_version ZELLIJ_VERSION)" "$(get_latest_github_release zellij-org/zellij)" "zellij-org/zellij" "zellij-x86_64-unknown-linux-musl.tar.gz"
 check_version "duf" "$(get_current_version DUF_VERSION)" "$(get_latest_github_release muesli/duf)" "muesli/duf" "duf_$(get_current_version DUF_VERSION)_linux_amd64.deb"
 check_version "openvscode" "$(get_current_version OPENVSCODE_VERSION)" "$(get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')" "gitpod-io/openvscode-server" "openvscode-server-v$(get_current_version OPENVSCODE_VERSION)-linux-x64.tar.gz"
+check_version "ttyd" "$(get_current_version TTYD_VERSION)" "$(get_latest_github_release tsl0922/ttyd)" "tsl0922/ttyd" "ttyd.x86_64"
 check_version "jdtls" "$(get_current_version JDTLS_VERSION)" "$(get_latest_jdtls)" "" ""
 
 echo ""

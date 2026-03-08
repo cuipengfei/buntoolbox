@@ -13,12 +13,13 @@ Buntoolbox is designed for Windows users with WSL disabled by enterprise policy.
 | OpenVSCode Server | ✅ Yes | 3000 |
 | SSH | ✅ Yes (sshd) | 22 |
 | Zellij | ✅ Yes | - |
+| ttyd | ✅ Yes | 7681 |
 
 ## Solution Options
 
 ### Option A: ttyd + Zellij (Lightweight Terminal)
 
-Lightweight web terminal serving Zellij over WebSocket. **Not currently in buntoolbox.**
+Lightweight web terminal serving Zellij over WebSocket. **Included in buntoolbox.**
 
 ```
 Container                          Windows

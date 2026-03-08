@@ -307,6 +307,7 @@ check_tool "procs" "procs" "$(get_latest_github_release dalance/procs)"
 check_tool "zellij" "zellij" "$(get_latest_github_release zellij-org/zellij)"
 check_tool "duf" "duf" "$(get_latest_github_release muesli/duf)"
 check_tool "openvscode" "openvscode-server" "$(get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')"
+check_tool "ttyd" "ttyd" "$(get_latest_github_release tsl0922/ttyd)"
 check_tool "jdtls" "jdtls" "$(get_latest_jdtls)"
 
 echo ""

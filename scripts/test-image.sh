@@ -90,6 +90,7 @@ EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_PROCS_VERSION=$(get_dockerfile_v
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_ZELLIJ_VERSION=$(get_dockerfile_version ZELLIJ_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_DUF_VERSION=$(get_dockerfile_version DUF_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_OPENVSCODE_VERSION=$(get_dockerfile_version OPENVSCODE_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_TTYD_VERSION=$(get_dockerfile_version TTYD_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_MIHOMO_VERSION=$(get_dockerfile_version MIHOMO_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_JDTLS_VERSION=$(get_dockerfile_version JDTLS_VERSION | cut -d'-' -f1)"
 
@@ -330,6 +331,7 @@ check "vim" "vim --version | grep -oE 'Vi IMproved [0-9.]+' | grep -oE '[0-9.]+'
 check "nano" "nano --version | grep -oE '[0-9.]+' | head -1" "nano --version" "nano" "Verify installation"
 check_ver "helix" "hx --version | grep -oE '[0-9.]+' | head -1" "hx --health 2>&1 | head -1" "Config" "Health check" "EXPECT_HELIX_VERSION"
 check_ver "openvscode-server" "openvscode-server --version | head -1" "openvscode-server --help 2>&1 | head -1" "OpenVSCode Server" "Show help" "EXPECT_OPENVSCODE_VERSION"
+check_ver "ttyd" "ttyd --version | grep -oE '[0-9.]+' | head -1" "ttyd --version" "ttyd" "Verify installation" "EXPECT_TTYD_VERSION"
 
 echo ""
 echo "=== TUI Tools ==="

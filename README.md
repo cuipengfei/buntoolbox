@@ -9,7 +9,7 @@
 - **运行时**: Bun, Node.js 24, Python 3.14 (pip/uv/pipx)
 - **JDK**: Azul Zulu 25 headless
 - **基础镜像**: Ubuntu 24.04 LTS
-- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, duf, zsh (oh-my-zsh), bd, mihomo, sshd, openvscode-server, jdtls 等
+- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, duf, zsh (oh-my-zsh), bd, mihomo, sshd, openvscode-server, ttyd, jdtls 等
 
 ## 使用方式
 
@@ -83,6 +83,23 @@ docker run -d -p 3000:3000 --name mydev-web cuipengfei/buntoolbox:latest \
 
 # Visit http://localhost:3000 in your browser
 # Full VS Code experience in the browser, no installation needed!
+```
+
+### ttyd Web Terminal (Lightweight Browser Terminal)
+
+```powershell
+# Quick start (default port 7681, writable terminal)
+docker run -d -p 7681:7681 --name mydev-ttyd cuipengfei/buntoolbox:latest ttyd-start
+
+# Custom port
+docker run -d -p 8080:8080 --name mydev-ttyd cuipengfei/buntoolbox:latest ttyd-start 8080
+
+# With Zellij (terminal multiplexer)
+docker run -d -p 7681:7681 --name mydev-ttyd cuipengfei/buntoolbox:latest \
+  ttyd-start 7681 zellij attach --create main
+
+# Visit http://localhost:7681 in your browser
+# Lightweight terminal - no IDE overhead, just a fast shell!
 ```
 
 ## 命名由来

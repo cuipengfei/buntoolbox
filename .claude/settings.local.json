@@ -285,7 +285,8 @@
       "Bash(# 检查 curl 用的是哪个版本\nnm -D /lib/x86_64-linux-gnu/libcurl.so.4 2>/dev/null | grep -E \"\"SSL_\\(read|write\\)\"\" || echo \"\"curl 不直接调用 SSL_read/write\"\")",
       "Bash(# 检查 node 的 TLS 实现\nldd $\\(which node\\) 2>/dev/null | grep -iE \"\"\\(ssl|crypto|tls\\)\"\" || echo \"\"node 没有动态链接 ssl\"\"\nstrings $\\(which node\\) 2>/dev/null | grep -iE \"\"openssl|boringssl\"\" | head -5)",
       "Bash(# 检查 bun 的 TLS 实现\nldd $\\(which bun\\) 2>/dev/null | grep -iE \"\"\\(ssl|crypto|tls\\)\"\" || echo \"\"bun 没有动态链接 ssl\"\"\nstrings $\\(which bun\\) 2>/dev/null | grep -iE \"\"openssl|boringssl\"\" | head -5)",
-      "WebFetch(domain:icepanel.medium.com)"
+      "WebFetch(domain:icepanel.medium.com)",
+      "Bash(git:*)"
     ],
     "deny": [],
     "ask": [],

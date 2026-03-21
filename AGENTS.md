@@ -45,7 +45,7 @@ buntoolbox/
 - **双 Shell 支持**: 默认 bash，预装 zsh + oh-my-zsh + zsh-autosuggestions，用户可随时 `zsh` 切换。starship/zoxide/direnv/aliases 在两种 shell 中均已配置。
 - **全平台 VS Code 接入**: 预置 `openvscode-start.sh`，默认映射 3000 端口提供无验证、浏览器内的完整 VS Code 体验。
 - **浏览器终端接入**: 预置 `ttyd-start.sh`，默认映射 7681 端口提供轻量 web 终端，支持自定义 shell 和 Zellij。
-- **特定工具检测绕过**: `bd` 没有数据库时 `--version` 会异常退出（请用 `--help`），`mihomo` 无版检参数（请用 `-v`），`jdtls` 依靠 jar 文件名而非命令。
+- **特定工具检测绕过**: `bd` 没有数据库时 `--version` 会异常退出（请用 `--help`）。
 
 ## COMMANDS
 ```bash
@@ -103,7 +103,6 @@ bd close bd-42 --reason "Done" --json
    - 构建完成后执行 `./scripts/test-image.sh`，确保版本与功能检查全绿。
 
 ## NOTES
-- **jdtls 安装约定**: 版本含有时间戳 (`1.56.0-202601291528`)。完整解压在 `~/.local/share/jdtls`，依靠 `~/jdtls` 的软连接暴露环境。
 - **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.14.0`），安装方式为官方 tarball。
 - **WSL 目录约定**: 本地二进制安装优先放到 `~/.local/bin`，避开 nvm/sdkman 初始化带来的额外复杂度。
 - **会话关闭协议**: 宣称完成工作前：`git status` -> `git add` -> `bd sync` -> `git commit` -> `bd sync` -> `git push`。

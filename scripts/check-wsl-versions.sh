@@ -105,22 +105,6 @@ get_latest_apt_candidate() {
     apt-cache policy "$pkg" 2>/dev/null | awk '/Candidate:/ {print $2; exit}' | sed 's/^[0-9]\+://; s/-.*$//'
 }
 
-get_latest_jdtls() {
-    local version timestamp
-    version=$(curl -fsSL --max-time 5 "https://download.eclipse.org/jdtls/milestones/" 2>/dev/null | \
-        grep -oE '1\.[0-9]+\.[0-9]+' | sort -V | tail -1)
-    if [ -n "$version" ]; then
-        timestamp=$(curl -fsSL --max-time 5 "https://download.eclipse.org/jdtls/milestones/${version}/" 2>/dev/null | \
-            grep -oE "jdt-language-server-${version}-[0-9]+\\.tar\\.gz" | head -1 | \
-            grep -oE "${version}-[0-9]+" | sed "s/${version}-//")
-        if [ -n "$timestamp" ]; then
-            echo "${version}-${timestamp}"
-        else
-            echo "$version"
-        fi
-    fi
-}
-
 # ============================================================================
 # Local version detection functions
 # ============================================================================
@@ -191,25 +175,8 @@ get_local_version() {
             bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \
             bd --help 2>&1 | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
-        mihomo)
-            mihomo -v 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | sed 's/^v//'
-            ;;
         claude)
             claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
-            ;;
-        jdtls)
-            # Check for jdtls jar in common locations
-            local jar_path=""
-            for dir in ~/jdtls ~/.local/share/jdtls /opt/jdtls /usr/local/share/jdtls; do
-                if [ -d "$dir/plugins" ]; then
-                    jar_path=$(find "$dir/plugins" -name 'org.eclipse.jdt.ls.core_*.jar' 2>/dev/null | head -1)
-                    [ -n "$jar_path" ] && break
-                fi
-            done
-            if [ -n "$jar_path" ]; then
-                # Extract version like 1.54.0.202511261751 -> 1.54.0-202511261751
-                basename "$jar_path" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]{12}' | sed 's/\.\([0-9]\{12\}\)$/-\1/'
-            fi
             ;;
         openvscode-server)
             # Try to extract version from binary path (e.g., openvscode-server-v1.106.3-linux-x64)
@@ -308,12 +275,9 @@ check_tool "zellij" "zellij" "$(get_latest_github_release zellij-org/zellij)"
 check_tool "duf" "duf" "$(get_latest_github_release muesli/duf)"
 check_tool "openvscode" "openvscode-server" "$(get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')"
 check_tool "ttyd" "ttyd" "$(get_latest_github_release tsl0922/ttyd)"
-check_tool "jdtls" "jdtls" "$(get_latest_jdtls)"
-
 echo ""
 echo "=== 其他工具 ==="
 check_tool "beads (bd)" "bd" "$(get_latest_github_release steveyegge/beads)"
-# mihomo skipped for WSL (only used in Docker)
 check_tool "claude" "claude" "$(get_latest_claude)"
 
 echo ""

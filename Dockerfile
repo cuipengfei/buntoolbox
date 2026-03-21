@@ -11,23 +11,21 @@ FROM ubuntu:24.04
 # Version Configuration (run scripts/check-versions.sh to check for updates)
 # =============================================================================
 ARG NODE_VERSION=24.14.0
-ARG GRADLE_VERSION=9.4.0
+ARG GRADLE_VERSION=9.4.1
 ARG MAVEN_VERSION=3.9.14
 ARG LAZYGIT_VERSION=0.60.0
 ARG HELIX_VERSION=25.07.1
 ARG EZA_VERSION=0.23.4
-ARG DELTA_VERSION=0.18.2
+ARG DELTA_VERSION=0.19.0
 ARG ZOXIDE_VERSION=0.9.9
 ARG DUF_VERSION=0.9.1
-ARG BEADS_VERSION=0.60.0
-ARG MIHOMO_VERSION=1.19.21
-ARG BUN_VERSION=1.3.10
-ARG UV_VERSION=0.10.10
+ARG BEADS_VERSION=0.61.0
+ARG BUN_VERSION=1.3.11
+ARG UV_VERSION=0.10.12
 ARG STARSHIP_VERSION=1.24.2
 ARG PROCS_VERSION=0.14.11
 ARG ZELLIJ_VERSION=0.43.1
 ARG OPENVSCODE_VERSION=1.109.5
-ARG JDTLS_VERSION=1.57.0-202602261110
 ARG TTYD_VERSION=1.7.7
 
 LABEL maintainer="buntoolbox"
@@ -206,13 +204,6 @@ RUN curl -fsSL "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION
 COPY scripts/ttyd-start.sh /usr/local/bin/ttyd-start
 RUN chmod +x /usr/local/bin/ttyd-start
 
-# jdtls (Java Language Server for IDE features)
-# Note: Version includes build timestamp (e.g., 1.54.0-202511261751)
-RUN mkdir -p /opt/jdtls \
-    && curl -fsSL "https://download.eclipse.org/jdtls/milestones/${JDTLS_VERSION%%-*}/jdt-language-server-${JDTLS_VERSION}.tar.gz" \
-    | tar -xz -C /opt/jdtls \
-    && ln -sf /opt/jdtls/bin/jdtls /usr/local/bin/jdtls
-
 # =============================================================================
 # 8. Medium-frequency tools (5 updates each)
 # =============================================================================
@@ -239,11 +230,6 @@ ENV PATH="${BUN_INSTALL}/bin:${PATH}"
 # lazygit
 RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_linux_x86_64.tar.gz" \
     | tar -xz -C /usr/local/bin lazygit
-
-# mihomo (Clash.Meta)
-RUN curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/v${MIHOMO_VERSION}/mihomo-linux-amd64-v${MIHOMO_VERSION}.gz" \
-    | gunzip -c > /usr/local/bin/mihomo \
-    && chmod +x /usr/local/bin/mihomo
 
 # =============================================================================
 # 9. High-frequency tools (9 updates)

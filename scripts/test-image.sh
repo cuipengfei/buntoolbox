@@ -91,8 +91,6 @@ EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_ZELLIJ_VERSION=$(get_dockerfile_
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_DUF_VERSION=$(get_dockerfile_version DUF_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_OPENVSCODE_VERSION=$(get_dockerfile_version OPENVSCODE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_TTYD_VERSION=$(get_dockerfile_version TTYD_VERSION)"
-EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_MIHOMO_VERSION=$(get_dockerfile_version MIHOMO_VERSION)"
-EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_JDTLS_VERSION=$(get_dockerfile_version JDTLS_VERSION | cut -d'-' -f1)"
 
 # Create test script
 TEST_SCRIPT=$(cat << 'EOF'
@@ -345,7 +343,6 @@ check "btop" "btop --version | grep -oE '[0-9.]+'" "btop --version" "btop" "Veri
 check_ver "procs" "procs --version | grep -oE '[0-9.]+' | head -1" "procs 1" "PID" "List processes" "EXPECT_PROCS_VERSION"
 check_ver "zellij" "zellij --version | grep -oE '[0-9.]+'" "zellij setup --check 2>&1 | head -1" "" "Check setup" "EXPECT_ZELLIJ_VERSION"
 check_ver "duf" "duf --version | grep -oE '[0-9.]+' | head -1" "duf --help" "Usage" "Show help" "EXPECT_DUF_VERSION"
-check_ver "jdtls" "ls /opt/jdtls/plugins/org.eclipse.jdt.ls.core_*.jar 2>/dev/null | grep -oE '[0-9]+\\.[0-9]+\\.[0-9]+' | head -1" "jdtls --help 2>&1 | head -1" "usage" "Show help" "EXPECT_JDTLS_VERSION"
 
 echo ""
 echo "=== Shell Enhancements ==="
@@ -361,7 +358,6 @@ echo ""
 echo "=== Other Tools ==="
 print_header
 check_ver "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help" "beads" "Show help" "EXPECT_BEADS_VERSION"
-check_ver "mihomo" "mihomo -v | grep -oE 'v[0-9.]+' | head -1" "mihomo -h" "Usage" "Show help" "EXPECT_MIHOMO_VERSION"
 check "gpg" "gpg --version | grep -oE '[0-9.]+' | head -1" "echo test | gpg --symmetric --batch --passphrase test -o /tmp/test.gpg && echo ok" "ok" "Symmetric encrypt"
 check "lsb_release" "lsb_release -rs" "lsb_release -a 2>&1" "Ubuntu" "Show distro info"
 

@@ -129,23 +129,6 @@ get_latest_maven() {
         jq -r '.[0].latest'
 }
 
-# Get latest jdtls version from Eclipse milestones page (returns version-timestamp format)
-get_latest_jdtls() {
-    local version timestamp
-    version=$(curl -fsSL --max-time 5 "https://download.eclipse.org/jdtls/milestones/" 2>/dev/null | \
-        grep -oE '1\.[0-9]+\.[0-9]+' | sort -V | tail -1)
-    if [ -n "$version" ]; then
-        timestamp=$(curl -fsSL --max-time 5 "https://download.eclipse.org/jdtls/milestones/${version}/" 2>/dev/null | \
-            grep -oE "jdt-language-server-${version}-[0-9]+\\.tar\\.gz" | head -1 | \
-            grep -oE "${version}-[0-9]+" | sed "s/${version}-//")
-        if [ -n "$timestamp" ]; then
-            echo "${version}-${timestamp}"
-        else
-            echo "$version"
-        fi
-    fi
-}
-
 # Get linux x86_64 assets only (no arm, no windows, no macos, no other archs)
 get_linux_assets() {
     local repo="$1"
@@ -237,12 +220,9 @@ check_version "zellij" "$(get_current_version ZELLIJ_VERSION)" "$(get_latest_git
 check_version "duf" "$(get_current_version DUF_VERSION)" "$(get_latest_github_release muesli/duf)" "muesli/duf" "duf_$(get_current_version DUF_VERSION)_linux_amd64.deb"
 check_version "openvscode" "$(get_current_version OPENVSCODE_VERSION)" "$(get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')" "gitpod-io/openvscode-server" "openvscode-server-v$(get_current_version OPENVSCODE_VERSION)-linux-x64.tar.gz"
 check_version "ttyd" "$(get_current_version TTYD_VERSION)" "$(get_latest_github_release tsl0922/ttyd)" "tsl0922/ttyd" "ttyd.x86_64"
-check_version "jdtls" "$(get_current_version JDTLS_VERSION)" "$(get_latest_jdtls)" "" ""
-
 echo ""
 echo "=== 其他工具 ==="
 check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release steveyegge/beads)" "steveyegge/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
-check_version "mihomo" "$(get_current_version MIHOMO_VERSION)" "$(get_latest_github_release MetaCubeX/mihomo)" "MetaCubeX/mihomo" "mihomo-linux-amd64-v$(get_current_version MIHOMO_VERSION).gz"
 
 echo ""
 if [ $updates_available -eq 1 ]; then

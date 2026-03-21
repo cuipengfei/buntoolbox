@@ -28,7 +28,7 @@ Buntoolbox is already well-designed for this exact use case. The image provides:
 | **Editors** | vim, nano, helix | TUI editing covered |
 | **Shell Enhancements** | starship, zoxide, direnv, fzf | Modern shell experience |
 | **TUI Utilities** | bat, eza, delta, btop, htop, ripgrep, fd | Excellent CLI replacement tools |
-| **Networking** | curl, wget, mihomo | Basic + proxy support |
+| **Networking** | curl, wget | Basic network tooling |
 | **CI Integration** | GitHub Actions workflow | Automated builds |
 
 ### ⚠️ Gaps for WSL Replacement

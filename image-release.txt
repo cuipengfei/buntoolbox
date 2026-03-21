@@ -70,9 +70,6 @@
 - sshd (SSH server, port 22, root:root)
 - telnet
 
-# Language Servers
-- jdtls (Java LSP)
-
 # Other Tools
 - jq (JSON processor)
 - htop, tree, less
@@ -80,4 +77,3 @@
 - file, lsof, bc
 - gpg
 - bd (beads issue tracker)
-- mihomo (Clash.Meta proxy)

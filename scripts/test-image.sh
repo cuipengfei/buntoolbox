@@ -78,6 +78,7 @@ EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BUN_VERSION=$(get_dockerfile_ver
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_NODE_VERSION=$(get_dockerfile_version NODE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_GRADLE_VERSION=$(get_dockerfile_version GRADLE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_MAVEN_VERSION=$(get_dockerfile_version MAVEN_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_HTTPIE_VERSION=$(get_dockerfile_version HTTPIE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_UV_VERSION=$(get_dockerfile_version UV_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BEADS_VERSION=$(get_dockerfile_version BEADS_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_LAZYGIT_VERSION=$(get_dockerfile_version LAZYGIT_VERSION)"
@@ -292,6 +293,7 @@ check "pkg-config" "pkg-config --version" "pkg-config --modversion zlib 2>/dev/n
 echo ""
 echo "=== Package Managers ==="
 print_header
+check_ver "httpie" "http --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "http --help | head -1" "usage:" "Show help" "EXPECT_HTTPIE_VERSION"
 check_ver "uv" "uv --version" "uv venv --help | head -1" "Create" "Show venv help" "EXPECT_UV_VERSION"
 check "uvx" "uvx --version" "uvx --help | head -3" "Run a command" "Show help"
 check "pipx" "pipx --version" "pipx list" "pipx" "List packages"

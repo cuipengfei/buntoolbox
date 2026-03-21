@@ -96,6 +96,11 @@ get_latest_maven() {
         jq -r '.[0].latest'
 }
 
+get_latest_httpie() {
+    curl -fsSL --max-time 5 "https://pypi.org/pypi/httpie/json" 2>/dev/null | \
+        jq -r '.info.version'
+}
+
 get_latest_apt_candidate() {
     local pkg="$1"
     if ! command -v apt-cache &>/dev/null; then
@@ -140,6 +145,9 @@ get_local_version() {
             ;;
         uv)
             uv --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
+            ;;
+        http)
+            http --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
         starship)
             starship --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
@@ -256,6 +264,7 @@ check_tool "Maven" "mvn" "$(get_latest_maven)"
 
 echo ""
 echo "=== 包管理器 ==="
+check_tool "httpie" "http" "$(get_latest_httpie)"
 check_tool "uv" "uv" "$(get_latest_github_release astral-sh/uv)"
 
 echo ""

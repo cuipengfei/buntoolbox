@@ -129,6 +129,11 @@ get_latest_maven() {
         jq -r '.[0].latest'
 }
 
+get_latest_httpie() {
+    curl -fsSL --max-time 15 "https://pypi.org/pypi/httpie/json" 2>/dev/null | \
+        jq -r '.info.version'
+}
+
 # Get linux x86_64 assets only (no arm, no windows, no macos, no other archs)
 get_linux_assets() {
     local repo="$1"
@@ -202,6 +207,7 @@ check_version "Maven" "$(get_current_version MAVEN_VERSION)" "$(get_latest_maven
 
 echo ""
 echo "=== 包管理器 ==="
+check_version "httpie" "$(get_current_version HTTPIE_VERSION)" "$(get_latest_httpie)" "" ""
 check_version "uv" "$(get_current_version UV_VERSION)" "$(get_latest_github_release astral-sh/uv)" "astral-sh/uv" "uv-x86_64-unknown-linux-gnu.tar.gz"
 
 echo ""

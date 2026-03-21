@@ -21,6 +21,7 @@ ARG ZOXIDE_VERSION=0.9.9
 ARG DUF_VERSION=0.9.1
 ARG BEADS_VERSION=0.61.0
 ARG BUN_VERSION=1.3.11
+ARG HTTPIE_VERSION=3.2.4
 ARG UV_VERSION=0.10.12
 ARG STARSHIP_VERSION=1.24.2
 ARG PROCS_VERSION=0.14.11
@@ -234,6 +235,9 @@ RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LA
 # =============================================================================
 # 9. High-frequency tools (9 updates)
 # =============================================================================
+# HTTPie (Python-based CLI HTTP client)
+RUN python3 -m pip install --no-cache-dir "httpie==${HTTPIE_VERSION}"
+
 # uv/uvx
 ENV UV_INSTALL_DIR=/root/.local/bin
 RUN mkdir -p /root/.local/bin \

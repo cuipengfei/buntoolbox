@@ -103,6 +103,6 @@ bd close bd-42 --reason "Done" --json
    - 构建完成后执行 `./scripts/test-image.sh`，确保版本与功能检查全绿。
 
 ## NOTES
-- **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.14.0`），安装方式为官方 tarball。
+- **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.14.1`），安装方式为官方 tarball。
 - **WSL 目录约定**: 本地二进制安装优先放到 `~/.local/bin`，避开 nvm/sdkman 初始化带来的额外复杂度。
 - **会话关闭协议**: 宣称完成工作前：`git status` -> `git add` -> `bd sync` -> `git commit` -> `bd sync` -> `git push`。

@@ -19,10 +19,10 @@ ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.19.2
 ARG ZOXIDE_VERSION=0.9.9
 ARG DUF_VERSION=0.9.1
-ARG BEADS_VERSION=0.62.0
+ARG BEADS_VERSION=1.0.0
 ARG BUN_VERSION=1.3.11
 ARG HTTPIE_VERSION=3.2.4
-ARG UV_VERSION=0.11.2
+ARG UV_VERSION=0.11.3
 ARG STARSHIP_VERSION=1.24.2
 ARG PROCS_VERSION=0.14.11
 ARG ZELLIJ_VERSION=0.44.0
@@ -254,7 +254,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 # 10. beads - most frequent (13 updates)
 # =============================================================================
 # beads (bd - issue tracker) - moved to last due to frequent releases
-RUN curl -fsSL "https://github.com/steveyegge/beads/releases/download/v${BEADS_VERSION}/beads_${BEADS_VERSION}_linux_amd64.tar.gz" \
+RUN curl -fsSL "https://github.com/gastownhall/beads/releases/download/v${BEADS_VERSION}/beads_${BEADS_VERSION}_linux_amd64.tar.gz" \
     | tar -xz -C /usr/local/bin bd
 
 # =============================================================================

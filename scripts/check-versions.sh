@@ -228,7 +228,7 @@ check_version "openvscode" "$(get_current_version OPENVSCODE_VERSION)" "$(get_la
 check_version "ttyd" "$(get_current_version TTYD_VERSION)" "$(get_latest_github_release tsl0922/ttyd)" "tsl0922/ttyd" "ttyd.x86_64"
 echo ""
 echo "=== 其他工具 ==="
-check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release steveyegge/beads)" "steveyegge/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
+check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release gastownhall/beads)" "gastownhall/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
 
 echo ""
 if [ $updates_available -eq 1 ]; then

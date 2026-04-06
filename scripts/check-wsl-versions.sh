@@ -286,7 +286,7 @@ check_tool "openvscode" "openvscode-server" "$(get_latest_github_release gitpod-
 check_tool "ttyd" "ttyd" "$(get_latest_github_release tsl0922/ttyd)"
 echo ""
 echo "=== 其他工具 ==="
-check_tool "beads (bd)" "bd" "$(get_latest_github_release steveyegge/beads)"
+check_tool "beads (bd)" "bd" "$(get_latest_github_release gastownhall/beads)"
 check_tool "claude" "claude" "$(get_latest_claude)"
 
 echo ""

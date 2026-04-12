@@ -134,6 +134,11 @@ get_latest_httpie() {
         jq -r '.info.version'
 }
 
+get_latest_claude() {
+    curl -fsSL --max-time 5 "https://registry.npmjs.org/@anthropic-ai/claude-code" 2>/dev/null | \
+        jq -r '.["dist-tags"].stable'
+}
+
 # Get linux x86_64 assets only (no arm, no windows, no macos, no other archs)
 get_linux_assets() {
     local repo="$1"
@@ -229,6 +234,7 @@ check_version "ttyd" "$(get_current_version TTYD_VERSION)" "$(get_latest_github_
 echo ""
 echo "=== 其他工具 ==="
 check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release gastownhall/beads)" "gastownhall/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
+check_version "claude" "$(get_current_version CLAUDE_CODE_VERSION)" "$(get_latest_claude)" "" ""
 
 echo ""
 if [ $updates_available -eq 1 ]; then

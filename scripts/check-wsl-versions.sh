@@ -78,7 +78,8 @@ get_latest_node() {
 }
 
 get_latest_claude() {
-    curl -fsSL --max-time 5 "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/latest" 2>/dev/null
+    curl -fsSL --max-time 5 "https://registry.npmjs.org/@anthropic-ai/claude-code" 2>/dev/null | \
+        jq -r '.["dist-tags"].stable'
 }
 
 get_latest_jdk_lts() {

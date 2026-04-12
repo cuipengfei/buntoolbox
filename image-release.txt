@@ -10,6 +10,7 @@
 - Node.js: v24.14.1
 - Bun: JavaScript runtime & toolkit
 - Python: 3.14
+- Claude Code: AI coding assistant (stable)
 
 # Build Tools
 - Maven
@@ -78,3 +79,4 @@
 - file, lsof, bc
 - gpg
 - bd (beads issue tracker)
+- claude

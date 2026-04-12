@@ -13,21 +13,22 @@ FROM ubuntu:24.04
 ARG NODE_VERSION=24.14.1
 ARG GRADLE_VERSION=9.4.1
 ARG MAVEN_VERSION=3.9.14
-ARG LAZYGIT_VERSION=0.60.0
+ARG LAZYGIT_VERSION=0.61.0
 ARG HELIX_VERSION=25.07.1
 ARG EZA_VERSION=0.23.4
 ARG DELTA_VERSION=0.19.2
 ARG ZOXIDE_VERSION=0.9.9
 ARG DUF_VERSION=0.9.1
 ARG BEADS_VERSION=1.0.0
-ARG BUN_VERSION=1.3.11
+ARG BUN_VERSION=1.3.12
 ARG HTTPIE_VERSION=3.2.4
-ARG UV_VERSION=0.11.3
+ARG UV_VERSION=0.11.6
 ARG STARSHIP_VERSION=1.24.2
 ARG PROCS_VERSION=0.14.11
-ARG ZELLIJ_VERSION=0.44.0
+ARG ZELLIJ_VERSION=0.44.1
 ARG OPENVSCODE_VERSION=1.109.5
 ARG TTYD_VERSION=1.7.7
+ARG CLAUDE_CODE_VERSION=2.1.92
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
@@ -249,6 +250,9 @@ ENV PATH="${UV_INSTALL_DIR}:${PATH}"
 RUN uv tool install pipx && pipx ensurepath \
     && rm -rf /root/.cache/uv
 ENV PATH="/root/.local/bin:${PATH}"
+
+# Claude Code (AI coding assistant)
+RUN curl -fsSL https://claude.ai/install.sh | bash -s ${CLAUDE_CODE_VERSION}
 
 # =============================================================================
 # 10. beads - most frequent (13 updates)

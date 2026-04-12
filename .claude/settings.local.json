@@ -286,7 +286,15 @@
       "Bash(# 检查 node 的 TLS 实现\nldd $\\(which node\\) 2>/dev/null | grep -iE \"\"\\(ssl|crypto|tls\\)\"\" || echo \"\"node 没有动态链接 ssl\"\"\nstrings $\\(which node\\) 2>/dev/null | grep -iE \"\"openssl|boringssl\"\" | head -5)",
       "Bash(# 检查 bun 的 TLS 实现\nldd $\\(which bun\\) 2>/dev/null | grep -iE \"\"\\(ssl|crypto|tls\\)\"\" || echo \"\"bun 没有动态链接 ssl\"\"\nstrings $\\(which bun\\) 2>/dev/null | grep -iE \"\"openssl|boringssl\"\" | head -5)",
       "WebFetch(domain:icepanel.medium.com)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(/mnt/d/code/buntoolbox/scripts/check-wsl-versions.sh:*)",
+      "Bash(\"/mnt/d/code/buntoolbox/scripts/check-versions.sh\")",
+      "Bash(/mnt/d/code/buntoolbox/scripts/test-image.sh:*)",
+      "Bash(\"/mnt/d/code/buntoolbox/scripts/test-image.sh\")",
+      "Bash(tmux:*)",
+      "Bash(~/.tmux/plugins/tpm/bin/install_plugins:*)",
+      "Bash(TMUX_PLUGIN_MANAGER_PATH=\"$HOME/.tmux/plugins/\" ~/.tmux/plugins/tpm/bin/install_plugins:*)",
+      "mcp__context7__query-docs"
     ],
     "deny": [],
     "ask": [],
@@ -294,5 +302,7 @@
       "/mnt/d/code/prompts/"
     ]
   },
-  "outputStyle": "natural-writing:natural-writing"
+  "outputStyle": "natural-writing:natural-writing",
+  "spinnerTipsEnabled": false,
+  "prefersReducedMotion": false
 }

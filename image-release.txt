@@ -7,7 +7,7 @@
 
 # Languages & Runtimes
 - Java: Azul Zulu JDK 25 headless
-- Node.js: v24.14.1
+- Node.js: v24.15.0
 - Bun: JavaScript runtime & toolkit
 - Python: 3.14
 - Claude Code: AI coding assistant (stable)

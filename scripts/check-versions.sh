@@ -90,7 +90,7 @@ get_latest_github_release() {
 }
 
 get_latest_zulu_package_version() {
-    curl -fsSL --max-time 15 "https://repos.azul.com/zulu/deb/dists/stable/main/binary-amd64/Packages.gz" 2>/dev/null | \
+    curl -fsSL --retry 3 --retry-all-errors --max-time 15 "https://repos.azul.com/zulu/deb/dists/stable/main/binary-amd64/Packages.gz" 2>/dev/null | \
         gzip -dc 2>/dev/null | \
         awk 'BEGIN{RS="\n\n"} /Package: zulu25-jdk-headless/ {for (i=1; i<=NF; i++) if ($i=="Version:") print $(i+1)}' | \
         sort -V | tail -1

@@ -89,6 +89,13 @@ get_latest_github_release() {
     fetch_github_release "$1" | jq -r '.tag_name // empty' | sed 's/^v//' | sed 's/^bun-v//'
 }
 
+get_latest_zulu_package_version() {
+    curl -fsSL --max-time 15 "https://repos.azul.com/zulu/deb/dists/stable/main/binary-amd64/Packages.gz" 2>/dev/null | \
+        gzip -dc 2>/dev/null | \
+        awk 'BEGIN{RS="\n\n"} /Package: zulu25-jdk-headless/ {for (i=1; i<=NF; i++) if ($i=="Version:") print $(i+1)}' | \
+        sort -V | tail -1
+}
+
 
 # Get current Ubuntu base image version from Dockerfile
 get_current_ubuntu() {
@@ -101,15 +108,14 @@ get_latest_ubuntu_lts() {
         grep -E "^Version:" | tail -1 | grep -oE '[0-9]+\.[0-9]+' | head -1
 }
 
-# Get current JDK major version from Dockerfile (extracts number from zulu<N>-jdk-headless)
+# Get current JDK package version from Dockerfile
 get_current_jdk() {
-    grep "zulu.*-jdk-headless" "$PROJECT_ROOT/$DOCKERFILE" | grep -oE 'zulu[0-9]+' | sed 's/zulu//'
+    get_current_version JDK_PACKAGE_VERSION
 }
 
-# Get latest Azul Zulu LTS version from endoflife.date API
+# Get latest Azul Zulu package version from official apt metadata
 get_latest_jdk_lts() {
-    curl -fsSL --max-time 5 "https://endoflife.date/api/azul-zulu.json" 2>/dev/null | \
-        jq -r '[.[] | select(.lts == true)] | sort_by(.cycle | tonumber) | reverse | .[0].cycle'
+    get_latest_zulu_package_version
 }
 
 # Get current Python major.minor version from Dockerfile (extracts from python3.XX)
@@ -164,6 +170,7 @@ check_version() {
     local name="$1" current="$2" latest="$3" repo="$4" selected="$5"
     if [ -z "$latest" ]; then
         printf "%-12s %-12s %-12s ${RED}%s${NC}\n" "$name" "$current" "?" "fetch failed"
+        updates_available=1
     elif [ "$current" = "$latest" ]; then
         printf "%-12s %-12s %-12s ${GREEN}%s${NC}\n" "$name" "$current" "$latest" "up-to-date"
     else

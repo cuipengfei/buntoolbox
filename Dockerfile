@@ -11,6 +11,7 @@ FROM ubuntu:24.04
 # Version Configuration (run scripts/check-versions.sh to check for updates)
 # =============================================================================
 ARG NODE_VERSION=24.15.0
+ARG JDK_PACKAGE_VERSION=25.0.3-3
 ARG GRADLE_VERSION=9.4.1
 ARG MAVEN_VERSION=3.9.15
 ARG LAZYGIT_VERSION=0.61.1
@@ -104,7 +105,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" > /etc/apt/sources.list.d/zulu.list \
     && apt-get update && apt-get install -y --no-install-recommends \
-    zulu25-jdk-headless \
+    zulu25-jdk-headless=${JDK_PACKAGE_VERSION} \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /usr/lib/jvm/*/jmods /usr/lib/jvm/*/man
 

@@ -60,9 +60,13 @@ get_dockerfile_version() {
     grep "^ARG ${1}=" "$DOCKERFILE" 2>/dev/null | cut -d'=' -f2
 }
 
-# Extract JDK major version from zulu<N>-jdk-headless
-get_dockerfile_jdk() {
-    grep "zulu.*-jdk-headless" "$DOCKERFILE" | grep -oE 'zulu[0-9]+' | sed 's/zulu//'
+# Extract JDK package version from Dockerfile ARG and derive runtime version from it
+get_dockerfile_jdk_package_version() {
+    get_dockerfile_version JDK_PACKAGE_VERSION
+}
+
+get_dockerfile_jdk_runtime_version() {
+    get_dockerfile_jdk_package_version | sed 's/-[^-]*$//'
 }
 
 # Extract Python version from python3.XX
@@ -72,7 +76,8 @@ get_dockerfile_python() {
 
 # Export versions as environment variables for container
 EXPECTED_VERSIONS=""
-EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_JDK_MAJOR=$(get_dockerfile_jdk)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_JDK_PACKAGE_VERSION=$(get_dockerfile_jdk_package_version)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_JDK_RUNTIME_VERSION=$(get_dockerfile_jdk_runtime_version)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_PYTHON_VERSION=$(get_dockerfile_python)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_BUN_VERSION=$(get_dockerfile_version BUN_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_NODE_VERSION=$(get_dockerfile_version NODE_VERSION)"
@@ -266,7 +271,8 @@ print_header
 
 # Java - compile and run
 echo 'public class T{public static void main(String[]a){System.out.println(1+1);}}' > /tmp/T.java
-check_ver "Java" "java -version 2>&1 | grep -oE 'version \"[0-9]+' | grep -oE '[0-9]+'" "javac /tmp/T.java && java -cp /tmp T" "2" "Compile & run (1+1=2)" "EXPECT_JDK_MAJOR"
+check_ver "Java" "java -version 2>&1 | sed -n '1s/.*version \"\([^\"]*\)\".*/\1/p'" "javac /tmp/T.java && java -cp /tmp T" "2" "Compile & run (1+1=2)" "EXPECT_JDK_RUNTIME_VERSION"
+check_ver "JDK pkg" "dpkg -s zulu25-jdk-headless | awk -F': ' '/^Version: /{print \$2}'" "dpkg -s zulu25-jdk-headless | awk -F': ' '/^Package: /{print \$2}'" "zulu25-jdk-headless" "Check package version" "EXPECT_JDK_PACKAGE_VERSION"
 
 check_ver "Python" "python --version | grep -oE '3\\.[0-9]+'" "python -c 'import json; print(json.dumps({\"a\":1}))'" '{"a": 1}' "JSON serialize dict" "EXPECT_PYTHON_VERSION"
 check "pip" "pip --version" "pip list --format=columns | head -1" "Package" "List packages"

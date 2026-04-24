@@ -8,3 +8,13 @@ session-summary*.pdf
 
 # Node
 node_modules/
+
+# bd (beads) runtime artifacts (issues.jsonl is the tracked source of truth)
+.beads/backup/
+.beads/embeddeddolt/
+.beads/dolt-server.lock
+.beads/export-state.json
+.beads/interactions.jsonl
+
+# Sisyphus orchestrator workspace
+.sisyphus/

@@ -2,7 +2,7 @@
 # Buntoolbox - Multi-language Development Environment
 # =============================================================================
 # Repository: https://github.com/cuipengfei/buntoolbox
-# Base Image: Ubuntu 24.04 LTS (Noble)
+# Base Image: Ubuntu 26.04 LTS (Resolute)
 # =============================================================================
 
 # Languages & Runtimes

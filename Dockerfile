@@ -1,11 +1,11 @@
 # Buntoolbox - Multi-language Development Environment
-# Base: Ubuntu 24.04 LTS (Noble)
+# Base: Ubuntu 26.04 LTS (Resolute)
 # Languages: JS/TS (Bun, Node.js), Python 3.14, Java (Zulu 25)
 #
 # Layer order optimized for minimal pull on updates:
 # Stable layers first, frequently updated layers last
 
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 # =============================================================================
 # Version Configuration (run scripts/check-versions.sh to check for updates)
@@ -115,8 +115,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 # =============================================================================
 # 3. Python 3.14 + pip (stable)
 # =============================================================================
-RUN add-apt-repository -y ppa:deadsnakes/ppa \
-    && apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.14 \
     python3.14-venv \
     python3.14-dev \
@@ -265,7 +264,7 @@ RUN curl -fsSL "https://github.com/gastownhall/beads/releases/download/v${BEADS_
 # =============================================================================
 # 11. Final Configuration (tiny, last)
 # =============================================================================
-# Use C.UTF-8 locale (built-in to Ubuntu 24.04, no locales package needed)
+# Use C.UTF-8 locale (built-in to Ubuntu 26.04, no locales package needed)
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 

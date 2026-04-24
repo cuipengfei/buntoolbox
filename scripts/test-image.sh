@@ -69,7 +69,7 @@ get_dockerfile_jdk_runtime_version() {
     get_dockerfile_jdk_package_version | sed 's/-[^-]*$//'
 }
 
-# Extract Python version from python3.XX
+# Extract Python version from python3.XX (major.minor)
 get_dockerfile_python() {
     grep "python3\.[0-9]" "$DOCKERFILE" | grep -oE 'python3\.[0-9]+' | head -1 | sed 's/python//'
 }
@@ -259,6 +259,8 @@ check_ver() {
 
 echo "=== OS ==="
 . /etc/os-release && echo "$NAME $VERSION"
+
+check "os-release" ". /etc/os-release && printf '%s\n' \"$VERSION_ID\"" ". /etc/os-release && printf '%s %s\n' \"$VERSION_ID\" \"$VERSION_CODENAME\"" "26.04 resolute" "Verify Ubuntu 26.04 metadata"
 
 echo ""
 echo "=== Environment ==="

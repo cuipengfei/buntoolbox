@@ -9,7 +9,7 @@
 Buntoolbox is already well-designed for this exact use case. The image provides:
 - Comprehensive multi-language support (Java, Python, Node.js/Bun)
 - Modern CLI tools that match or exceed WSL developer experience
-- Solid foundation with Ubuntu 24.04 LTS
+- Solid foundation with Ubuntu 26.04 LTS
 - Good editor support (vim, nano, helix)
 - Essential version control tooling (git, gh, lazygit)
 

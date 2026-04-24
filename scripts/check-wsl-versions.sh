@@ -180,6 +180,9 @@ get_local_version() {
         duf)
             duf --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
+        tmux)
+            tmux -V 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?[a-z]?'
+            ;;
         bd)
             bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \
             bd --help 2>&1 | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+'
@@ -198,7 +201,7 @@ get_local_version() {
             fi
             ;;
         *)
-            "$cmd" $version_flag 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
+            "$cmd" $version_flag 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?[a-z]?'
             ;;
     esac
 }
@@ -267,6 +270,17 @@ echo ""
 echo "=== 包管理器 ==="
 check_tool "httpie" "http" "$(get_latest_httpie)"
 check_tool "uv" "uv" "$(get_latest_github_release astral-sh/uv)"
+
+echo ""
+echo "=== 基础开发工具 ==="
+check_tool "gh" "gh" "$(get_latest_apt_candidate gh)"
+check_tool "git" "git" "$(get_latest_apt_candidate git)"
+check_tool "jq" "jq" "$(get_latest_apt_candidate jq)"
+check_tool "ripgrep" "rg" "$(get_latest_apt_candidate ripgrep)"
+check_tool "fd" "fd" "$(get_latest_apt_candidate fd-find)"
+check_tool "fzf" "fzf" "$(get_latest_apt_candidate fzf)"
+check_tool "tmux" "tmux" "$(get_latest_apt_candidate tmux)"
+check_tool "btop" "btop" "$(get_latest_apt_candidate btop)"
 
 echo ""
 echo "=== Shell 增强 ==="

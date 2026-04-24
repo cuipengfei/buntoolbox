@@ -5,7 +5,7 @@
 **Branch:** master
 
 ## OVERVIEW
-Buntoolbox 是一个多语言开发环境 Docker 镜像（基于 Ubuntu 24.04 LTS，约 2GB大小），专为受企业安全策略限制 WSL 的 Windows 用户而设计。
+Buntoolbox 是一个多语言开发环境 Docker 镜像（基于 Ubuntu 26.04 LTS，约 2GB大小），专为受企业安全策略限制 WSL 的 Windows 用户而设计。
 **核心技术栈**: Azul Zulu JDK 25 headless, Node.js 24 + Bun, Python 3.14 + uv/pipx, Maven, Gradle, Dockerfile 编排与 Bash 基础设施脚本。
 
 ## STRUCTURE

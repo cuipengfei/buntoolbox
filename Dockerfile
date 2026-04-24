@@ -237,7 +237,7 @@ RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LA
 # 9. High-frequency tools (9 updates)
 # =============================================================================
 # HTTPie (Python-based CLI HTTP client)
-RUN python3 -m pip install --no-cache-dir "httpie==${HTTPIE_VERSION}"
+RUN python3 -m pip install --no-cache-dir --break-system-packages "httpie==${HTTPIE_VERSION}"
 
 # uv/uvx
 ENV UV_INSTALL_DIR=/root/.local/bin

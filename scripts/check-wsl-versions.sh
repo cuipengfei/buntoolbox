@@ -1,18 +1,20 @@
 #!/bin/bash
 # Check versions of tools installed in local WSL environment
 # Compares against latest available versions (same sources as check-versions.sh)
-# Usage: ./scripts/check-wsl-versions.sh [-v|--verbose]
+# Usage: ./scripts/check-wsl-versions.sh [-v|--verbose] [--smoke]
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VERBOSE=false
 CACHE_DIR="/tmp/check-versions-cache"
+RUN_SMOKE=0
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         -v|--verbose) VERBOSE=true; shift ;;
+        --smoke) RUN_SMOKE=1; shift ;;
         *) shift ;;
     esac
 done
@@ -48,14 +50,14 @@ fetch_github_release() {
     fi
 
     local data
-    if command -v gh &>/dev/null && gh auth status &>/dev/null; then
-        if data=$(gh api "repos/${repo}/releases/latest" 2>/dev/null); then
+    if command -v gh &>/dev/null && timeout 5 gh auth status &>/dev/null; then
+        if data=$(timeout 5 gh api "repos/${repo}/releases/latest" 2>/dev/null); then
             echo "$data" > "$cache_file"
             echo "$data"
             return
         fi
     fi
-    if data=$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" 2>/dev/null); then
+    if data=$(curl -fsSL --max-time 5 "https://api.github.com/repos/${repo}/releases/latest" 2>/dev/null); then
         echo "$data" > "$cache_file"
         echo "$data"
     else
@@ -68,13 +70,13 @@ get_latest_github_release() {
 }
 
 get_latest_gradle() {
-    curl -fsSL "https://services.gradle.org/versions/current" 2>/dev/null | jq -r '.version'
+    curl -fsSL --max-time 5 "https://services.gradle.org/versions/current" 2>/dev/null | jq -r '.version'
 }
 
 get_latest_node() {
     local major
     major=$(node --version 2>/dev/null | sed 's/^v//' | cut -d'.' -f1)
-    curl -fsSL "https://nodejs.org/dist/index.json" 2>/dev/null | jq -r --arg v "$major" '[.[] | select(.version | startswith("v" + $v + "."))][0].version' | sed 's/^v//'
+    curl -fsSL --max-time 5 "https://nodejs.org/dist/index.json" 2>/dev/null | jq -r --arg v "$major" '[.[] | select(.version | startswith("v" + $v + "."))][0].version' | sed 's/^v//'
 }
 
 get_latest_claude() {
@@ -145,10 +147,13 @@ get_local_version() {
             mvn --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
         uv)
-            uv --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
+            uv --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
             ;;
         http)
-            http --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
+            http --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
+            ;;
+        gh)
+            gh --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
             ;;
         starship)
             starship --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1
@@ -184,11 +189,17 @@ get_local_version() {
             tmux -V 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?[a-z]?'
             ;;
         bd)
-            bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \
-            bd --help 2>&1 | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+'
+            (bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \
+            bd --help 2>&1 | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+' || true) | head -1
             ;;
         claude)
-            claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
+            local claude_bin
+            claude_bin=$(command -v claude 2>/dev/null || true)
+            if [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && [ ! -L "$claude_bin" ]; then
+                "$claude_bin" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
+            else
+                true
+            fi
             ;;
         openvscode-server)
             # Try to extract version from binary path (e.g., openvscode-server-v1.106.3-linux-x64)
@@ -206,6 +217,61 @@ get_local_version() {
     esac
 }
 
+is_command_usable() {
+    local cmd="$1"
+
+    case "$cmd" in
+        claude)
+            local claude_bin
+            claude_bin=$(command -v claude 2>/dev/null || true)
+            [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && [ ! -L "$claude_bin" ] && timeout 3 bash -c '"$0" --version >/dev/null 2>&1' "$claude_bin"
+            ;;
+        *) command -v "$cmd" >/dev/null 2>&1 ;;
+    esac
+}
+
+run_smoke_test() {
+    local cmd="$1"
+
+    case "$cmd" in
+        java) timeout 8 bash -c "java -XshowSettings:properties -version >/dev/null 2>&1" ;;
+        python3|python) timeout 8 bash -c "python3 -c 'print(1+1)' >/dev/null" ;;
+        node) timeout 8 bash -c "node -e 'console.log(1+1)' >/dev/null" ;;
+        bun) timeout 8 bash -c "bun -e 'console.log(1+1)' >/dev/null" ;;
+        gradle) timeout 8 bash -c "gradle -q help >/dev/null 2>&1" ;;
+        mvn) timeout 8 bash -c "mvn -q -version >/dev/null 2>&1" ;;
+        http) timeout 8 bash -c "http --help >/dev/null 2>&1" ;;
+        uv) timeout 8 bash -c "uv --help >/dev/null 2>&1" ;;
+        gh) timeout 8 bash -c "gh --help >/dev/null 2>&1" ;;
+        git) timeout 8 bash -c "git --help >/dev/null 2>&1" ;;
+        jq) timeout 8 bash -c "printf '{\"a\":1}' | jq -e '.a==1' >/dev/null" ;;
+        rg) timeout 8 bash -c "printf 'a\nb\n' | rg -q b" ;;
+        fd) timeout 8 bash -c "fd --version >/dev/null 2>&1" ;;
+        fzf) timeout 8 bash -c "printf 'a\nb\n' | fzf --filter=a >/dev/null" ;;
+        tmux) timeout 8 bash -c "tmux -V >/dev/null 2>&1" ;;
+        btop) timeout 8 bash -c "btop --help >/dev/null 2>&1" ;;
+        starship) timeout 8 bash -c "starship print-config >/dev/null 2>&1" ;;
+        zoxide) timeout 8 bash -c "zoxide add /tmp >/dev/null 2>&1 && zoxide query tmp >/dev/null 2>&1" ;;
+        zsh) timeout 8 bash -c "zsh -c 'echo ok' >/dev/null" ;;
+        lazygit) timeout 8 bash -c "lazygit --version >/dev/null 2>&1" ;;
+        hx) timeout 8 bash -c "hx --health >/dev/null 2>&1 || hx --version >/dev/null 2>&1" ;;
+        eza) timeout 8 bash -c "eza -1 / >/dev/null 2>&1" ;;
+        delta) timeout 8 bash -c "printf 'a\nb\n' | delta >/dev/null 2>&1" ;;
+        procs) timeout 8 bash -c "procs 1 >/dev/null 2>&1" ;;
+        zellij) timeout 8 bash -c "zellij setup --check >/dev/null 2>&1" ;;
+        duf) timeout 8 bash -c "duf >/dev/null 2>&1" ;;
+        openvscode-server) timeout 8 bash -c "openvscode-server --help >/dev/null 2>&1" ;;
+        ttyd) timeout 8 bash -c "ttyd --help >/dev/null 2>&1" ;;
+        bd) timeout 8 bash -c "bd --help >/dev/null 2>&1" ;;
+        claude)
+            local claude_bin
+            claude_bin=$(command -v claude 2>/dev/null || true)
+            [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && [ ! -L "$claude_bin" ] && timeout 8 bash -c '"$0" --help </dev/null >/dev/null 2>&1' "$claude_bin"
+            ;;
+        *) timeout 8 bash -c "$cmd --help >/dev/null 2>&1 || $cmd --version >/dev/null 2>&1" ;;
+    esac
+}
+
 # ============================================================================
 # Main check logic
 # ============================================================================
@@ -213,11 +279,12 @@ get_local_version() {
 echo ""
 echo "Checking WSL tool versions..."
 echo ""
-printf "%-12s %-10s %-12s %-12s %s\n" "Tool" "Installed" "Local" "Latest" "Status"
-printf "%-12s %-10s %-12s %-12s %s\n" "----" "---------" "-----" "------" "------"
+printf "%-12s %-10s %-12s %-12s %-8s %s\n" "Tool" "Installed" "Local" "Latest" "Smoke" "Status"
+printf "%-12s %-10s %-12s %-12s %-8s %s\n" "----" "---------" "-----" "------" "-----" "------"
 
 updates_available=0
 not_installed=0
+smoke_failed=0
 
 check_tool() {
     local name="$1"
@@ -227,10 +294,11 @@ check_tool() {
     local installed="✗"
     local local_ver="-"
     local status=""
+    local smoke="-"
 
-    if command -v "$cmd" &>/dev/null; then
+    if is_command_usable "$cmd"; then
         installed="✓"
-        local_ver=$(get_local_version "$cmd")
+        local_ver=$(get_local_version "$cmd" || true)
         [ -z "$local_ver" ] && local_ver="?"
     fi
 
@@ -245,12 +313,21 @@ check_tool() {
             status="${YELLOW}update available${NC}"
             updates_available=$((updates_available + 1))
         fi
+
+        if [ "$RUN_SMOKE" = "1" ]; then
+            if run_smoke_test "$cmd"; then
+                smoke="ok"
+            else
+                smoke="fail"
+                smoke_failed=$((smoke_failed + 1))
+            fi
+        fi
     else
         status="${DIM}not installed${NC}"
         not_installed=$((not_installed + 1))
     fi
 
-    printf "%-12s %-10s %-12s %-12s " "$name" "$installed" "$local_ver" "${latest:-?}"
+    printf "%-12s %-10s %-12s %-12s %-8s " "$name" "$installed" "$local_ver" "${latest:-?}" "$smoke"
     echo -e "$status"
 }
 
@@ -307,6 +384,9 @@ check_tool "claude" "claude" "$(get_latest_claude)"
 echo ""
 echo "----------------------------------------"
 echo -e "Total: ${not_installed} not installed, ${updates_available} updates available"
+if [ "$RUN_SMOKE" = "1" ]; then
+    echo -e "Smoke: ${smoke_failed} failed"
+fi
 
 if [ $updates_available -gt 0 ]; then
     echo -e "${YELLOW}Some updates are available.${NC}"

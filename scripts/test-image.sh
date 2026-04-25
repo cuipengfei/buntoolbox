@@ -12,10 +12,14 @@ set -e
 #   DOCKER_BIN      Override docker CLI (e.g. Windows Docker Desktop docker.exe)
 #   VERBOSE=1       Same as -v
 #   SKIP_PULL=1     Same as --no-pull
+#   PULL_TIMEOUT    Timeout in seconds for docker pull (default: 120)
+#   RUN_TIMEOUT     Timeout in seconds for docker run (default: 300)
 
 DOCKER_BIN="${DOCKER_BIN:-docker}"
 VERBOSE="${VERBOSE:-0}"
 SKIP_PULL="${SKIP_PULL:-0}"
+PULL_TIMEOUT="${PULL_TIMEOUT:-120}"
+RUN_TIMEOUT="${RUN_TIMEOUT:-300}"
 IMAGE_NAME="cuipengfei/buntoolbox:latest"
 
 while [ $# -gt 0 ]; do
@@ -45,7 +49,7 @@ echo "=========================================="
 if [ "$SKIP_PULL" = "1" ]; then
   echo "(skip pull)"
 else
-  "$DOCKER_BIN" pull "$IMAGE_NAME"
+  timeout "$PULL_TIMEOUT" "$DOCKER_BIN" pull "$IMAGE_NAME"
 fi
 echo ""
 
@@ -282,12 +286,12 @@ check "pip" "pip --version" "pip list --format=columns | head -1" "Package" "Lis
 check_ver "Node.js" "node --version | sed 's/^v//'" "node -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object" "EXPECT_NODE_VERSION"
 
 check_ver "Bun" "bun --version" "bun -e 'console.log(JSON.stringify({a:1}))'" '{"a":1}' "JSON stringify object" "EXPECT_BUN_VERSION"
-check "bunx" "bunx --version" "bunx --help | head -1" "Usage" "Show help"
+check "bunx" "bunx --version" "bunx cowsay 'ok bunx' 2>/dev/null" "ok bunx" "Run package via bunx"
 
 echo ""
 echo "=== Build Tools ==="
 print_header
-check_ver "Maven" "mvn --version | grep -oE 'Maven [0-9.]+' | cut -d' ' -f2" "mvn --version" "Apache Maven" "Verify installation" "EXPECT_MAVEN_VERSION"
+check_ver "Maven" "mvn --version | grep -oE 'Maven [0-9.]+' | cut -d' ' -f2" "printf '<project><modelVersion>4.0.0</modelVersion><groupId>x</groupId><artifactId>y</artifactId><version>1</version></project>' > /tmp/mvn-pom.xml && mvn -q -f /tmp/mvn-pom.xml validate && echo ok" "ok" "Run mvn validate" "EXPECT_MAVEN_VERSION"
 check_ver "Gradle" "gradle --version | grep -oE 'Gradle [0-9.]+' | cut -d' ' -f2" "gradle --version" "Gradle" "Verify installation" "EXPECT_GRADLE_VERSION"
 printf 'test:\n\t@echo ok\n' > /tmp/Makefile
 check "make" "make --version | grep -oE '[0-9.]+' | head -1" "make -f /tmp/Makefile test" "ok" "Run Makefile target"
@@ -302,9 +306,9 @@ check "pkg-config" "pkg-config --version" "pkg-config --modversion zlib 2>/dev/n
 echo ""
 echo "=== Package Managers ==="
 print_header
-check_ver "httpie" "http --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "http --help | head -1" "usage:" "Show help" "EXPECT_HTTPIE_VERSION"
-check_ver "uv" "uv --version" "uv venv --help | head -1" "Create" "Show venv help" "EXPECT_UV_VERSION"
-check "uvx" "uvx --version" "uvx --help | head -3" "Run a command" "Show help"
+check_ver "httpie" "http --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "http --offline GET https://example.com >/dev/null && echo ok" "ok" "Execute offline request" "EXPECT_HTTPIE_VERSION"
+check_ver "uv" "uv --version" "rm -rf /tmp/uv-smoke && uv venv /tmp/uv-smoke >/dev/null && [ -x /tmp/uv-smoke/bin/python ] && echo ok" "ok" "Create virtual env" "EXPECT_UV_VERSION"
+check "uvx" "uvx --version" "uvx --from pycowsay pycowsay ok-uvx 2>/dev/null" "ok-uvx" "Run package via uvx"
 check "pipx" "pipx --version" "pipx list" "pipx" "List packages"
 check "npm" "npm --version" "npm config list" "node" "Show config"
 
@@ -324,7 +328,7 @@ check "fd" "fd --version | grep -oE '[0-9.]+'" "fd --type f . /etc 2>/dev/null |
 check "fzf" "fzf --version | grep -oE '[0-9.]+' | head -1" "printf 'a\nb' | fzf --filter=a" "a" "Filter list"
 check "tmux" "tmux -V | grep -oE '[0-9.]+'" "tmux new-session -d -s test && tmux kill-session -t test && echo ok" "ok" "Create/kill session"
 check "direnv" "direnv version" "direnv stdlib | head -1" "#!/" "Dump stdlib"
-check "htop" "htop --version | grep -oE '[0-9.]+' | head -1" "htop --version" "htop" "Verify installation"
+check "htop" "htop --version | grep -oE '[0-9.]+' | head -1" "htop --help 2>&1 | head -1" "htop" "Show help"
 check "tree" "tree --version | grep -oE '[0-9.]+' | head -1" "tree -L 1 /tmp" "/tmp" "List directory tree"
 check "curl" "curl --version | grep -oE '[0-9.]+' | head -1" "curl -s --connect-timeout 1 http://localhost 2>&1 || echo ok" "ok" "Test HTTP client"
 check "wget" "wget --version | grep -oE '[0-9.]+' | head -1" "wget --spider --timeout=1 http://localhost 2>&1 || echo ok" "ok" "Test HTTP client"
@@ -336,24 +340,24 @@ check "less" "less --version | grep -oE '[0-9]+' | head -1" "echo test | less -F
 echo ""
 echo "=== Editors ==="
 print_header
-check "vim" "vim --version | grep -oE 'Vi IMproved [0-9.]+' | grep -oE '[0-9.]+'" "vim --version | head -1" "VIM" "Verify installation"
-check "nano" "nano --version | grep -oE '[0-9.]+' | head -1" "nano --version" "nano" "Verify installation"
+check "vim" "vim --version | grep -oE 'Vi IMproved [0-9.]+' | grep -oE '[0-9.]+'" "printf 'ok\ngo-vim\n' > /tmp/vim-smoke.txt && vim -es -u NONE -c 'wq' /tmp/vim-smoke.txt && tail -1 /tmp/vim-smoke.txt" "go-vim" "Edit file in ex mode"
+check "nano" "nano --version | grep -oE '[0-9.]+' | head -1" "nano --help 2>&1 | head -1" "Usage:" "Show help"
 check_ver "helix" "hx --version | grep -oE '[0-9.]+' | head -1" "hx --health 2>&1 | head -1" "Config" "Health check" "EXPECT_HELIX_VERSION"
-check_ver "openvscode-server" "openvscode-server --version | head -1" "openvscode-server --help 2>&1 | head -1" "OpenVSCode Server" "Show help" "EXPECT_OPENVSCODE_VERSION"
+check_ver "openvscode-server" "openvscode-server --version | head -1" "openvscode-server --help >/dev/null 2>&1 && echo ok" "ok" "Show help" "EXPECT_OPENVSCODE_VERSION"
 check_ver "ttyd" "ttyd --version | grep -oE '[0-9.]+' | head -1" "ttyd --version" "ttyd" "Verify installation" "EXPECT_TTYD_VERSION"
 
 echo ""
 echo "=== TUI Tools ==="
 print_header
 cd /tmp/test-repo 2>/dev/null || git init /tmp/test-repo >/dev/null
-check_ver "lazygit" "lazygit --version | grep -oE 'version=[0-9.]+' | cut -d= -f2" "lazygit --version" "version" "Verify installation" "EXPECT_LAZYGIT_VERSION"
+check_ver "lazygit" "lazygit --version | grep -oE 'version=[0-9.]+' | cut -d= -f2" "lazygit --help | head -1" "Usage:" "Show help" "EXPECT_LAZYGIT_VERSION"
 check "bat" "bat --version | grep -oE '[0-9.]+' | head -1" "printf 'line1\nline2' | bat -p --color=never" "line1" "Syntax highlight"
 check_ver "eza" "eza --version | grep -oE 'v[0-9.]+'" "eza -1 /" "bin" "List directory" "EXPECT_EZA_VERSION"
 check_ver "delta" "delta --version | grep -oE '[0-9.]+'" "echo -e 'a\nb' | delta" "a" "Format diff" "EXPECT_DELTA_VERSION"
-check "btop" "btop --version | grep -oE '[0-9.]+'" "btop --version" "btop" "Verify installation"
+check "btop" "btop --version | grep -oE '[0-9.]+'" "btop --help 2>&1 | head -1" "btop" "Show help"
 check_ver "procs" "procs --version | grep -oE '[0-9.]+' | head -1" "procs 1" "PID" "List processes" "EXPECT_PROCS_VERSION"
 check_ver "zellij" "zellij --version | grep -oE '[0-9.]+'" "zellij setup --check 2>&1 | head -1" "" "Check setup" "EXPECT_ZELLIJ_VERSION"
-check_ver "duf" "duf --version | grep -oE '[0-9.]+' | head -1" "duf --help" "Usage" "Show help" "EXPECT_DUF_VERSION"
+check_ver "duf" "duf --version | grep -oE '[0-9.]+' | head -1" "duf --json / >/dev/null 2>&1 && echo ok" "ok" "Emit JSON disk stats" "EXPECT_DUF_VERSION"
 
 echo ""
 echo "=== Shell Enhancements ==="
@@ -368,8 +372,8 @@ check "zshrc" "test -f /root/.zshrc && echo exists" "grep -q 'ZSH_THEME' /root/.
 echo ""
 echo "=== Other Tools ==="
 print_header
-check_ver "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help" "beads" "Show help" "EXPECT_BEADS_VERSION"
-check_ver "claude" "claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'" "claude --help </dev/null 2>&1 | sed -n '1p'" "Usage: claude" "Show help" "EXPECT_CLAUDE_CODE_VERSION"
+check_ver "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help | grep -qi 'beads' && echo ok" "ok" "Parse beads help output" "EXPECT_BEADS_VERSION"
+check_ver "claude" "claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'" "claude --help </dev/null 2>&1 | grep -q 'Usage: claude' && echo ok" "ok" "Parse CLI help output" "EXPECT_CLAUDE_CODE_VERSION"
 check "gpg" "gpg --version | grep -oE '[0-9.]+' | head -1" "echo test | gpg --symmetric --batch --passphrase test -o /tmp/test.gpg && echo ok" "ok" "Symmetric encrypt"
 check "lsb_release" "lsb_release -rs" "lsb_release -a 2>&1" "Ubuntu" "Show distro info"
 
@@ -380,10 +384,10 @@ check "ping" "ping -V 2>&1 | grep -oE '[0-9]+' | head -1" "ping -c 1 127.0.0.1 2
 check "ip" "ip -V 2>&1 | grep -oE 'iproute2-[0-9.]+' | cut -d- -f2" "ip addr" "lo:" "Show interfaces"
 check "ss" "ss -V 2>&1 | grep -oE 'iproute2-[0-9.]+' | cut -d- -f2" "ss -tuln 2>&1 | head -1" "Netid" "List sockets"
 check "dig" "dig -v 2>&1 | grep -oE '[0-9.]+' | head -1" "dig -h 2>&1 | head -1" "Usage" "Show help"
-check "nslookup" "nslookup -version 2>&1 | grep -oE '[0-9.]+' | head -1" "nslookup -version 2>&1" "nslookup" "Verify installation"
+check "nslookup" "nslookup -version 2>&1 | grep -oE '[0-9.]+' | head -1" "nslookup localhost >/dev/null 2>&1 && echo ok" "ok" "Resolve localhost"
 check "host" "host -V 2>&1 | grep -oE '[0-9.]+' | head -1" "host -h 2>&1 | head -1" "host" "Show help"
 check "nc" "dpkg -l netcat-openbsd | grep -oE '[0-9.]+' | head -1" "nc -h 2>&1" "usage" "Show help"
-check "traceroute" "traceroute --version 2>&1 | grep -oE '[0-9.]+'" "traceroute --version 2>&1" "traceroute" "Verify installation"
+check "traceroute" "traceroute --version 2>&1 | grep -oE '[0-9.]+'" "traceroute -n -m 1 127.0.0.1 2>&1 | grep -E '127\.0\.0\.1|\*'" "127.0.0.1" "Trace one hop localhost"
 check "socat" "socat -V 2>&1 | grep -oE '[0-9.]+\\.[0-9.]+' | head -1" "echo test | socat - -" "test" "Echo via socat"
 check "ssh" "ssh -V 2>&1 | grep -oE '[0-9.]+p[0-9]' | head -1" "ssh -V 2>&1" "OpenSSH" "Verify installation"
 check "scp" "ssh -V 2>&1 | grep -oE '[0-9.]+p[0-9]' | head -1" "scp 2>&1 | head -1" "usage" "Show help"
@@ -415,7 +419,7 @@ echo "=========================================="
 EOF
 )
 
-"$DOCKER_BIN" run --rm -t -e VERBOSE="$VERBOSE" $EXPECTED_VERSIONS "$IMAGE_NAME" bash -c "$TEST_SCRIPT"
+timeout "$RUN_TIMEOUT" "$DOCKER_BIN" run --rm -t -e VERBOSE="$VERBOSE" $EXPECTED_VERSIONS "$IMAGE_NAME" bash -c "$TEST_SCRIPT"
 
 echo ""
 echo "=========================================="

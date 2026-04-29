@@ -12,7 +12,7 @@ FROM ubuntu:26.04
 # =============================================================================
 ARG NODE_VERSION=24.15.0
 ARG JDK_PACKAGE_VERSION=25.0.3-3
-ARG GRADLE_VERSION=9.4.1
+ARG GRADLE_VERSION=9.5.0
 ARG MAVEN_VERSION=3.9.15
 ARG LAZYGIT_VERSION=0.61.1
 ARG HELIX_VERSION=25.07.1
@@ -29,7 +29,7 @@ ARG PROCS_VERSION=0.14.11
 ARG ZELLIJ_VERSION=0.44.1
 ARG OPENVSCODE_VERSION=1.109.5
 ARG TTYD_VERSION=1.7.7
-ARG CLAUDE_CODE_VERSION=2.1.112
+ARG CLAUDE_CODE_VERSION=2.1.116
 
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"

@@ -45,7 +45,7 @@ buntoolbox/
 - **双 Shell 支持**: 默认 bash，预装 zsh + oh-my-zsh + zsh-autosuggestions，用户可随时 `zsh` 切换。starship/zoxide/direnv/aliases 在两种 shell 中均已配置。
 - **全平台 VS Code 接入**: 预置 `openvscode-start.sh`，默认映射 3000 端口提供无验证、浏览器内的完整 VS Code 体验。
 - **浏览器终端接入**: 预置 `ttyd-start.sh`，默认映射 7681 端口提供轻量 web 终端，支持自定义 shell 和 Zellij。
-- **特定工具检测绕过**: `bd` 没有数据库时 `--version` 会异常退出（请用 `--help`）。
+- **bd 任务认领**: 用 `bd update <id> --claim`（原子写入 assignee + status=in_progress + started_at），优于手动 `--status in_progress`。**绝不**用 `bd edit`（开 $EDITOR，agent 无法交互），改字段一律 `bd update <id> --description/--title/--notes/--acceptance`。
 
 ## COMMANDS
 ```bash
@@ -56,10 +56,53 @@ buntoolbox/
 # 测试由 GitHub Actions 刚编译推送到 Docker Hub 的镜像
 ./scripts/test-image.sh
 
-# bd 任务认领与流转
-bd update bd-42 --status in_progress --json
-bd close bd-42 --reason "Done" --json
+# bd 任务认领与流转（v1.0.2 起推荐用法）
+bd update buntoolbox-xxx --claim --json          # 原子认领
+bd comments add buntoolbox-xxx "进展说明"          # 评论用 positional，不是 -m
+bd close buntoolbox-xxx --reason "Done" --json
+
+# 解析 bd JSON 输出时，必须 2>/dev/null 抛掉 .beads 权限警告
+bd show buntoolbox-xxx --json 2>/dev/null | jq .
 ```
+
+## BD WORKFLOW: Main ↔ Sub-Agent (MECE 5 切片)
+
+主代理与子代理造 bd issue 沟通时的最低线约定。完整调研记录见 bd issue `vn7 / dh2 / iuw / 1ms / s0l`。
+
+### 1. Handoff（主代理建 issue）
+- Issue body 五段模板：`# Task / # Scope / # Acceptance / # Constraints / # Executor notes`。
+- 长内容一律 `bd create "..." --body-file=/tmp/x.md`；**不要** inline `-d`（backtick / `!` / 引号会炒 shell）。
+- 需提示执行参数时用 `metadata.execution_*`：`agent_type / suggested_model / reasoning_effort / mode / parallel_group`；没依据不填。
+- `-p 0..4` 反映真实紧急度；issue_type 默认 `task`。
+
+### 2. 子代理执行契约
+1. `bd show <id> --json 2>/dev/null` 先读，不靠记忆。
+2. `bd update <id> --claim --json` 原子认领。
+3. **永不** `bd edit`（开 $EDITOR，agent 无法交互）。
+4. Acceptance 逐字当合同读。
+5. 不越界（不改 issue 未要求的文件）。
+
+### 3. 结果回写
+- **默认单条结构化评论**：`## Result / ## Evidence (表格) / ## Verification / ## Limits / ## Next action`。
+- 多评论**仅**用于：partial 中转 / 外部 blocker / 修正之前评论。
+- 每条 claim 挂证据（命令+输出 / `path:line` / URL / hash）；未验证部分明说。
+- `--reason` ≤120 字符；长报告进评论，不进 reason。
+
+### 4. 失败 / 部分完成恢复
+- crash → 主代理加 `FAILED:` 评论，然后 `bd reopen --reason "..."`（已关）或 `bd update --status open --assignee ""`（未关）。
+- 僵尸 claim → `bd stale --days 1 --status in_progress --json` 找出重置。
+- **不要** `bd close` 失败任务（会从 `bd ready` 隐藏）；保持 open + 失败评论。
+- `bd doctor`：先 `--dry-run` 或 `--fix -i`；**不要** `--fix --yes`（参考 issue #1062 历史损坏）。
+- 同一 issue 上 retry；scope 变了才开新 issue。
+
+### 5. 并行 / 依赖
+- **硬阻塞** → `bd dep add <child> <parent>`（真不能并行才用）。
+- **关联** → `bd dep relate <a> <b>`（see also，不阻塞）。
+- **层级** → `bd create --parent <epic-id>`；hierarchy ≠ 自动阻塞。
+- 子代理选活唯一入口是 `bd ready`，**不用** `bd list`。
+- `metadata.execution_parallel_group` 只是 orchestrator 提示，**不**是阻塞机制。
+- 多 agent 冲突解决 / merge 用 `bd merge-slot acquire/release` 串行化。
+- 只读 worker 加 `--readonly`；禁 auto-sync 加 `--sandbox`。
 
 ## WORKFLOW: 新增工具 / 版本升级（标准流程）
 
@@ -105,4 +148,4 @@ bd close bd-42 --reason "Done" --json
 ## NOTES
 - **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.15.0`），安装方式为官方 tarball。
 - **WSL 目录约定**: 本地二进制安装优先放到 `~/.local/bin`，避开 nvm/sdkman 初始化带来的额外复杂度。
-- **会话关闭协议**: 宣称完成工作前：`git status` -> `git add` -> `bd sync` -> `git commit` -> `bd sync` -> `git push`。
+- **会话关闭协议**: 宣称完成工作前：`git status` → `git add` → `git commit -m "<msg> (bd-xxx)"` → `git push`。提交信息**末尾带括号 issue ID**，方便 `bd doctor` / `bd orphans` 追溯；不存在 `bd sync` 命令，Dolt 同步靠 `bd hooks install`（一次性）或手动 `bd dolt commit`。

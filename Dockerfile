@@ -7,30 +7,6 @@
 
 FROM ubuntu:26.04
 
-# =============================================================================
-# Version Configuration (run scripts/check-versions.sh to check for updates)
-# =============================================================================
-ARG NODE_VERSION=24.15.0
-ARG JDK_PACKAGE_VERSION=25.0.3-3
-ARG GRADLE_VERSION=9.5.0
-ARG MAVEN_VERSION=3.9.15
-ARG LAZYGIT_VERSION=0.61.1
-ARG HELIX_VERSION=25.07.1
-ARG EZA_VERSION=0.23.4
-ARG DELTA_VERSION=0.19.2
-ARG ZOXIDE_VERSION=0.9.9
-ARG DUF_VERSION=0.9.1
-ARG BEADS_VERSION=1.0.3
-ARG BUN_VERSION=1.3.13
-ARG HTTPIE_VERSION=3.2.4
-ARG UV_VERSION=0.11.8
-ARG STARSHIP_VERSION=1.25.0
-ARG PROCS_VERSION=0.14.11
-ARG ZELLIJ_VERSION=0.44.1
-ARG OPENVSCODE_VERSION=1.109.5
-ARG TTYD_VERSION=1.7.7
-ARG CLAUDE_CODE_VERSION=2.1.116
-
 LABEL maintainer="buntoolbox"
 LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
 
@@ -102,6 +78,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # =============================================================================
 # 2. Azul Zulu JDK 25 headless (stable, large)
 # =============================================================================
+ARG JDK_PACKAGE_VERSION=25.0.3-3
 RUN curl -fsSL https://repos.azul.com/azul-repo.key | gpg --dearmor -o /usr/share/keyrings/azul.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/azul.gpg] https://repos.azul.com/zulu/deb stable main" > /etc/apt/sources.list.d/zulu.list \
     && apt-get update && apt-get install -y --no-install-recommends \
@@ -127,6 +104,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # =============================================================================
 # 4. Maven (manual install for version control)
 # =============================================================================
+ARG MAVEN_VERSION=3.9.15
 RUN curl -fsSL "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
     | tar -xz -C /opt \
     && ln -sf /opt/apache-maven-${MAVEN_VERSION} /opt/maven
@@ -145,6 +123,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | g
 # =============================================================================
 # 6. Node.js LTS (stable)
 # =============================================================================
+ARG NODE_VERSION=24.15.0
 RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
     | tar -xJ --strip-components=1 -C /usr/local
 
@@ -152,44 +131,53 @@ RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-l
 # 7. Stable TUI Tools (low change frequency)
 # =============================================================================
 # eza (ls replacement)
+ARG EZA_VERSION=0.23.4
 RUN curl -fsSL "https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz" \
     | tar -xz -C /usr/local/bin
 
 # delta (git diff)
+ARG DELTA_VERSION=0.19.2
 RUN curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz --strip-components=1 -C /usr/local/bin "delta-${DELTA_VERSION}-x86_64-unknown-linux-musl/delta"
 
 # zoxide (smart cd)
+ARG ZOXIDE_VERSION=0.9.9
 RUN curl -fsSL "https://github.com/ajeetdsouza/zoxide/releases/download/v${ZOXIDE_VERSION}/zoxide-${ZOXIDE_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C /usr/local/bin zoxide
 
 # duf (disk usage utility)
+ARG DUF_VERSION=0.9.1
 RUN curl -fsSL "https://github.com/muesli/duf/releases/download/v${DUF_VERSION}/duf_${DUF_VERSION}_linux_amd64.deb" -o /tmp/duf.deb \
     && apt-get install -y /tmp/duf.deb \
     && rm /tmp/duf.deb
 
 
 # helix editor
+ARG HELIX_VERSION=25.07.1
 RUN curl -fsSL "https://github.com/helix-editor/helix/releases/download/${HELIX_VERSION}/helix-${HELIX_VERSION}-x86_64-linux.tar.xz" \
     | tar -xJ -C /opt \
     && ln -sf /opt/helix-${HELIX_VERSION}-x86_64-linux/hx /usr/local/bin/hx
 ENV HELIX_RUNTIME=/opt/helix-${HELIX_VERSION}-x86_64-linux/runtime
 
 # starship prompt
+ARG STARSHIP_VERSION=1.25.0
 RUN curl -fsSL "https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-x86_64-unknown-linux-gnu.tar.gz" \
     | tar -xz -C /usr/local/bin
 
 # procs (ps replacement)
+ARG PROCS_VERSION=0.14.11
 RUN curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VERSION}/procs-v${PROCS_VERSION}-x86_64-linux.zip" \
     -o /tmp/procs.zip \
     && unzip -q /tmp/procs.zip -d /usr/local/bin \
     && rm /tmp/procs.zip
 
 # zellij (terminal multiplexer)
+ARG ZELLIJ_VERSION=0.44.1
 RUN curl -fsSL "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C /usr/local/bin
 
 # openvscode-server (VS Code in browser)
+ARG OPENVSCODE_VERSION=1.109.5
 RUN mkdir -p /opt \
     && curl -fsSL "https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-v${OPENVSCODE_VERSION}/openvscode-server-v${OPENVSCODE_VERSION}-linux-x64.tar.gz" \
     | tar -xz -C /opt \
@@ -199,6 +187,7 @@ COPY scripts/openvscode-start.sh /usr/local/bin/openvscode-start
 RUN chmod +x /usr/local/bin/openvscode-start
 
 # ttyd (web terminal)
+ARG TTYD_VERSION=1.7.7
 RUN curl -fsSL "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.x86_64" \
     -o /usr/local/bin/ttyd \
     && chmod +x /usr/local/bin/ttyd
@@ -210,6 +199,7 @@ RUN chmod +x /usr/local/bin/ttyd-start
 # 8. Medium-frequency tools (5 updates each)
 # =============================================================================
 # Gradle
+ARG GRADLE_VERSION=9.5.0
 RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip \
     && unzip -q /tmp/gradle.zip -d /opt \
     && ln -sf /opt/gradle-${GRADLE_VERSION} /opt/gradle \
@@ -219,6 +209,7 @@ ENV GRADLE_HOME=/opt/gradle
 ENV PATH="${GRADLE_HOME}/bin:${PATH}"
 
 # Bun
+ARG BUN_VERSION=1.3.13
 ENV BUN_INSTALL=/root/.bun
 RUN mkdir -p /root/.bun/bin \
     && curl -fsSL "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-x64.zip" -o /tmp/bun.zip \
@@ -230,6 +221,7 @@ RUN mkdir -p /root/.bun/bin \
 ENV PATH="${BUN_INSTALL}/bin:${PATH}"
 
 # lazygit
+ARG LAZYGIT_VERSION=0.61.1
 RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_linux_x86_64.tar.gz" \
     | tar -xz -C /usr/local/bin lazygit
 
@@ -237,9 +229,11 @@ RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LA
 # 9. High-frequency tools (9 updates)
 # =============================================================================
 # HTTPie (Python-based CLI HTTP client)
+ARG HTTPIE_VERSION=3.2.4
 RUN python3 -m pip install --no-cache-dir --break-system-packages "httpie==${HTTPIE_VERSION}"
 
 # uv/uvx
+ARG UV_VERSION=0.11.8
 ENV UV_INSTALL_DIR=/root/.local/bin
 RUN mkdir -p /root/.local/bin \
     && curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
@@ -252,12 +246,14 @@ RUN uv tool install pipx && pipx ensurepath \
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Claude Code (AI coding assistant)
+ARG CLAUDE_CODE_VERSION=2.1.116
 RUN curl -fsSL https://claude.ai/install.sh | bash -s ${CLAUDE_CODE_VERSION}
 
 # =============================================================================
 # 10. beads - most frequent (13 updates)
 # =============================================================================
 # beads (bd - issue tracker) - moved to last due to frequent releases
+ARG BEADS_VERSION=1.0.3
 RUN curl -fsSL "https://github.com/gastownhall/beads/releases/download/v${BEADS_VERSION}/beads_${BEADS_VERSION}_linux_amd64.tar.gz" \
     | tar -xz -C /usr/local/bin bd
 

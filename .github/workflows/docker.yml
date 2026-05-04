@@ -10,6 +10,15 @@ on:
     branches:
       - master
   workflow_dispatch:
+    inputs:
+      verification_tag:
+        description: 'Optional extra Docker tag to publish, e.g. m001-baseline'
+        required: false
+        type: string
+      beads_version_override:
+        description: 'Optional BEADS_VERSION build arg override for layer-delta verification'
+        required: false
+        type: string
 
 env:
   REGISTRY: docker.io
@@ -49,6 +58,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ inputs.verification_tag }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.verification_tag != '' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -58,5 +68,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ github.event_name == 'workflow_dispatch' && inputs.beads_version_override != '' && format('BEADS_VERSION={0}', inputs.beads_version_override) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

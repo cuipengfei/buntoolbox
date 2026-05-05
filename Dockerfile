@@ -172,7 +172,7 @@ RUN curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VERS
     && rm /tmp/procs.zip
 
 # zellij (terminal multiplexer)
-ARG ZELLIJ_VERSION=0.44.1
+ARG ZELLIJ_VERSION=0.44.2
 RUN curl -fsSL "https://github.com/zellij-org/zellij/releases/download/v${ZELLIJ_VERSION}/zellij-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C /usr/local/bin
 

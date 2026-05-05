@@ -246,7 +246,7 @@ RUN uv tool install pipx && pipx ensurepath \
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Claude Code (AI coding assistant)
-ARG CLAUDE_CODE_VERSION=2.1.116
+ARG CLAUDE_CODE_VERSION=2.1.119
 RUN curl -fsSL https://claude.ai/install.sh | bash -s ${CLAUDE_CODE_VERSION}
 
 # =============================================================================

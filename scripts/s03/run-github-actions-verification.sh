@@ -11,6 +11,9 @@ INCREMENT_BEADS_VERSION="${INCREMENT_BEADS_VERSION:-1.0.2}"
 REPORT="${REPORT:-.gsd/milestones/M001/slices/S03/S03-VERIFICATION.md}"
 TMPDIR="${TMPDIR:-/tmp}"
 RUN_CLEAN_PULL="${RUN_CLEAN_PULL:-0}"
+USE_EXISTING_TAGS="${USE_EXISTING_TAGS:-0}"
+BASELINE_RUN_ID="${BASELINE_RUN_ID:-}"
+INCREMENT_RUN_ID="${INCREMENT_RUN_ID:-}"
 
 need() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -63,15 +66,47 @@ run_workflow() {
 fetch_manifest() {
   local tag="$1"
   local out="$2"
-  local token
+  local token raw child_digest
   token=$(curl -fsSL 'https://auth.docker.io/token?service=registry.docker.io&scope=repository:cuipengfei/buntoolbox:pull' \
     | python3 -c 'import sys,json; print(json.load(sys.stdin)["token"])')
+
+  raw="${out%.json}.raw.json"
+  curl -fsSL \
+    -H "Authorization: Bearer ${token}" \
+    -H 'Accept: application/vnd.docker.distribution.manifest.v2+json' \
+    -H 'Accept: application/vnd.docker.distribution.manifest.list.v2+json' \
+    -H 'Accept: application/vnd.oci.image.index.v1+json' \
+    -H 'Accept: application/vnd.oci.image.manifest.v1+json' \
+    "https://registry-1.docker.io/v2/cuipengfei/buntoolbox/manifests/${tag}" \
+    > "$raw"
+
+  child_digest=$(python3 - "$raw" <<'PY'
+import json
+import sys
+with open(sys.argv[1], 'r', encoding='utf-8') as f:
+    data = json.load(f)
+if data.get('layers'):
+    print('')
+    raise SystemExit(0)
+for manifest in data.get('manifests', []):
+    platform = manifest.get('platform') or {}
+    if platform.get('os') == 'linux' and platform.get('architecture') == 'amd64':
+        print(manifest['digest'])
+        raise SystemExit(0)
+raise SystemExit('No linux/amd64 child manifest found')
+PY
+)
+
+  if [[ -z "$child_digest" ]]; then
+    cp "$raw" "$out"
+    return
+  fi
 
   curl -fsSL \
     -H "Authorization: Bearer ${token}" \
     -H 'Accept: application/vnd.docker.distribution.manifest.v2+json' \
     -H 'Accept: application/vnd.oci.image.manifest.v1+json' \
-    "https://registry-1.docker.io/v2/cuipengfei/buntoolbox/manifests/${tag}" \
+    "https://registry-1.docker.io/v2/cuipengfei/buntoolbox/manifests/${child_digest}" \
     > "$out"
 }
 
@@ -212,8 +247,13 @@ PY
 
 main() {
   local baseline_run increment_run
-  baseline_run=$(run_workflow "$BASELINE_TAG" "$BASELINE_BEADS_VERSION")
-  increment_run=$(run_workflow "$INCREMENT_TAG" "$INCREMENT_BEADS_VERSION")
+  if [[ "$USE_EXISTING_TAGS" == "1" ]]; then
+    baseline_run="${BASELINE_RUN_ID:-existing-tag}"
+    increment_run="${INCREMENT_RUN_ID:-existing-tag}"
+  else
+    baseline_run=$(run_workflow "$BASELINE_TAG" "$BASELINE_BEADS_VERSION")
+    increment_run=$(run_workflow "$INCREMENT_TAG" "$INCREMENT_BEADS_VERSION")
+  fi
 
   local baseline_manifest="${TMPDIR}/s03-manifest-${BASELINE_TAG}.json"
   local increment_manifest="${TMPDIR}/s03-manifest-${INCREMENT_TAG}.json"

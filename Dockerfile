@@ -160,7 +160,7 @@ RUN curl -fsSL "https://github.com/helix-editor/helix/releases/download/${HELIX_
 ENV HELIX_RUNTIME=/opt/helix-${HELIX_VERSION}-x86_64-linux/runtime
 
 # starship prompt
-ARG STARSHIP_VERSION=1.25.0
+ARG STARSHIP_VERSION=1.25.1
 RUN curl -fsSL "https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-x86_64-unknown-linux-gnu.tar.gz" \
     | tar -xz -C /usr/local/bin
 

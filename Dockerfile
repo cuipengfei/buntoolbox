@@ -233,7 +233,7 @@ ARG HTTPIE_VERSION=3.2.4
 RUN python3 -m pip install --no-cache-dir --break-system-packages "httpie==${HTTPIE_VERSION}"
 
 # uv/uvx
-ARG UV_VERSION=0.11.9
+ARG UV_VERSION=0.11.10
 ENV UV_INSTALL_DIR=/root/.local/bin
 RUN mkdir -p /root/.local/bin \
     && curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \

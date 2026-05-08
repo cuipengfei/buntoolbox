@@ -305,6 +305,6 @@
     ]
   },
   "outputStyle": "natural-writing:natural-writing",
-  "spinnerTipsEnabled": false,
+  "spinnerTipsEnabled": true,
   "prefersReducedMotion": false
 }

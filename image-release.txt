@@ -80,3 +80,4 @@
 - gpg
 - bd (beads issue tracker)
 - claude
+- rtk (Rust Token Killer - LLM token optimizer)

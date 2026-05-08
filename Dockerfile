@@ -226,14 +226,14 @@ RUN curl -fsSL "https://github.com/jesseduffield/lazygit/releases/download/v${LA
     | tar -xz -C /usr/local/bin lazygit
 
 # =============================================================================
-# 9. High-frequency tools (9 updates)
+# 9. High-frequency tools (10 updates)
 # =============================================================================
 # HTTPie (Python-based CLI HTTP client)
 ARG HTTPIE_VERSION=3.2.4
 RUN python3 -m pip install --no-cache-dir --break-system-packages "httpie==${HTTPIE_VERSION}"
 
 # uv/uvx
-ARG UV_VERSION=0.11.10
+ARG UV_VERSION=0.11.11
 ENV UV_INSTALL_DIR=/root/.local/bin
 RUN mkdir -p /root/.local/bin \
     && curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" \
@@ -246,9 +246,13 @@ RUN uv tool install pipx && pipx ensurepath \
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Claude Code (AI coding assistant)
-ARG CLAUDE_CODE_VERSION=2.1.119
+ARG CLAUDE_CODE_VERSION=2.1.123
 RUN curl -fsSL https://claude.ai/install.sh | bash -s ${CLAUDE_CODE_VERSION}
 
+# rtk (Rust Token Killer - LLM token optimizer)
+ARG RTK_VERSION=0.39.0
+RUN curl -fsSL "https://github.com/rtk-ai/rtk/releases/download/v${RTK_VERSION}/rtk-${RTK_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+    | tar -xz -C /usr/local/bin
 # =============================================================================
 # 10. beads - most frequent (13 updates)
 # =============================================================================

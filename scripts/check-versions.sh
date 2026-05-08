@@ -242,6 +242,7 @@ echo ""
 echo "=== 其他工具 ==="
 check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release gastownhall/beads)" "gastownhall/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
 check_version "claude" "$(get_current_version CLAUDE_CODE_VERSION)" "$(get_latest_claude)" "" ""
+check_version "rtk" "$(get_current_version RTK_VERSION)" "$(get_latest_github_release rtk-ai/rtk)" "rtk-ai/rtk" "rtk-$(get_current_version RTK_VERSION)-x86_64-unknown-linux-musl.tar.gz"
 
 echo ""
 if [ $updates_available -eq 1 ]; then

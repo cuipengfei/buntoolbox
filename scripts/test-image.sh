@@ -102,6 +102,7 @@ EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_DUF_VERSION=$(get_dockerfile_ver
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_OPENVSCODE_VERSION=$(get_dockerfile_version OPENVSCODE_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_TTYD_VERSION=$(get_dockerfile_version TTYD_VERSION)"
 EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_CLAUDE_CODE_VERSION=$(get_dockerfile_version CLAUDE_CODE_VERSION)"
+EXPECTED_VERSIONS="$EXPECTED_VERSIONS -e EXPECT_RTK_VERSION=$(get_dockerfile_version RTK_VERSION)"
 
 # Create test script
 TEST_SCRIPT=$(cat << 'EOF'
@@ -374,6 +375,7 @@ echo "=== Other Tools ==="
 print_header
 check_ver "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help | grep -qi 'beads' && echo ok" "ok" "Parse beads help output" "EXPECT_BEADS_VERSION"
 check_ver "claude" "claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'" "claude --help </dev/null 2>&1 | grep -q 'Usage: claude' && echo ok" "ok" "Parse CLI help output" "EXPECT_CLAUDE_CODE_VERSION"
+check_ver "rtk" "rtk --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "rtk gain 2>&1 | grep -q 'RTK\|Token\|saved' && echo ok" "ok" "Verify rtk gain stats" "EXPECT_RTK_VERSION"
 check "gpg" "gpg --version | grep -oE '[0-9.]+' | head -1" "echo test | gpg --symmetric --batch --passphrase test -o /tmp/test.gpg && echo ok" "ok" "Symmetric encrypt"
 check "lsb_release" "lsb_release -rs" "lsb_release -a 2>&1" "Ubuntu" "Show distro info"
 

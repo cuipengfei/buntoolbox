@@ -263,6 +263,7 @@ run_smoke_test() {
         openvscode-server) timeout 8 bash -c "openvscode-server --help >/dev/null 2>&1" ;;
         ttyd) timeout 8 bash -c "ttyd --help >/dev/null 2>&1" ;;
         bd) timeout 8 bash -c "bd --help >/dev/null 2>&1" ;;
+        rtk) timeout 8 bash -c "rtk --help >/dev/null 2>&1" ;;
         claude)
             local claude_bin
             claude_bin=$(command -v claude 2>/dev/null || true)
@@ -380,6 +381,7 @@ echo ""
 echo "=== 其他工具 ==="
 check_tool "beads (bd)" "bd" "$(get_latest_github_release gastownhall/beads)"
 check_tool "claude" "claude" "$(get_latest_claude)"
+check_tool "rtk" "rtk" "$(get_latest_github_release rtk-ai/rtk)"
 
 echo ""
 echo "----------------------------------------"

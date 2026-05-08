@@ -251,7 +251,7 @@ RUN curl -fsSL https://claude.ai/install.sh | bash -s ${CLAUDE_CODE_VERSION}
 
 # rtk (Rust Token Killer - LLM token optimizer)
 ARG RTK_VERSION=0.39.0
-RUN curl -fsSL "https://github.com/rtk-ai/rtk/releases/download/v${RTK_VERSION}/rtk-${RTK_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+RUN curl -fsSL "https://github.com/rtk-ai/rtk/releases/download/v${RTK_VERSION}/rtk-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C /usr/local/bin
 # =============================================================================
 # 10. beads - most frequent (13 updates)

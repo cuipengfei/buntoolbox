@@ -1,16 +1,19 @@
-# Buntoolbox i3 - browser-delivered desktop variant
-# Base: LinuxServer Webtop Ubuntu i3
-# This variant is intentionally a sibling of the root Dockerfile, not a child of
-# buntoolbox:latest, so that the existing terminal/TUI image remains unchanged.
+# syntax=docker/dockerfile:1
 
-FROM lscr.io/linuxserver/webtop:ubuntu-i3
+ARG WEBTOP_BASE=lscr.io/linuxserver/webtop:ubuntu-i3
+FROM ${WEBTOP_BASE}
+
+ARG WEBTOP_BASE=lscr.io/linuxserver/webtop:ubuntu-i3
+ARG BUNTOOLBOX_VARIANT=i3
+ARG BUNTOOLBOX_DESKTOP_NAME=i3
+ARG BUNTOOLBOX_DESKTOP_DESCRIPTION="i3 desktop"
 
 LABEL maintainer="buntoolbox"
-LABEL description="Buntoolbox browser-delivered i3 desktop variant"
-LABEL org.opencontainers.image.title="buntoolbox:i3"
-LABEL org.opencontainers.image.description="Buntoolbox toolchain on LinuxServer Webtop Ubuntu i3 with root-first desktop defaults"
-LABEL org.opencontainers.image.base.name="lscr.io/linuxserver/webtop:ubuntu-i3"
-LABEL org.buntoolbox.variant="i3"
+LABEL description="Buntoolbox browser-delivered ${BUNTOOLBOX_DESKTOP_NAME} desktop variant"
+LABEL org.opencontainers.image.title="buntoolbox:${BUNTOOLBOX_VARIANT}"
+LABEL org.opencontainers.image.description="Buntoolbox toolchain on LinuxServer Webtop Ubuntu ${BUNTOOLBOX_DESKTOP_NAME} with root-first desktop defaults"
+LABEL org.opencontainers.image.base.name="${WEBTOP_BASE}"
+LABEL org.buntoolbox.variant="${BUNTOOLBOX_VARIANT}"
 LABEL org.buntoolbox.webtop.root-first="true"
 LABEL org.buntoolbox.webtop.http-port="3200"
 LABEL org.buntoolbox.webtop.https-port="3201"
@@ -41,7 +44,7 @@ RUN chmod +x \
     && /opt/buntoolbox/webtop/root-first-patch.sh \
     && /opt/buntoolbox/webtop/root-first-guard.sh
 
-# Dockerfile.i3 consumes the same shared layer scripts as the root Dockerfile,
+# Webtop variants consume the same shared layer scripts as the root Dockerfile,
 # with point-of-use COPY/RUN boundaries to preserve cache granularity.
 COPY docker/layers/01-apt-base-packages.sh /tmp/buntoolbox-layers/01-apt-base-packages.sh
 RUN bash /tmp/buntoolbox-layers/01-apt-base-packages.sh
@@ -146,8 +149,8 @@ RUN bash /tmp/buntoolbox-layers/12-image-release.sh
 RUN set -eux; \
     mkdir -p /root /workspace; \
     printf '%s\n' \
-      'buntoolbox_variant=i3' \
-      'buntoolbox_base=lscr.io/linuxserver/webtop:ubuntu-i3' \
+      "buntoolbox_variant=${BUNTOOLBOX_VARIANT}" \
+      "buntoolbox_base=${WEBTOP_BASE}" \
       'buntoolbox_root_first=true' \
       'buntoolbox_webtop_http_port=3200' \
       'buntoolbox_webtop_https_port=3201' \

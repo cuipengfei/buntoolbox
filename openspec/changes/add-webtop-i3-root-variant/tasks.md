@@ -18,7 +18,7 @@
 
 ## 3. 新增 i3 image 构建路径
 
-- [x] 3.1 新增 `Dockerfile.i3` 或等价 i3 build entry，base 使用 `lscr.io/linuxserver/webtop:ubuntu-i3` 或明确记录的 digest/tag。
+- [x] 3.1 新增 `Dockerfile.i3` 或等价 i3 build entry；后续已收敛为 `docker/webtop/Dockerfile` shared entry，base 通过 `WEBTOP_BASE=lscr.io/linuxserver/webtop:ubuntu-i3` 或明确记录的 digest/tag 指定。
 - [x] 3.2 在 i3 build 中设置 root-first env：`HOME=/root`、`CUSTOM_USER=root`、`CUSTOM_PORT=3200`、`CUSTOM_HTTPS_PORT=3201`，并按第 1.5 项处理 `CUSTOM_WS_PORT`。
 - [x] 3.3 保留 webtop `/init` 作为默认 GUI stack entrypoint，除非第 1.6 项明确另一个默认 runtime model。
 - [x] 3.4 在 i3 build 中复用共享 buntoolbox toolchain layers，不复制完整根 Dockerfile 工具安装内容。
@@ -46,7 +46,7 @@
 ## 6. GitHub Actions 发布路径
 
 - [x] 6.1 保留现有 latest build/tag/push 路径，确保 i3 build 不会发布 `latest`。
-- [x] 6.2 新增 i3 build metadata 和 build-push step/job，使用 `Dockerfile.i3`。
+- [x] 6.2 新增 i3 build metadata 和 build-push step/job，使用 `Dockerfile.i3` 或后续 shared `docker/webtop/Dockerfile` 等价入口。
 - [x] 6.3 PR 中 latest/i3 均 build/test 但不 push。
 - [x] 6.4 default branch push 发布 `latest` 和 `i3`。
 - [x] 6.5 release tag 发布 `X.Y.Z`、`X.Y`、`i3-X.Y.Z`、`i3-X.Y`。

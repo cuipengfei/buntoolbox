@@ -17,8 +17,9 @@
 
 - `cuipengfei/buntoolbox:latest` 是既有 terminal/TUI image，面向 shell、SSH、OpenVSCode Server 和 ttyd 等开发工作流。
 - `cuipengfei/buntoolbox:i3` 是 browser-delivered i3 desktop image，面向需要在浏览器里打开 i3 desktop GUI 的场景。
-- `latest` 不包含 GUI/i3 desktop stack；需要浏览器桌面时请显式选择 `i3` tag。
-- 两个 image 共享 buntoolbox toolchain 版本来源和测试逻辑；`i3` 在 common tool checks 之外额外运行 webtop/root-first runtime checks。
+- `cuipengfei/buntoolbox:kde` 是 browser-delivered KDE desktop image，面向需要更接近传统桌面/Windows-like GUI 的场景。
+- `latest` 不包含 GUI desktop stack；需要浏览器桌面时请显式选择 `i3` 或 `kde` tag。
+- 三个 image 共享 buntoolbox toolchain 版本来源和测试逻辑；`i3` / `kde` 在 common tool checks 之外额外运行 webtop/root-first runtime checks。
 
 ### Basic Usage
 
@@ -60,7 +61,38 @@ Security note: treat the i3 desktop endpoint as local-only unless you add approp
 
 Root-first note: `buntoolbox:i3` is designed for normal interactive workflows as `root` with `HOME=/root`. The LinuxServer/Webtop base may still contain an `abc` account for upstream compatibility, but `abc` is not the normal buntoolbox i3 desktop workflow.
 
-Validation note: CI builds and tests both variants before publishing. `latest` runs the common toolchain smoke tests; `i3` runs the same common tests plus checks for webtop on `3200`, OpenVSCode availability on `3000`, root-first session behavior, and absence of critical `abc` GUI processes.
+Validation note: CI builds and tests all variants before publishing. `latest` runs the common toolchain smoke tests; browser desktop variants run the same common tests plus checks for webtop on `3200`, OpenVSCode availability on `3000`, root-first session behavior, and absence of critical `abc` GUI processes.
+
+### Browser KDE Desktop Variant
+
+`cuipengfei/buntoolbox:kde` 提供 browser-delivered KDE desktop，并保留与 i3 variant 相同的 buntoolbox 端口语义：
+
+- `3200`: webtop GUI HTTP endpoint
+- `3201`: webtop GUI HTTPS endpoint
+- `3000`: OpenVSCode Server (`openvscode-start` 默认端口)
+- `7681`: ttyd web terminal
+
+```powershell
+docker run -d --name mydev-kde `
+  --shm-size=1gb `
+  -p 3200:3200 `
+  -p 3201:3201 `
+  -p 3000:3000 `
+  -p 7681:7681 `
+  -v ${PWD}:/workspace `
+  cuipengfei/buntoolbox:kde
+
+# Browser desktop GUI:
+#   http://localhost:3200
+#   https://localhost:3201
+# Optional developer services inside the same container:
+#   openvscode-start   # serves on http://localhost:3000 by default
+#   ttyd-start         # serves on http://localhost:7681 by default
+```
+
+KDE runtime note: this image is based on LinuxServer Webtop Ubuntu KDE, which is Wayland-only upstream. It is heavier than `i3`, but offers a more traditional desktop feel.
+
+Security and root-first notes are the same as `i3`: keep desktop endpoints local-only unless protected, and expect normal interactive workflows to run as `root` with `HOME=/root`.
 
 ### Windows (WSL Disabled) - Project Development
 

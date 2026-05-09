@@ -294,13 +294,3 @@ echo ""
 echo "=== Image Metadata ==="
 print_header
 check "image-release" "cat /etc/image-release | grep -c '^-' || echo 0" "cat /etc/image-release | grep -q 'buntoolbox' && echo ok" "ok" "Buntoolbox info present"
-
-if [ "${BUNTOOLBOX_TEST_VARIANT:-latest}" != "i3" ]; then
-    echo ""
-    echo "=========================================="
-    echo "Results: $PASSED passed, $FAILED failed"
-    echo "BUNTOOLBOX_TESTS_COMPLETED"
-    echo "=========================================="
-
-    [ $FAILED -eq 0 ]
-fi

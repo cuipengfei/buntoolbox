@@ -19,12 +19,20 @@ on:
         description: 'Optional extra i3-image Docker tag to publish; must start with i3-, e.g. i3-m001-baseline'
         required: false
         type: string
+      kde_verification_tag:
+        description: 'Optional extra kde-image Docker tag to publish; must start with kde-, e.g. kde-m001-baseline'
+        required: false
+        type: string
       latest_beads_version_override:
         description: 'Optional latest-image BEADS_VERSION build arg override for layer-delta verification'
         required: false
         type: string
       i3_beads_version_override:
         description: 'Optional i3-image BEADS_VERSION build arg override for layer-delta verification'
+        required: false
+        type: string
+      kde_beads_version_override:
+        description: 'Optional kde-image BEADS_VERSION build arg override for layer-delta verification'
         required: false
         type: string
 
@@ -55,6 +63,7 @@ jobs:
           set -euo pipefail
           latest_tag='${{ inputs.latest_verification_tag }}'
           i3_tag='${{ inputs.i3_verification_tag }}'
+          kde_tag='${{ inputs.kde_verification_tag }}'
 
           if [[ -n "$latest_tag" && ! "$latest_tag" =~ ^latest-[A-Za-z0-9_.-]+$ ]]; then
             echo "latest_verification_tag must be empty or start with latest-" >&2
@@ -63,6 +72,11 @@ jobs:
 
           if [[ -n "$i3_tag" && ! "$i3_tag" =~ ^i3-[A-Za-z0-9_.-]+$ ]]; then
             echo "i3_verification_tag must be empty or start with i3-" >&2
+            exit 1
+          fi
+
+          if [[ -n "$kde_tag" && ! "$kde_tag" =~ ^kde-[A-Za-z0-9_.-]+$ ]]; then
+            echo "kde_verification_tag must be empty or start with kde-" >&2
             exit 1
           fi
 
@@ -130,12 +144,17 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile.i3
+          file: ./docker/webtop/Dockerfile
           platforms: linux/amd64
           load: true
           tags: buntoolbox:ci-i3-test
           labels: ${{ steps.i3_meta.outputs.labels }}
-          build-args: ${{ github.event_name == 'workflow_dispatch' && inputs.i3_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.i3_beads_version_override) || '' }}
+          build-args: |
+            WEBTOP_BASE=lscr.io/linuxserver/webtop:ubuntu-i3
+            BUNTOOLBOX_VARIANT=i3
+            BUNTOOLBOX_DESKTOP_NAME=i3
+            BUNTOOLBOX_DESKTOP_DESCRIPTION=i3 desktop
+            ${{ github.event_name == 'workflow_dispatch' && inputs.i3_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.i3_beads_version_override) || '' }}
           cache-from: type=gha,scope=i3
           cache-to: type=gha,mode=max,scope=i3
 
@@ -163,11 +182,89 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./Dockerfile.i3
+          file: ./docker/webtop/Dockerfile
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.i3_meta.outputs.tags }}
           labels: ${{ steps.i3_meta.outputs.labels }}
-          build-args: ${{ github.event_name == 'workflow_dispatch' && inputs.i3_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.i3_beads_version_override) || '' }}
+          build-args: |
+            WEBTOP_BASE=lscr.io/linuxserver/webtop:ubuntu-i3
+            BUNTOOLBOX_VARIANT=i3
+            BUNTOOLBOX_DESKTOP_NAME=i3
+            BUNTOOLBOX_DESKTOP_DESCRIPTION=i3 desktop
+            ${{ github.event_name == 'workflow_dispatch' && inputs.i3_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.i3_beads_version_override) || '' }}
           cache-from: type=gha,scope=i3
           cache-to: type=gha,mode=max,scope=i3
+
+      - name: Extract KDE metadata (tags, labels)
+        id: kde_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern=kde-{{version}}
+            type=semver,pattern=kde-{{major}}.{{minor}}
+            type=raw,value=kde,enable={{is_default_branch}}
+            type=raw,value=${{ inputs.kde_verification_tag }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.kde_verification_tag != '' }}
+
+      - name: Build KDE Docker image for tests
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/webtop/Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: buntoolbox:ci-kde-test
+          labels: ${{ steps.kde_meta.outputs.labels }}
+          build-args: |
+            WEBTOP_BASE=lscr.io/linuxserver/webtop:ubuntu-kde
+            BUNTOOLBOX_VARIANT=kde
+            BUNTOOLBOX_DESKTOP_NAME=KDE
+            BUNTOOLBOX_DESKTOP_DESCRIPTION=KDE desktop
+            ${{ github.event_name == 'workflow_dispatch' && inputs.kde_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.kde_beads_version_override) || '' }}
+          cache-from: type=gha,scope=kde
+          cache-to: type=gha,mode=max,scope=kde
+
+      - name: Record KDE base provenance
+        run: |
+          set -euo pipefail
+          docker image inspect buntoolbox:ci-kde-test \
+            --format 'buntoolbox_kde_image={{.Id}}'
+          docker image inspect buntoolbox:ci-kde-test \
+            --format 'buntoolbox_kde_base={{ index .Config.Labels "org.opencontainers.image.base.name" }}'
+          docker buildx imagetools inspect lscr.io/linuxserver/webtop:ubuntu-kde
+          docker run --rm --entrypoint /bin/bash buntoolbox:ci-kde-test -lc '
+            set -euo pipefail
+            printf "os_release="
+            grep -E "^(PRETTY_NAME|VERSION_ID|VERSION_CODENAME)=" /etc/os-release || true
+            if [[ -r /etc/image-release ]]; then
+              printf "webtop_build_version="
+              grep -E "^build_version=" /etc/image-release | head -1 || true
+              printf "webtop_revision="
+              grep -E "^(revision|org.opencontainers.image.revision)=" /etc/image-release | head -1 || true
+              grep -Ein "build|version|revision|webtop|linuxserver|selkies|base" /etc/image-release || true
+            else
+              printf "webtop_image_release=MISSING\n"
+            fi
+          '
+
+      - name: Test KDE Docker image
+        run: bash ./scripts/test-image.sh --no-pull --variant kde buntoolbox:ci-kde-test
+
+      - name: Build and push KDE Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/webtop/Dockerfile
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.kde_meta.outputs.tags }}
+          labels: ${{ steps.kde_meta.outputs.labels }}
+          build-args: |
+            WEBTOP_BASE=lscr.io/linuxserver/webtop:ubuntu-kde
+            BUNTOOLBOX_VARIANT=kde
+            BUNTOOLBOX_DESKTOP_NAME=KDE
+            BUNTOOLBOX_DESKTOP_DESCRIPTION=KDE desktop
+            ${{ github.event_name == 'workflow_dispatch' && inputs.kde_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.kde_beads_version_override) || '' }}
+          cache-from: type=gha,scope=kde
+          cache-to: type=gha,mode=max,scope=kde

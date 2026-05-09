@@ -15,6 +15,7 @@ Buntoolbox is designed for Windows users with WSL disabled by enterprise policy.
 | Zellij | ✅ Yes | - |
 | ttyd | ✅ Yes | 7681 |
 | Webtop i3 desktop | ✅ Yes, in `cuipengfei/buntoolbox:i3` | 3200 / 3201 |
+| Webtop KDE desktop | ✅ Yes, in `cuipengfei/buntoolbox:kde` | 3200 / 3201 |
 
 ## Solution Options
 
@@ -81,9 +82,9 @@ docker run -d -p 3000:3000 cuipengfei/buntoolbox:latest \
 
 Access: http://localhost:3000
 
-### Option C: Webtop i3 Desktop (`buntoolbox:i3`)
+### Option C: Webtop Desktop (`buntoolbox:i3` / `buntoolbox:kde`)
 
-Run a browser-delivered Linux i3 desktop while keeping buntoolbox's normal developer ports intact.
+Run a browser-delivered Linux desktop while keeping buntoolbox's normal developer ports intact. Choose `i3` for the lighter tiling desktop or `kde` for a more traditional desktop feel.
 
 ```powershell
 docker run -d --name mydev-i3 `
@@ -96,17 +97,31 @@ docker run -d --name mydev-i3 `
   cuipengfei/buntoolbox:i3
 ```
 
+KDE uses the same port contract:
+
+```powershell
+docker run -d --name mydev-kde `
+  --shm-size=1gb `
+  -p 3200:3200 `
+  -p 3201:3201 `
+  -p 3000:3000 `
+  -p 7681:7681 `
+  -v ${PWD}:/workspace `
+  cuipengfei/buntoolbox:kde
+```
+
 Access:
 
-- Webtop i3 desktop HTTP: http://localhost:3200
-- Webtop i3 desktop HTTPS: https://localhost:3201
+- Webtop desktop HTTP: http://localhost:3200
+- Webtop desktop HTTPS: https://localhost:3201
 - Optional OpenVSCode Server after running `openvscode-start`: http://localhost:3000
 - Optional ttyd after running `ttyd-start`: http://localhost:7681
 
 Notes:
 
-- `buntoolbox:latest` remains the terminal/TUI image and does not include the GUI/i3 desktop stack.
-- `buntoolbox:i3` is root-first for normal interactive workflows: `whoami=root`, `HOME=/root`.
+- `buntoolbox:latest` remains the terminal/TUI image and does not include GUI desktop stacks.
+- `buntoolbox:i3` and `buntoolbox:kde` are root-first for normal interactive workflows: `whoami=root`, `HOME=/root`.
+- `buntoolbox:kde` is based on LinuxServer Webtop Ubuntu KDE, which is Wayland-only upstream and heavier than i3.
 - The LinuxServer/Webtop base may still contain an `abc` account for upstream compatibility, but critical GUI/runtime processes are tested not to run as `abc`.
 - Keep `--shm-size=1gb` or an equivalent shared-memory setting for browser/desktop workloads.
 - Treat `3200`/`3201`, `3000`, and `7681` as local-only unless protected by auth, firewall, TLS/proxy controls, or another access-control layer.

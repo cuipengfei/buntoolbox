@@ -28,7 +28,7 @@
 ## Impact
 
 - 影响 Docker 构建结构：根 `Dockerfile` 需要逐步迁移到共享 layer scripts，但 `buntoolbox:latest` 行为必须保持兼容。
-- 新增 `Dockerfile.i3` 或等价 i3 构建入口，新增 webtop root-first patch、preflight/guard 脚本和 i3 variant runtime 配置。
+- 新增 `Dockerfile.i3` 或等价 i3 构建入口；后续 KDE 扩展已将 Webtop GUI variants 收敛到 shared `docker/webtop/Dockerfile`，并保留 webtop root-first patch、preflight/guard 脚本和 i3 variant runtime 配置。
 - 影响脚本：`scripts/check-versions.sh`、`scripts/check-wsl-versions.sh`、`scripts/test-image.sh` 需要读取新的共享版本来源，并复用 common checks。
 - 影响 CI：`.github/workflows/docker.yml` 需要增加 i3 build/tag/push 路径，但不能让 i3 发布 `latest`。
 - 影响文档：`README.md`、`image-release.txt` 或 variant-specific metadata 需要说明两个 image 的选择、端口和安全注意项。

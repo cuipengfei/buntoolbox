@@ -5,8 +5,8 @@
 **Branch:** master
 
 ## OVERVIEW
-Buntoolbox 是一个多语言开发环境 Docker 镜像（基于 Ubuntu 26.04 LTS），专为受企业安全策略限制 WSL 的 Windows 用户而设计。当前发布两个 sibling variants：`cuipengfei/buntoolbox:latest` 是 terminal/TUI/dev image（约 2.64GB），`cuipengfei/buntoolbox:i3` 是基于 LinuxServer Webtop i3 的 browser desktop image（约 5.10GB）。
-**核心技术栈**: Azul Zulu JDK 25 headless, Node.js 24 + Bun, Python 3.14 + uv/pipx, Maven, Gradle, OpenVSCode Server, ttyd, Dockerfile 编排与 Bash 基础设施脚本；`i3` variant 额外包含 Webtop/Selkies/i3 browser GUI stack。
+Buntoolbox 是一个多语言开发环境 Docker 镜像（基于 Ubuntu 26.04 LTS），专为受企业安全策略限制 WSL 的 Windows 用户而设计。当前发布三个 sibling variants：`cuipengfei/buntoolbox:latest` 是 terminal/TUI/dev image；`cuipengfei/buntoolbox:i3` 是基于 LinuxServer Webtop i3 的 browser desktop image；`cuipengfei/buntoolbox:kde` 是基于 LinuxServer Webtop KDE 的 browser desktop image。
+**核心技术栈**: Azul Zulu JDK 25 headless, Node.js 24 + Bun, Python 3.14 + uv/pipx, Maven, Gradle, OpenVSCode Server, ttyd, Dockerfile 编排与 Bash 基础设施脚本；`i3` / `kde` variants 额外包含 Webtop/Selkies/browser GUI stack。
 
 ## STRUCTURE
 ```
@@ -15,16 +15,16 @@ buntoolbox/
 ├── docker/           # 共享 layer scripts/env snippets 与 webtop root-first patch
 ├── scripts/          # 用于版本检查与自动化测试镜像的 bash 工具箱
 ├── Dockerfile        # latest 分层构建入口
-├── Dockerfile.i3     # i3/browser desktop 分层构建入口
+├── docker/webtop/Dockerfile # i3/kde browser desktop 共享分层构建入口
 └── README.md         # 面向用户的使用文档与接入指南
 ```
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| 工具版本更新 | `docker/layers/*.env`, `scripts/` | 修改共享版本 snippet 后，必须先运行 `check-versions.sh` 与 `check-wsl-versions.sh`；`latest` 与 `i3` 共用这些版本来源。 |
-| CI 镜像构建 | `.github/workflows/` | Push / PR / v* tag 触发构建。PR build/test 但不 push；default branch 发布 `latest` 和 `i3`；release tag 发布 semver 与 `i3-*` tags。 |
-| 验证构建结果 | `scripts/test-image.sh`| CI 完成后验证镜像。`latest` 当前 83 项 common checks；`i3` 当前 89 项（common checks + 6 项 webtop/root-first runtime checks）。 |
+| 工具版本更新 | `docker/layers/*.env`, `scripts/` | 修改共享版本 snippet 后，必须先运行 `check-versions.sh` 与 `check-wsl-versions.sh`；`latest`、`i3` 与 `kde` 共用这些版本来源。 |
+| CI 镜像构建 | `.github/workflows/` | Push / PR / v* tag 触发构建。PR build/test 但不 push；default branch 发布 `latest`、`i3` 和 `kde`；release tag 发布 semver、`i3-*` 与 `kde-*` tags。 |
+| 验证构建结果 | `scripts/test-image.sh`| CI 完成后验证镜像。`latest` 跑 common checks；`i3` / `kde` 跑 common checks + shared webtop/root-first runtime checks + desktop-specific checks。 |
 | 本地开发环境 | `scripts/check-wsl-versions.sh` | 检查并保证本地 WSL 工具与上游版本一致。 |
 | Issue 追踪 | bd (beads) 命令行工具 | `bd ready`, `bd create`, `bd close`。不要用 Markdown TODO 列表。 |
 
@@ -33,7 +33,7 @@ buntoolbox/
 - **Bash 脚本**: 全局变量 `UPPER_SNAKE_CASE`，函数 `snake_case`。所有脚本首部添加 `set -e` 并提供用法注释。
 - **Dockerfile 构建分层**: 按**更新频率**排序（稳定的系统基础与运行时在前，频繁更新的高层工具与配置在后）。
 - **清理与缓存**: `apt-get` 等清理操作必须与安装命令放在同一 `RUN` 指令中完成。
-- **版本声明**: 工具版本以 `docker/layers/*.env` 作为共享来源，`Dockerfile` 与 `Dockerfile.i3` 在 point-of-use COPY/RUN 边界读取，避免两个 variants 漂移。
+- **版本声明**: 工具版本以 `docker/layers/*.env` 作为共享来源，`Dockerfile` 与 `docker/webtop/Dockerfile` 在 point-of-use COPY/RUN 边界读取，避免 variants 漂移。
 
 ## ANTI-PATTERNS (THIS PROJECT)
 - ❌ **Markdown TODOs**: 禁用 Markdown 格式的任务列表，必须使用 `bd` 命令进行任务管理追踪。
@@ -47,7 +47,7 @@ buntoolbox/
 - **双 Shell 支持**: 默认 bash，预装 zsh + oh-my-zsh + zsh-autosuggestions，用户可随时 `zsh` 切换。starship/zoxide/direnv/aliases 在两种 shell 中均已配置。
 - **全平台 VS Code 接入**: 预置 `openvscode-start.sh`，默认映射 3000 端口提供无验证、浏览器内的完整 VS Code 体验。
 - **浏览器终端接入**: 预置 `ttyd-start.sh`，默认映射 7681 端口提供轻量 web 终端，支持自定义 shell 和 Zellij。
-- **浏览器桌面接入**: `cuipengfei/buntoolbox:i3` 预置 Webtop i3 browser desktop。Webtop HTTP/HTTPS 为 3200/3201；3000 保留给 `openvscode-start`；正常交互 root-first，`HOME=/root`。
+- **浏览器桌面接入**: `cuipengfei/buntoolbox:i3` / `cuipengfei/buntoolbox:kde` 预置 Webtop browser desktop。Webtop HTTP/HTTPS 为 3200/3201；3000 保留给 `openvscode-start`；正常交互 root-first，`HOME=/root`。
 - **bd 任务认领**: 用 `bd update <id> --claim`（原子写入 assignee + status=in_progress + started_at），优于手动 `--status in_progress`。**绝不**用 `bd edit`（开 $EDITOR，agent 无法交互），改字段一律 `bd update <id> --description/--title/--notes/--acceptance`。
 
 ## COMMANDS
@@ -59,6 +59,7 @@ buntoolbox/
 # 测试由 GitHub Actions 刚编译推送到 Docker Hub 的镜像
 ./scripts/test-image.sh
 ./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3
+./scripts/test-image.sh --variant kde --image cuipengfei/buntoolbox:kde
 
 # bd 任务认领与流转（v1.0.2 起推荐用法）
 bd update buntoolbox-xxx --claim --json          # 原子认领
@@ -122,16 +123,16 @@ bd show buntoolbox-xxx --json 2>/dev/null | jq .
 
 3. **落地到 Dockerfile**
    - 按构建分层原则放置到合适层（稳定层在前，高频更新层在后）。
-   - 版本号优先落在 `docker/layers/*.env` 共享 snippet；安装逻辑优先落在 `docker/layers/*.sh` 共享脚本，供 `Dockerfile` 和 `Dockerfile.i3` 复用。
-   - 如果新增工具只适用于某个 variant，必须在 Dockerfile、README 和测试里明确写出 variant 边界；默认假设工具应同时出现在 `latest` 与 `i3`。
+   - 版本号优先落在 `docker/layers/*.env` 共享 snippet；安装逻辑优先落在 `docker/layers/*.sh` 共享脚本，供 `Dockerfile` 和 `docker/webtop/Dockerfile` 复用。
+   - 如果新增工具只适用于某个 variant，必须在 Dockerfile、README 和测试里明确写出 variant 边界；默认假设工具应同时出现在 `latest`、`i3` 与 `kde`。
    - 安装与清理放在同一 `RUN` 中，避免镜像层膨胀。
-   - 如需 shell 自动加载，在最终配置区写入对应 profile/bashrc 初始化，并确认 root-first `i3` variant 中 `HOME=/root` 的配置路径一致。
+   - 如需 shell 自动加载，在最终配置区写入对应 profile/bashrc 初始化，并确认 root-first Webtop variants 中 `HOME=/root` 的配置路径一致。
 
 4. **同步更新脚本（必须）**
    - `scripts/check-versions.sh`：支持新工具/新版本对齐检查。
    - `scripts/check-wsl-versions.sh`：支持本机环境同源检查。
-   - `scripts/test-image.sh` / `scripts/lib/test-common-tools.sh`：新增或更新 common tool 验证项，使 `latest` 与 `i3` 默认都覆盖该工具。
-   - 如果工具只属于 `i3` runtime，则放入 `scripts/lib/test-i3-runtime.sh` 或等价 variant-specific checks，并说明为什么不属于 common checks。
+   - `scripts/test-image.sh` / `scripts/lib/test-common-tools.sh`：新增或更新 common tool 验证项，使 `latest`、`i3` 与 `kde` 默认都覆盖该工具。
+   - 如果工具只属于 Webtop runtime，则优先放入 `scripts/lib/test-webtop-runtime.sh`；如果只属于某个 desktop，则放入 `scripts/lib/test-i3-runtime.sh` 或 `scripts/lib/test-kde-runtime.sh`，并说明为什么不属于 common checks。
 
 5. **同步更新文档与元信息（必须）**
    - `README.md`（用户可见工具清单）
@@ -142,8 +143,8 @@ bd show buntoolbox-xxx --json 2>/dev/null | jq .
 6. **执行验证**
    - 脚本语法：`bash -n scripts/*.sh`（至少覆盖改动脚本）。
    - 版本检查：`./scripts/check-versions.sh`、`./scripts/check-wsl-versions.sh`。
-   - 镜像验证：`./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest` 和 `./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3`。
-   - 说明：若远端 `latest` / `i3` 尚未由 CI 重建，`test-image.sh` 可能出现预期版本差异，属正常现象；此时先让 GitHub Actions 构建并发布两个 tags，再跑 post-push image tests。
+   - 镜像验证：`./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest`、`./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3` 和 `./scripts/test-image.sh --variant kde --image cuipengfei/buntoolbox:kde`。
+   - 说明：若远端 `latest` / `i3` / `kde` 尚未由 CI 重建，`test-image.sh` 可能出现预期版本差异，属正常现象；此时先让 GitHub Actions 构建并发布三个 tags，再跑 post-push image tests。
 
 7. **提交与推送**
    - `git add` 相关文件 → `git commit` → `git push`。

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Test Docker image (pull from Docker Hub by default, no local build)
-# Usage: ./scripts/test-image.sh [--variant latest|i3] [--image image_name] [image_name]
+# Usage: ./scripts/test-image.sh [--variant latest|i3|kde] [--image image_name] [image_name]
 # Examples:
 #   ./scripts/test-image.sh
 #   ./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3
@@ -10,7 +10,7 @@ set -e
 # Options:
 #   -v, --verbose          Print full command outputs for each check
 #   --no-pull              Skip docker pull (useful when offline if image already exists)
-#   --variant latest|i3    Select variant checks to run (default: latest)
+#   --variant latest|i3|kde    Select variant checks to run (default: latest)
 #   -i, --image IMAGE      Docker image to test
 #   -h, --help             Show usage
 # Env:
@@ -35,13 +35,14 @@ Usage: ./scripts/test-image.sh [options] [image_name]
 Options:
   -v, --verbose          Print full command outputs for each check
   --no-pull              Skip docker pull
-  --variant latest|i3    Select variant checks to run (default: latest)
+  --variant latest|i3|kde    Select variant checks to run (default: latest)
   -i, --image IMAGE      Docker image to test
   -h, --help             Show this help
 
 Defaults:
   latest variant tests cuipengfei/buntoolbox:latest
   i3 variant tests cuipengfei/buntoolbox:i3 unless --image or positional image is provided
+  kde variant tests cuipengfei/buntoolbox:kde unless --image or positional image is provided
 EOF
 }
 
@@ -61,7 +62,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         --variant)
-            [ $# -ge 2 ] || die "--variant requires latest or i3"
+            [ $# -ge 2 ] || die "--variant requires latest, i3, or kde"
             VARIANT="$2"
             shift 2
             ;;
@@ -91,7 +92,7 @@ done
 [ $# -eq 0 ] || die "unexpected extra arguments: $*"
 
 case "$VARIANT" in
-    latest|i3)
+    latest|i3|kde)
         ;;
     *)
         die "unsupported variant: $VARIANT"
@@ -102,8 +103,16 @@ if [ -z "$IMAGE_NAME" ]; then
     case "$VARIANT" in
         latest) IMAGE_NAME="cuipengfei/buntoolbox:latest" ;;
         i3) IMAGE_NAME="cuipengfei/buntoolbox:i3" ;;
+        kde) IMAGE_NAME="cuipengfei/buntoolbox:kde" ;;
     esac
 fi
+
+is_webtop_variant() {
+    case "$VARIANT" in
+        i3|kde) return 0 ;;
+        *) return 1 ;;
+    esac
+}
 
 TEST_IMAGE_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="$TEST_IMAGE_SCRIPT_DIR/lib"
@@ -159,7 +168,7 @@ echo "Testing image: $IMAGE_NAME"
 echo "Variant: $VARIANT"
 echo "=========================================="
 
-if [ "$VARIANT" = "i3" ]; then
+if is_webtop_variant; then
     GUARD_FIXTURE_OUTPUT="$(mktemp)"
     GUARD_ROOT="$(mktemp -d)"
     mkdir -p "$GUARD_ROOT/etc/s6-overlay/s6-rc.d/fatal"
@@ -185,18 +194,36 @@ fi
 
 CONTAINER_SCRIPT=$(cat "$LIB_DIR/test-common-tools.sh")
 
+if is_webtop_variant; then
+    CONTAINER_SCRIPT="$CONTAINER_SCRIPT
+$(cat "$LIB_DIR/test-webtop-runtime.sh")"
+fi
+
 if [ "$VARIANT" = "i3" ]; then
     CONTAINER_SCRIPT="$CONTAINER_SCRIPT
 $(cat "$LIB_DIR/test-i3-runtime.sh")"
 fi
 
-if [ "$VARIANT" = "i3" ]; then
-    CONTAINER_NAME="buntoolbox-i3-test-$$"
-    cleanup_i3_container() {
+if [ "$VARIANT" = "kde" ]; then
+    CONTAINER_SCRIPT="$CONTAINER_SCRIPT
+$(cat "$LIB_DIR/test-kde-runtime.sh")"
+fi
+
+CONTAINER_SCRIPT="$CONTAINER_SCRIPT"'
+echo ""
+echo "=========================================="
+echo "Results: $PASSED passed, $FAILED failed"
+echo "BUNTOOLBOX_TESTS_COMPLETED"
+echo "=========================================="
+[ $FAILED -eq 0 ]'
+
+if is_webtop_variant; then
+    CONTAINER_NAME="buntoolbox-${VARIANT}-test-$$"
+    cleanup_webtop_container() {
         "$DOCKER_BIN" rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
     }
 
-    trap cleanup_i3_container EXIT
+    trap cleanup_webtop_container EXIT
 
     timeout "$RUN_TIMEOUT" "$DOCKER_BIN" run -d --name "$CONTAINER_NAME" \
         -e VERBOSE="$VERBOSE" \

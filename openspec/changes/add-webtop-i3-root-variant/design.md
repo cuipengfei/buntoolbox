@@ -44,7 +44,7 @@
 
 ### Decision: 复用 webtop GUI stack，但 patch 掉正常 `abc` runtime path
 
-`Dockerfile.i3` 保留 webtop `/init` 与 s6 service topology，但在构建阶段应用 root-first patch。Patch 目标不是删除 `abc` account，而是禁止正常 GUI/runtime 路径使用 `abc`。
+Webtop GUI build entry 保留 webtop `/init` 与 s6 service topology，但在构建阶段应用 root-first patch。最初 i3 方案使用 `Dockerfile.i3`；后续 KDE 扩展已收敛为 shared `docker/webtop/Dockerfile`，通过 build args 区分 i3/kde。Patch 目标不是删除 `abc` account，而是禁止正常 GUI/runtime 路径使用 `abc`。
 
 Patch 语义包括：
 
@@ -140,7 +140,7 @@ scripts/lib/test-i3-runtime.sh
 
 1. 先实现 OpenSpec artifacts 和 Gate 0 evidence 采集任务，不直接动 Docker build 逻辑。
 2. 抽取共享 layer scripts/env snippets，并让现有 `Dockerfile` 使用它们；验证 `latest` 默认行为和测试入口保持兼容。
-3. 新增 `Dockerfile.i3`，从 `lscr.io/linuxserver/webtop:ubuntu-i3` 开始，加入 root-first preflight/patch/guard，再复用共享 toolchain layers。
+3. 新增 `Dockerfile.i3` 或等价 Webtop build entry；后续采用 shared `docker/webtop/Dockerfile`，从 `lscr.io/linuxserver/webtop:ubuntu-i3` 开始，加入 root-first preflight/patch/guard，再复用共享 toolchain layers。
 4. 重构测试脚本，抽取 common tool checks，增加 i3 runtime checks。
 5. 更新 GitHub Actions，增加 i3 build/tag/push 路径。
 6. 更新 README 和 image metadata。
@@ -151,7 +151,7 @@ scripts/lib/test-i3-runtime.sh
 - 如果 shared layer 抽取导致 `latest` 行为漂移，回退共享层迁移，保留原 `Dockerfile` 路径，先只保留 proposal/design 记录。
 - 如果 root-first patch 在 upstream webtop 上失败，guard 应 fail build；不要发布 `i3` tag。
 - 如果 i3 CI 失败，必须保证 latest build/tag/push 路径仍可独立通过。
-- 删除 i3 variant 的回退范围应限于 `Dockerfile.i3`、`docker/webtop/`、i3-specific CI tag/path 和 i3 docs，不影响 `latest`。
+- 删除 i3 variant 的回退范围应限于 Webtop build entry、`docker/webtop/`、i3-specific CI tag/path 和 i3 docs，不影响 `latest`；如果 shared `docker/webtop/Dockerfile` 同时服务 KDE，回退时必须避免误删 KDE 仍需的共享入口。
 
 ## Resolved Decisions / Remaining Questions
 

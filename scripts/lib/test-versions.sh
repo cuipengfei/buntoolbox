@@ -25,7 +25,7 @@ get_layer_env_version() {
             lhs == key {
                 value = $0
                 sub("^[^=]*=", "", value)
-                gsub(/^\"|\"$/, "", value)
+                gsub(/^"|"$/, "", value)
                 if (value ~ /^\$\{[A-Za-z_][A-Za-z0-9_]*:-[^}]+\}$/) {
                     sub(/^\$\{[A-Za-z_][A-Za-z0-9_]*:-/, "", value)
                     sub(/\}$/, "", value)

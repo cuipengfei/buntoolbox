@@ -47,19 +47,19 @@
 
 - [x] 6.1 保留现有 latest build/tag/push 路径，确保 i3 build 不会发布 `latest`。
 - [x] 6.2 新增 i3 build metadata 和 build-push step/job，使用 `Dockerfile.i3` 或后续 shared `docker/webtop/Dockerfile` 等价入口。
-- [x] 6.3 PR 中 latest/i3 均 build/test 但不 push。
-- [x] 6.4 default branch push 发布 `latest` 和 `i3`。
-- [x] 6.5 release tag 发布 `X.Y.Z`、`X.Y`、`i3-X.Y.Z`、`i3-X.Y`。
-- [x] 6.6 workflow_dispatch 的 verification tag / override 行为如需支持 i3，必须明确命名，避免 verification tag 误覆盖 latest 或 i3。
+- [x] 6.3 PR 中 `latest`、`i3` 均 build/test 但不 push；后续 KDE 扩展要求 `latest`、`i3`、`kde` 均 build/test 但不 push。
+- [x] 6.4 default branch push 发布 `latest` 和 `i3`；后续 KDE 扩展还发布 `kde`。
+- [x] 6.5 release tag 发布 `X.Y.Z`、`X.Y`、`i3-X.Y.Z`、`i3-X.Y`；后续 KDE 扩展还发布 `kde-X.Y.Z`、`kde-X.Y`。
+- [x] 6.6 workflow_dispatch 的 verification tag / override 行为如需支持 GUI variants，必须明确命名，避免 verification tag 误覆盖 latest、i3 或 kde。
 
 ## 7. 文档与 metadata
 
-- [x] 7.1 更新 README，明确 `cuipengfei/buntoolbox:latest` 是既有 terminal/TUI image，`cuipengfei/buntoolbox:i3` 是 browser-delivered i3 desktop image。
+- [x] 7.1 更新 README，明确 `cuipengfei/buntoolbox:latest` 是既有 terminal/TUI image，`cuipengfei/buntoolbox:i3` 是 browser-delivered i3 desktop image；后续 KDE 扩展还需明确 `cuipengfei/buntoolbox:kde` 是 browser-delivered KDE desktop image。
 - [x] 7.2 README i3 示例必须包含 `3200` webtop GUI 端口、`3000` openvscode 端口、`7681` ttyd 端口，并说明 `3201` HTTPS 行为。
 - [x] 7.3 README i3 示例必须包含 desktop runtime 注意项，例如 `--shm-size=1gb` 或等价说明。
 - [x] 7.4 README 必须包含 local-only/security warning，说明 browser desktop endpoint 不应无保护直接暴露到公网。
-- [x] 7.5 更新 `image-release.txt` 或 variant-specific metadata，确保 latest 与 i3 的身份、base 和端口语义可追踪。
-- [x] 7.6 文档必须说明 `buntoolbox:i3` 是 root-first；`abc` account 即使存在也不是正常交互 workflow。
+- [x] 7.5 更新 `image-release.txt` 或 variant-specific metadata，确保 latest、i3 与 kde 的身份、base 和端口语义可追踪。
+- [x] 7.6 文档必须说明 `buntoolbox:i3` / `buntoolbox:kde` 是 root-first；`abc` account 即使存在也不是正常交互 workflow。
 
 ## 8. 验证与收口
 
@@ -67,5 +67,5 @@
 - [x] 8.2 运行 shell syntax checks，至少覆盖 `scripts/` 与新增 `docker/` 下所有 shell scripts。
 - [x] 8.3 验证 `scripts/test-image.sh` 默认路径仍指向 latest，并能运行 common checks。
 - [x] 8.4 验证 i3 variant test path 能运行 common checks 和 i3 runtime checks。
-- [x] 8.5 验证 CI 配置语义：PR 不 push，default branch 发布 latest/i3，release tag 发布 semver/i3-semver。
+- [x] 8.5 验证 CI 配置语义：PR 不 push，default branch 发布 `latest`、`i3`、`kde`，release tag 发布 semver、i3-semver、kde-semver。
 - [x] 8.6 记录无法在本地完成的重型验证，例如 Docker build/push，交由 GitHub Actions 或用户批准后的环境执行。

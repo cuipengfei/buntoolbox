@@ -59,15 +59,15 @@ The i3 image SHALL reserve `3000` for `openvscode-start` / openvscode-server and
 - **WHEN** `openvscode-start` is launched inside `buntoolbox:i3` without overriding its default port
 - **THEN** openvscode-server SHALL be able to listen and serve on `3000`.
 
-### Requirement: Latest and i3 share common toolchain installation logic
-The system SHALL share buntoolbox toolchain installation logic between `latest` and `i3` without duplicating a full Dockerfile worth of tool install steps.
+### Requirement: Image variants share common toolchain installation logic
+The system SHALL share buntoolbox toolchain installation logic between `latest`, `i3`, and `kde` without duplicating a full Dockerfile worth of tool install steps.
 
 #### Scenario: Tool version changes are single-source
 - **WHEN** a tool version such as Node, Bun, JDK, uv, or beads is updated
-- **THEN** the version SHALL be changed in a shared source rather than independently editing both latest and i3 Dockerfiles.
+- **THEN** the version SHALL be changed in a shared source rather than independently editing per-variant Dockerfiles.
 
-#### Scenario: Tool install logic is reused by both variants
-- **WHEN** both image variants are built
+#### Scenario: Tool install logic is reused by all variants
+- **WHEN** any image variant is built
 - **THEN** common buntoolbox tools SHALL be installed through shared layer scripts or an equivalent shared mechanism.
 
 ### Requirement: Shared layers preserve cache granularity
@@ -78,30 +78,34 @@ The shared build structure SHALL preserve Docker layer granularity comparable to
 - **THEN** earlier heavy layers such as JDK, Python, and Node SHALL NOT be invalidated solely because of a monolithic shared install script.
 
 ### Requirement: Image tests share common checks and isolate variant checks
-The image test scripts SHALL share common buntoolbox tool checks across `latest` and `i3`, while keeping i3-specific runtime checks separate.
+The image test scripts SHALL share common buntoolbox tool checks across `latest`, `i3`, and `kde`, while keeping Webtop common runtime checks and desktop-specific runtime checks separate.
 
-#### Scenario: Common tools are tested in both variants
-- **WHEN** `scripts/test-image.sh` tests either `latest` or `i3`
+#### Scenario: Common tools are tested in all variants
+- **WHEN** `scripts/test-image.sh` tests `latest`, `i3`, or `kde`
 - **THEN** it SHALL run the shared common tool checks for buntoolbox tools.
 
 #### Scenario: i3 variant runs GUI runtime checks
 - **WHEN** `scripts/test-image.sh` is run with the i3 variant mode
 - **THEN** it SHALL additionally verify root-first runtime behavior, webtop port behavior, and absence of critical `abc` GUI processes.
 
-### Requirement: CI publishes latest and i3 independently
-The CI workflow SHALL publish `latest` and `i3` tags independently without allowing the i3 build to publish `latest`.
+#### Scenario: KDE variant runs GUI runtime checks
+- **WHEN** `scripts/test-image.sh` is run with the kde variant mode
+- **THEN** it SHALL additionally verify shared Webtop root-first runtime behavior, webtop port behavior, KDE session markers, and absence of critical `abc` GUI processes.
 
-#### Scenario: Master push publishes both tracks
+### Requirement: CI publishes latest and GUI variants independently
+The CI workflow SHALL publish `latest`, `i3`, and `kde` tags independently without allowing GUI variant builds to publish `latest`.
+
+#### Scenario: Master push publishes all tracks
 - **WHEN** a push to the default branch passes CI
-- **THEN** CI SHALL publish the existing `latest` tag and the new `i3` tag.
+- **THEN** CI SHALL publish the existing `latest` tag plus the `i3` and `kde` GUI variant tags.
 
-#### Scenario: Release tag publishes semver and i3-semver tags
+#### Scenario: Release tag publishes semver and GUI-semver tags
 - **WHEN** a `vX.Y.Z` tag is built
-- **THEN** CI SHALL publish `X.Y.Z`, `X.Y`, `i3-X.Y.Z`, and `i3-X.Y` tags.
+- **THEN** CI SHALL publish `X.Y.Z`, `X.Y`, `i3-X.Y.Z`, `i3-X.Y`, `kde-X.Y.Z`, and `kde-X.Y` tags.
 
 #### Scenario: Pull requests do not push images
 - **WHEN** CI runs for a pull request
-- **THEN** both image paths MAY build and test, but SHALL NOT push image tags.
+- **THEN** all image paths MAY build and test, but SHALL NOT push image tags.
 
 ### Requirement: Documentation explains variant selection and safety
 The README and image metadata SHALL explain the difference between `latest` and `i3`, including ports, root-first behavior, desktop runtime flags, and safety boundaries.

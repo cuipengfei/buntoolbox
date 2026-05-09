@@ -152,8 +152,8 @@ bd show buntoolbox-xxx --json 2>/dev/null | jq .
 
 8. **CI 收口**
    - `gh run watch` 监视 GitHub Actions 构建进度。
-   - CI 必须先测试 `buntoolbox:ci-latest-test` 和 `buntoolbox:ci-i3-test`，再发布 `latest` 与 `i3`。
-   - 构建完成后分别执行 `./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest` 与 `./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3`，确保两个发布后镜像版本与功能检查全绿。
+   - CI 必须先测试 `buntoolbox:ci-latest-test`、`buntoolbox:ci-i3-test` 和 `buntoolbox:ci-kde-test`，再发布 `latest`、`i3` 与 `kde`。
+   - 构建完成后分别执行 `./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest`、`./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3` 与 `./scripts/test-image.sh --variant kde --image cuipengfei/buntoolbox:kde`，确保三个发布后镜像版本与功能检查全绿。
 
 ## NOTES
 - **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.15.0`），安装方式为官方 tarball。

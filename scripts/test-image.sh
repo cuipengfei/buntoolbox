@@ -164,7 +164,7 @@ if [ "$VARIANT" = "i3" ]; then
     GUARD_ROOT="$(mktemp -d)"
     mkdir -p "$GUARD_ROOT/etc/s6-overlay/s6-rc.d/fatal"
     cp "$TEST_IMAGE_SCRIPT_DIR/fixtures/root-first-guard/fatal-abc-runtime.sh" "$GUARD_ROOT/etc/s6-overlay/s6-rc.d/fatal/run"
-    if BUNTOOLBOX_WEBTOP_ROOT="$GUARD_ROOT" "$TEST_IMAGE_SCRIPT_DIR/../docker/webtop/root-first-guard.sh" >"$GUARD_FIXTURE_OUTPUT" 2>&1; then
+    if BUNTOOLBOX_WEBTOP_ROOT="$GUARD_ROOT" bash "$TEST_IMAGE_SCRIPT_DIR/../docker/webtop/root-first-guard.sh" >"$GUARD_FIXTURE_OUTPUT" 2>&1; then
         cat "$GUARD_FIXTURE_OUTPUT"
         rm -f "$GUARD_FIXTURE_OUTPUT"
         rm -rf "$GUARD_ROOT"

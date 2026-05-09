@@ -141,7 +141,7 @@ apply_root_home_defaults() {
 }
 
 run_guard() {
-  BUNTOOLBOX_WEBTOP_ROOT="${SCAN_ROOT}" "$(dirname "${BASH_SOURCE[0]}")/root-first-guard.sh"
+  BUNTOOLBOX_WEBTOP_ROOT="${SCAN_ROOT}" bash "$(dirname "${BASH_SOURCE[0]}")/root-first-guard.sh"
 }
 
 main() {

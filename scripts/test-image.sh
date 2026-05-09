@@ -204,20 +204,29 @@ if [ "$VARIANT" = "i3" ]; then
         $EXPECTED_VERSIONS \
         "$IMAGE_NAME" >/dev/null
 
+    set +e
     TEST_OUTPUT=$(timeout "$RUN_TIMEOUT" "$DOCKER_BIN" exec -t \
         -e VERBOSE="$VERBOSE" \
         -e BUNTOOLBOX_TEST_VARIANT="$VARIANT" \
         $EXPECTED_VERSIONS \
         "$CONTAINER_NAME" bash -c "$CONTAINER_SCRIPT")
+    TEST_STATUS=$?
+    set -e
 else
+    set +e
     TEST_OUTPUT=$(timeout "$RUN_TIMEOUT" "$DOCKER_BIN" run --rm -t \
         -e VERBOSE="$VERBOSE" \
         -e BUNTOOLBOX_TEST_VARIANT="$VARIANT" \
         $EXPECTED_VERSIONS \
         "$IMAGE_NAME" bash -c "$CONTAINER_SCRIPT")
+    TEST_STATUS=$?
+    set -e
 fi
 
 printf '%s\n' "$TEST_OUTPUT"
+if [ "$TEST_STATUS" -ne 0 ]; then
+    die "container test command failed with status: $TEST_STATUS"
+fi
 if ! printf '%s\n' "$TEST_OUTPUT" | grep -q 'BUNTOOLBOX_TESTS_COMPLETED'; then
     die "container test output missing completion sentinel"
 fi

@@ -265,38 +265,43 @@ The following NEW packages will be installed:
 - 测试中显式运行 `openvscode-start`，确认其可在 `3000` listen/serve。
 - Webtop runtime test 同时证明 webtop 不占用 `3000`。
 
-## 未验证事项
+## 已收口验证
 
-- canonical `lscr.io/linuxserver/webtop:ubuntu-i3` 的 manifest list digest 已通过 `docker buildx imagetools inspect` 验证；canonical tag 的 `build_version` / revision 未通过直接拉取 canonical tag 验证，因为本次禁止 `docker pull`，且本地没有该 tag。当前 `build_version` / revision 证据来自本地已有 `linuxserver/webtop:ubuntu-i3`。
-- 未执行本地 `docker build`：根 Dockerfile 与 `Dockerfile.i3` 的真实构建结果、最终镜像层缓存效果、以及安装脚本在构建期的完整行为，需由 GitHub Actions 或用户批准后的构建环境验证。
-- 未执行真实 `buntoolbox:i3` runtime test：webtop `3200`、OpenVSCode `3000`、GUI process root-first 状态已写入测试脚本，但需要 i3 image 构建完成后运行 `./scripts/test-image.sh --variant i3 <image>` 验证。
-- 未触发 GitHub Actions：CI tag 语义已做静态 YAML/文本检查，但 PR/default branch/release tag 的真实 push 行为需由 GitHub Actions run 验证。
-- 已在 GitHub Actions i3 test build 后增加 `Record i3 base provenance` 步骤；该步骤会在 CI 环境中运行 `docker buildx imagetools inspect lscr.io/linuxserver/webtop:ubuntu-i3`，并从 `buntoolbox:ci-i3-test` 的 `/etc/image-release` 输出 build/version/revision 相关记录。此项是 CI 验证路径，不代表本地已执行完整 image build/runtime 验证。
+本 change 后续已通过 GitHub Actions 和本地 post-push image smoke tests 收口。项目约束仍然是不在本机执行耗时 `docker build`；真实 build 由 GitHub Actions 完成，本机只执行 pull/test。
 
-## 8.6 Heavy verification handoff
+### GitHub Actions 验证
 
-本 change 当前已完成的本地验证限于静态检查、脚本入口检查、root-first guard fixture、基于本地已有 `linuxserver/webtop:ubuntu-i3` 的 filesystem patch fixture，以及 OpenSpec strict validation。以下验证明确交给 CI 或用户批准后的环境：
+- Run `25601833365`（commit `cef8323`）成功完成 `latest` 与 `i3` 的 build/test/push，全流程用时 `8m02s`。
+- Run `25602411197`（commit `0778dae`，升级 `uv` 和 `claude`）成功完成 `latest` 与 `i3` 的 build/test/push，全流程用时 `7m59s`。
+- `latest` CI 路径：先 build `buntoolbox:ci-latest-test`，再运行 `bash ./scripts/test-image.sh --no-pull --variant latest buntoolbox:ci-latest-test`，通过后发布 `latest`。
+- `i3` CI 路径：先 build `buntoolbox:ci-i3-test`，记录 `lscr.io/linuxserver/webtop:ubuntu-i3` provenance，再运行 `bash ./scripts/test-image.sh --no-pull --variant i3 buntoolbox:ci-i3-test`，通过后发布 `i3`。
+- `Record i3 base provenance` 在 CI 中执行 `docker buildx imagetools inspect lscr.io/linuxserver/webtop:ubuntu-i3`，并从 `buntoolbox:ci-i3-test` 的 `/etc/image-release` 输出 build/version/revision 相关记录。
+
+### 本地 post-push image 验证
+
+已对 Docker Hub 上发布后的两个 tags 执行本地 smoke tests：
 
 ```bash
-# latest image build/test
-docker build -t cuipengfei/buntoolbox:latest-test -f Dockerfile .
-./scripts/test-image.sh --no-pull --variant latest cuipengfei/buntoolbox:latest-test
-
-# i3 image build/test
-docker build -t cuipengfei/buntoolbox:i3-test -f Dockerfile.i3 .
-./scripts/test-image.sh --no-pull --variant i3 cuipengfei/buntoolbox:i3-test
-
-# CI publication semantics
-gh run watch <run-id>
-
-# CI i3 base provenance evidence
-# GitHub Actions job output should include:
-# - buntoolbox_i3_base=lscr.io/linuxserver/webtop:ubuntu-i3
-# - docker buildx imagetools inspect lscr.io/linuxserver/webtop:ubuntu-i3
-# - /etc/image-release build/version/revision lines from buntoolbox:ci-i3-test
+./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest
+./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3
 ```
 
-本地未执行上述命令，原因是项目约束禁止本地耗时 Docker build，且本轮用户明确要求不要 commit/push。
-- `linuxserver/webtop:ubuntu-i3` 与 `lscr.io/linuxserver/webtop:ubuntu-i3` 的 manifest list digest equivalence 已通过 registry manifest 查询验证；build_version/revision equivalence 仍需 CI 或直接 canonical image inspect 验证。
-- `apt-get -s install` 只验证 resolver simulation；未执行真实安装，未验证安装后文件、服务或 runtime 行为。
-- 未启动 webtop `/init` 完整 GUI stack；本次 runtime scan 通过 `--entrypoint /bin/bash` 读取 image 文件系统完成。
+结果：
+
+- `cuipengfei/buntoolbox:latest`: `83 passed, 0 failed`。
+- `cuipengfei/buntoolbox:i3`: `89 passed, 0 failed`。
+- `i3` 多出的 6 项 runtime checks 验证：`whoami=root`、`HOME=/root`、webtop HTTP 在 `3200` 响应、webtop 不监听 `3000`、`openvscode-start` 可在 `3000` 服务、关键 GUI processes 不以 `abc` 运行。
+- `i3` root-first guard fixture 已验证：受控 fatal `abc` runtime pattern 会被拒绝。
+
+### 版本与层复用观察
+
+- `uv` 已升级并验证为 `0.11.12`。
+- `claude` 已升级并验证为 `2.1.126`。
+- 升级后本地 pull 观察显示：`latest` 前段大量 layers 为 `Already exists`，只拉后段约 14 个新 layers；`i3` 前段大量 layers 为 `Already exists`，只拉后段约 15 个新 layers。
+- 本地 inspect 显示当前 `latest` 为 60 layers、约 2.64GB；当前 `i3` 为 81 layers、约 5.10GB。
+
+### 仍需注意的边界
+
+- 本地没有执行 `docker build`；这是项目约束而不是未完成验证。真实 build/test/push 由 GitHub Actions 收口。
+- `latest` 与 `i3` 是 sibling images，最终 RootFS layer digest 不共享；它们共享的是维护层面的版本来源、安装脚本和测试逻辑。
+- Webtop upstream tag 未来可能 drift；root-first patch 与 guard 的目的就是在 upstream 重新引入未审查 `abc` runtime 行为时 fail closed。

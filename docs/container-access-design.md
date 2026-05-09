@@ -4,7 +4,7 @@ Access buntoolbox container from Windows host (no WSL) via browser.
 
 ## Context
 
-Buntoolbox is designed for Windows users with WSL disabled by enterprise policy. This document covers different methods to access the container's terminal and IDE.
+Buntoolbox is designed for Windows users with WSL disabled by enterprise policy. This document covers different methods to access the container's terminal, IDE, and optional browser-delivered Linux desktop.
 
 ## Current Options in Buntoolbox
 
@@ -14,6 +14,7 @@ Buntoolbox is designed for Windows users with WSL disabled by enterprise policy.
 | SSH | ✅ Yes (sshd) | 22 |
 | Zellij | ✅ Yes | - |
 | ttyd | ✅ Yes | 7681 |
+| Webtop i3 desktop | ✅ Yes, in `cuipengfei/buntoolbox:i3` | 3200 / 3201 |
 
 ## Solution Options
 
@@ -80,7 +81,37 @@ docker run -d -p 3000:3000 cuipengfei/buntoolbox:latest \
 
 Access: http://localhost:3000
 
-### Option C: noVNC + GUI Terminal
+### Option C: Webtop i3 Desktop (`buntoolbox:i3`)
+
+Run a browser-delivered Linux i3 desktop while keeping buntoolbox's normal developer ports intact.
+
+```powershell
+docker run -d --name mydev-i3 `
+  --shm-size=1gb `
+  -p 3200:3200 `
+  -p 3201:3201 `
+  -p 3000:3000 `
+  -p 7681:7681 `
+  -v ${PWD}:/workspace `
+  cuipengfei/buntoolbox:i3
+```
+
+Access:
+
+- Webtop i3 desktop HTTP: http://localhost:3200
+- Webtop i3 desktop HTTPS: https://localhost:3201
+- Optional OpenVSCode Server after running `openvscode-start`: http://localhost:3000
+- Optional ttyd after running `ttyd-start`: http://localhost:7681
+
+Notes:
+
+- `buntoolbox:latest` remains the terminal/TUI image and does not include the GUI/i3 desktop stack.
+- `buntoolbox:i3` is root-first for normal interactive workflows: `whoami=root`, `HOME=/root`.
+- The LinuxServer/Webtop base may still contain an `abc` account for upstream compatibility, but critical GUI/runtime processes are tested not to run as `abc`.
+- Keep `--shm-size=1gb` or an equivalent shared-memory setting for browser/desktop workloads.
+- Treat `3200`/`3201`, `3000`, and `7681` as local-only unless protected by auth, firewall, TLS/proxy controls, or another access-control layer.
+
+### Option D: noVNC + GUI Terminal
 
 Full GUI terminal rendered inside container, streamed as images. **Not currently in buntoolbox.**
 
@@ -99,7 +130,7 @@ Container                                    Windows
 - Clipboard sync required
 - Higher latency than text-based solutions
 
-### Option D: KasmVNC (Universal GUI Solution)
+### Option E: KasmVNC (Universal GUI Solution)
 
 Run **any Linux GUI application** inside container, access via browser.
 

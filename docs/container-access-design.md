@@ -126,6 +126,78 @@ Notes:
 - Keep `--shm-size=1gb` or an equivalent shared-memory setting for browser/desktop workloads.
 - Treat `3200`/`3201`, `3000`, and `7681` as local-only unless protected by auth, firewall, TLS/proxy controls, or another access-control layer.
 
+KDE GPU notes for Windows + Docker Desktop + WSL2:
+
+- This path requires Docker Desktop's WSL2 backend. If WSL2 is not available at all, treat the Webtop desktop as CPU-rendered.
+- Use WSLg/Mesa D3D12 for GUI application GPU rendering. Pass `/dev/dxg`, mount the full `/usr/lib/wsl` tree read-only, set `LD_LIBRARY_PATH=/usr/lib/wsl/lib`, and set `GALLIUM_DRIVER=d3d12`. This is the buntoolbox-tested WSLg path; LinuxServer/Webtop documents `/dev/dri` and NVIDIA GPU paths, not WSLg `/dev/dxg` as an upstream-supported Webtop GPU path.
+- Prefer mounting `/usr/lib/wsl`, not only `/usr/lib/wsl/lib`, because Mesa's D3D12 path can need the WSL driver files under the same tree.
+- Set `LIBVA_DRIVER_NAME=d3d12` for the matching VAAPI path when available.
+- Set `DISABLE_DRI3=true` in this WSL2 Webtop shape so Webtop/Selkies does not try to treat WSL's virtual `/dev/dri` nodes like a normal Linux DRM render path. On the validated host, `/dev/dri/card0` reported `drmIsKMS = 0`, so it is not a KMS-capable device for KWin's DRM display backend.
+- Do not rely on Docker Desktop `--gpus all` as the GUI OpenGL answer. It is useful for NVIDIA/CUDA style exposure, but WSLg OpenGL apps use `/dev/dxg` plus Mesa D3D12.
+- Verify with `glxinfo -B`, `eglinfo`, and an actual OpenGL app such as `glxgears -info`. Good evidence is `D3D12 (...)`, `Microsoft Corporation`, and `Accelerated: yes`.
+- Keep three GPU layers separate: container GPU visibility, GUI application OpenGL rendering, and Webtop/Selkies stream encoding/KWin compositor behavior. Current buntoolbox evidence covers application OpenGL through D3D12. It does not prove Selkies hardware stream encoding and does not make KWin compositor GPU rendering the success criterion.
+- In Docker Desktop + WSL2 Webtop, design around KWin using its software compositor path even when Linux OpenGL applications are accelerated through D3D12. A real KWin OpenGL compositor generally needs a platform/backend it can use for accelerated compositing; the WSLg `/dev/dxg` path is not a DRM/KMS display pipeline.
+
+GPU-enabled KDE run example:
+
+```powershell
+docker run --rm -d --name mydev-kde-gpu `
+  --shm-size=1gb `
+  --device /dev/dxg `
+  --mount type=bind,source=/usr/lib/wsl,target=/usr/lib/wsl,readonly `
+  -e LD_LIBRARY_PATH=/usr/lib/wsl/lib `
+  -e GALLIUM_DRIVER=d3d12 `
+  -e LIBVA_DRIVER_NAME=d3d12 `
+  -e DISABLE_DRI3=true `
+  -p 3200:3200 `
+  -p 3201:3201 `
+  -p 3000:3000 `
+  -p 7681:7681 `
+  -v ${PWD}:/workspace `
+  cuipengfei/buntoolbox:kde
+```
+
+GPU verification commands:
+
+```bash
+docker exec mydev-kde-gpu glxinfo -B
+docker exec mydev-kde-gpu eglinfo
+docker exec -d mydev-kde-gpu glxgears -info
+```
+
+Optional Selkies VAAPI experiment:
+
+```powershell
+docker run --rm -d --name mydev-kde-vaapi-poc `
+  --shm-size=1gb `
+  --device /dev/dxg `
+  --device /dev/dri `
+  --mount type=bind,source=/usr/lib/wsl,target=/usr/lib/wsl,readonly `
+  -e LD_LIBRARY_PATH=/usr/lib/wsl/lib `
+  -e GALLIUM_DRIVER=d3d12 `
+  -e LIBVA_DRIVER_NAME=d3d12 `
+  -e DISABLE_DRI3=true `
+  -e SELKIES_DEBUG=true `
+  -e SELKIES_ENCODER=x264enc `
+  -e SELKIES_DRI_NODE=/dev/dri/renderD128 `
+  -e SELKIES_USE_CPU=false `
+  -p 3290:3200 `
+  cuipengfei/buntoolbox:kde
+```
+
+Check logs before trusting this path:
+
+```bash
+docker logs mydev-kde-vaapi-poc 2>&1 \
+  | grep -Ei 'encoder|dri|vaapi|pixel|gpu|x264|error|warn|fallback|capture|screen'
+```
+
+Important boundary:
+
+- Do not set `SELKIES_ENCODER=vah264enc` for the current LinuxServer Webtop WebSocket/Pixelflux service. That service accepts Webtop encoder names such as `x264enc`, `x264enc-striped`, and `jpeg`, not raw GStreamer element names.
+- `SELKIES_DRI_NODE` / `DRI_NODE` is the VAAPI render-node knob for this service.
+- A local PoC made `vainfo` report D3D12 H.264 encode entrypoints, but FFmpeg `h264_vaapi` produced a zero-byte stream and GStreamer VAAPI encode was not reliable. Treat Selkies VAAPI on WSLg as experimental until an end-to-end browser session proves stable quality and real hardware encoding.
+
 ### Option D: noVNC + GUI Terminal
 
 Full GUI terminal rendered inside container, streamed as images. **Not currently in buntoolbox.**

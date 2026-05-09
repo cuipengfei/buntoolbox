@@ -94,6 +94,67 @@ KDE runtime note: this image is based on LinuxServer Webtop Ubuntu KDE, which is
 
 Security and root-first notes are the same as `i3`: keep desktop endpoints local-only unless protected, and expect normal interactive workflows to run as `root` with `HOME=/root`.
 
+#### KDE GPU acceleration on Windows + Docker Desktop + WSL2
+
+For the KDE flavor, the practical Windows GPU path we can verify on Docker Desktop's WSL2 backend is WSLg/Mesa D3D12. This can make Linux OpenGL GUI applications inside the Webtop desktop use the Windows GPU as much as this stack allows.
+
+This section requires Docker Desktop's WSL2 backend. If your environment truly forbids WSL2 entirely, do not design the KDE flavor around GPU acceleration; run it as CPU-rendered Webtop instead.
+
+Use this run shape when Docker Desktop is using the WSL2 backend and the host WSL filesystem contains `/dev/dxg` and `/usr/lib/wsl`. This is a buntoolbox-tested WSLg path, not a LinuxServer/Webtop upstream guarantee:
+
+```powershell
+docker run --rm -d --name mydev-kde-gpu `
+  --shm-size=1gb `
+  --device /dev/dxg `
+  --mount type=bind,source=/usr/lib/wsl,target=/usr/lib/wsl,readonly `
+  -e LD_LIBRARY_PATH=/usr/lib/wsl/lib `
+  -e GALLIUM_DRIVER=d3d12 `
+  -e LIBVA_DRIVER_NAME=d3d12 `
+  -e DISABLE_DRI3=true `
+  -p 3200:3200 `
+  -p 3201:3201 `
+  -p 3000:3000 `
+  -p 7681:7681 `
+  -v ${PWD}:/workspace `
+  cuipengfei/buntoolbox:kde
+```
+
+Open the desktop at `http://localhost:3200`.
+
+Verify app-level OpenGL GPU rendering inside the container:
+
+```bash
+docker exec mydev-kde-gpu glxinfo -B
+docker exec mydev-kde-gpu eglinfo
+```
+
+Expected good evidence includes:
+
+- `OpenGL renderer string: D3D12 (...)`
+- `Vendor: Microsoft Corporation`
+- `Accelerated: yes`
+- a visible OpenGL app such as `glxgears -info` showing `GL_RENDERER = D3D12 (...)`
+
+Do not treat `btop`, `nvidia-smi`, or `--gpus all` alone as proof that the KDE desktop compositor is using GPU rendering. Those are different layers. In this stack:
+
+- Container GPU visibility is provided by `/dev/dxg` plus the WSL libraries mounted at `/usr/lib/wsl`.
+- Linux OpenGL GUI apps can render through Mesa's `d3d12` driver.
+- WSL's `/dev/dri/card0` should not be treated like a normal KMS-capable Linux display device for KWin. On the validated host it reported `drmIsKMS = 0`.
+- Docker Desktop's `--gpus all` path is primarily the NVIDIA compute/CUDA path and is not the required path for WSLg OpenGL GUI rendering.
+- Webtop/Selkies stream encoding acceleration is separate again. LinuxServer documents `/dev/dri`/NVIDIA paths for that layer, but does not document WSLg `/dev/dxg` as a supported Webtop encoding path.
+- KDE/KWin compositor acceleration is separate from application OpenGL acceleration. In Docker Desktop + WSL2 Webtop, design around KWin using its software compositor path even while OpenGL apps are GPU accelerated.
+
+VAAPI stream-encoding status for this WSLg path:
+
+- `vainfo --display drm --device /dev/dri/renderD128` can report Mesa D3D12 H.264 encode entrypoints when `/dev/dxg`, `/dev/dri`, and `/usr/lib/wsl` are passed into a test container.
+- That is not enough to switch Selkies to hardware encoding. In local PoC, FFmpeg `h264_vaapi` initialized successfully but produced a zero-byte H.264 stream, and GStreamer `vaapih264enc` failed to produce a reliable encoded stream.
+- The newer GStreamer `vah264enc` element was not available from the tested Ubuntu 26.04 packages, and the legacy `gstreamer1.0-vaapi` path exposed `vaapih264enc`, not `vah264enc`.
+- Current LinuxServer Webtop runs Selkies in WebSocket/Pixelflux mode. In that mode `SELKIES_ENCODER` accepts Webtop values such as `x264enc`, `x264enc-striped`, and `jpeg`; it does not accept GStreamer element names like `vah264enc` or `nvh264enc`.
+- `SELKIES_DRI_NODE=/dev/dri/renderD128` is the right knob to experiment with Selkies VAAPI on this stack, while keeping `SELKIES_ENCODER=x264enc` and `SELKIES_USE_CPU=false`. A local debug run confirmed Selkies read `dri_node=/dev/dri/renderD128` and initialized the Wayland GL renderer with that device.
+- Therefore the KDE image should keep Selkies on its stable `x264enc,jpeg` default on this WSLg path. Do not change the image default to a VAAPI encoder unless a fresh end-to-end Selkies/Webtop session proves non-CPU stream encoding without blank output, crashes, or text-quality regressions.
+
+For maximum reliability on this stack, optimize for GPU-accelerated GUI apps, not for forcing KWin itself to become an OpenGL compositor. For a lower-resource browser desktop, prefer the `i3` variant.
+
 ### Windows (WSL Disabled) - Project Development
 
 ```powershell

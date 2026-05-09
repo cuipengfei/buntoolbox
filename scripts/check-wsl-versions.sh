@@ -6,6 +6,8 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+LAYERS_DIR="$PROJECT_ROOT/docker/layers"
 VERBOSE=false
 CACHE_DIR="/tmp/check-versions-cache"
 RUN_SMOKE=0
@@ -113,6 +115,46 @@ get_latest_apt_candidate() {
     apt-cache policy "$pkg" 2>/dev/null | awk '/Candidate:/ {print $2; exit}' | sed 's/^[0-9]\+://; s/-.*$//'
 }
 
+get_shared_version() {
+    local key="$1"
+    local file
+
+    [ -d "$LAYERS_DIR" ] || return 1
+
+    while IFS= read -r -d '' file; do
+        awk -F= -v key="$key" '
+            {
+                lhs = $1
+                sub(/^export[[:space:]]+/, "", lhs)
+            }
+            lhs == key {
+                value = $0
+                sub("^[^=]*=", "", value)
+                sub(/[[:space:]]*#.*/, "", value)
+                gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+                gsub(/^"|"$/, "", value)
+                if (value ~ /^\$\{[A-Za-z_][A-Za-z0-9_]*:-[^}]+\}$/) {
+                    sub(/^\$\{[A-Za-z_][A-Za-z0-9_]*:-/, "", value)
+                    sub(/\}$/, "", value)
+                }
+                print value
+                found = 1
+                exit
+            }
+            END { exit found ? 0 : 1 }
+        ' "$file" && return 0
+    done < <(find "$LAYERS_DIR" -type f -name '*.env' -print0 2>/dev/null | sort -z)
+
+    return 1
+}
+
+expected_or_latest() {
+    local key="$1"
+    shift
+
+    get_shared_version "$key" || "$@"
+}
+
 # ============================================================================
 # Local version detection functions
 # ============================================================================
@@ -129,7 +171,11 @@ get_local_version() {
     # Special handling for different tools
     case "$cmd" in
         java)
-            java -version 2>&1 | head -1 | grep -oE '[0-9]+' | head -1
+            if command -v dpkg-query &>/dev/null && dpkg-query -W -f='${Version}\n' zulu25-jdk-headless 2>/dev/null; then
+                true
+            else
+                java -version 2>&1 | head -1 | grep -oE '[0-9]+(\.[0-9]+)*' | head -1
+            fi
             ;;
         python|python3)
             python3 --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1
@@ -334,20 +380,20 @@ check_tool() {
 
 echo ""
 echo "=== 语言运行时 ==="
-check_tool "JDK" "java" "$(get_latest_jdk_lts)"
-check_tool "Python" "python3" "$(get_latest_python)"
-check_tool "Node.js" "node" "$(get_latest_node)"
-check_tool "Bun" "bun" "$(get_latest_github_release oven-sh/bun)"
+check_tool "JDK" "java" "$(expected_or_latest JDK_PACKAGE_VERSION get_latest_jdk_lts)"
+check_tool "Python" "python3" "$(expected_or_latest PYTHON_VERSION get_latest_python)"
+check_tool "Node.js" "node" "$(expected_or_latest NODE_VERSION get_latest_node)"
+check_tool "Bun" "bun" "$(expected_or_latest BUN_VERSION get_latest_github_release oven-sh/bun)"
 
 echo ""
 echo "=== 构建工具 ==="
-check_tool "Gradle" "gradle" "$(get_latest_gradle)"
-check_tool "Maven" "mvn" "$(get_latest_maven)"
+check_tool "Gradle" "gradle" "$(expected_or_latest GRADLE_VERSION get_latest_gradle)"
+check_tool "Maven" "mvn" "$(expected_or_latest MAVEN_VERSION get_latest_maven)"
 
 echo ""
 echo "=== 包管理器 ==="
-check_tool "httpie" "http" "$(get_latest_httpie)"
-check_tool "uv" "uv" "$(get_latest_github_release astral-sh/uv)"
+check_tool "httpie" "http" "$(expected_or_latest HTTPIE_VERSION get_latest_httpie)"
+check_tool "uv" "uv" "$(expected_or_latest UV_VERSION get_latest_github_release astral-sh/uv)"
 
 echo ""
 echo "=== 基础开发工具 ==="
@@ -362,26 +408,26 @@ check_tool "btop" "btop" "$(get_latest_apt_candidate btop)"
 
 echo ""
 echo "=== Shell 增强 ==="
-check_tool "starship" "starship" "$(get_latest_github_release starship/starship)"
-check_tool "zoxide" "zoxide" "$(get_latest_github_release ajeetdsouza/zoxide)"
+check_tool "starship" "starship" "$(expected_or_latest STARSHIP_VERSION get_latest_github_release starship/starship)"
+check_tool "zoxide" "zoxide" "$(expected_or_latest ZOXIDE_VERSION get_latest_github_release ajeetdsouza/zoxide)"
 check_tool "zsh" "zsh" "$(get_latest_apt_candidate zsh)"
 
 echo ""
 echo "=== TUI 工具 ==="
-check_tool "lazygit" "lazygit" "$(get_latest_github_release jesseduffield/lazygit)"
-check_tool "helix" "hx" "$(get_latest_github_release helix-editor/helix)"
-check_tool "eza" "eza" "$(get_latest_github_release eza-community/eza)"
-check_tool "delta" "delta" "$(get_latest_github_release dandavison/delta)"
-check_tool "procs" "procs" "$(get_latest_github_release dalance/procs)"
-check_tool "zellij" "zellij" "$(get_latest_github_release zellij-org/zellij)"
-check_tool "duf" "duf" "$(get_latest_github_release muesli/duf)"
-check_tool "openvscode" "openvscode-server" "$(get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')"
-check_tool "ttyd" "ttyd" "$(get_latest_github_release tsl0922/ttyd)"
+check_tool "lazygit" "lazygit" "$(expected_or_latest LAZYGIT_VERSION get_latest_github_release jesseduffield/lazygit)"
+check_tool "helix" "hx" "$(expected_or_latest HELIX_VERSION get_latest_github_release helix-editor/helix)"
+check_tool "eza" "eza" "$(expected_or_latest EZA_VERSION get_latest_github_release eza-community/eza)"
+check_tool "delta" "delta" "$(expected_or_latest DELTA_VERSION get_latest_github_release dandavison/delta)"
+check_tool "procs" "procs" "$(expected_or_latest PROCS_VERSION get_latest_github_release dalance/procs)"
+check_tool "zellij" "zellij" "$(expected_or_latest ZELLIJ_VERSION get_latest_github_release zellij-org/zellij)"
+check_tool "duf" "duf" "$(expected_or_latest DUF_VERSION get_latest_github_release muesli/duf)"
+check_tool "openvscode" "openvscode-server" "$(expected_or_latest OPENVSCODE_VERSION get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')"
+check_tool "ttyd" "ttyd" "$(expected_or_latest TTYD_VERSION get_latest_github_release tsl0922/ttyd)"
 echo ""
 echo "=== 其他工具 ==="
-check_tool "beads (bd)" "bd" "$(get_latest_github_release gastownhall/beads)"
-check_tool "claude" "claude" "$(get_latest_claude)"
-check_tool "rtk" "rtk" "$(get_latest_github_release rtk-ai/rtk)"
+check_tool "beads (bd)" "bd" "$(expected_or_latest BEADS_VERSION get_latest_github_release gastownhall/beads)"
+check_tool "claude" "claude" "$(expected_or_latest CLAUDE_CODE_VERSION get_latest_claude)"
+check_tool "rtk" "rtk" "$(expected_or_latest RTK_VERSION get_latest_github_release rtk-ai/rtk)"
 
 echo ""
 echo "----------------------------------------"

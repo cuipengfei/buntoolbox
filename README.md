@@ -13,12 +13,51 @@
 
 ## 使用方式
 
+### Image Variants
+
+- `cuipengfei/buntoolbox:latest` 是既有 terminal/TUI image，面向 shell、SSH、OpenVSCode Server 和 ttyd 等开发工作流。
+- `cuipengfei/buntoolbox:i3` 是 browser-delivered i3 desktop image，面向需要在浏览器里打开 i3 desktop GUI 的场景。
+- `latest` 不包含 GUI/i3 desktop stack；需要浏览器桌面时请显式选择 `i3` tag。
+
 ### Basic Usage
 
 ```bash
 docker pull cuipengfei/buntoolbox:latest
 docker run -it cuipengfei/buntoolbox
 ```
+
+### Browser i3 Desktop Variant
+
+`cuipengfei/buntoolbox:i3` 提供 browser-delivered i3 desktop，并保留 buntoolbox 的开发入口端口语义：
+
+- `3200`: webtop GUI HTTP endpoint
+- `3201`: webtop GUI HTTPS endpoint
+- `3000`: OpenVSCode Server (`openvscode-start` 默认端口)
+- `7681`: ttyd web terminal
+
+```powershell
+docker run -d --name mydev-i3 `
+  --shm-size=1gb `
+  -p 3200:3200 `
+  -p 3201:3201 `
+  -p 3000:3000 `
+  -p 7681:7681 `
+  -v ${PWD}:/workspace `
+  cuipengfei/buntoolbox:i3
+
+# Browser desktop GUI:
+#   http://localhost:3200
+#   https://localhost:3201
+# Optional developer services inside the same container:
+#   openvscode-start   # serves on http://localhost:3000 by default
+#   ttyd-start         # serves on http://localhost:7681 by default
+```
+
+Desktop runtime note: keep at least `--shm-size=1gb` or an equivalent shared-memory setting for browser/desktop workloads. Without enough `/dev/shm`, Chromium- or desktop-heavy sessions may become unstable.
+
+Security note: treat the i3 desktop endpoint as local-only unless you add appropriate protection. Do not expose `3200`/`3201`, `3000`, or `7681` directly to the public internet without authentication, TLS/proxy controls, firewall rules, or another access-control layer.
+
+Root-first note: `buntoolbox:i3` is designed for normal interactive workflows as `root` with `HOME=/root`. The LinuxServer/Webtop base may still contain an `abc` account for upstream compatibility, but `abc` is not the normal buntoolbox i3 desktop workflow.
 
 ### Windows (WSL Disabled) - Project Development
 

@@ -4,8 +4,8 @@ set -euo pipefail
 REPO="${GITHUB_REPOSITORY:-cuipengfei/buntoolbox}"
 IMAGE="${IMAGE:-docker.io/cuipengfei/buntoolbox}"
 WORKFLOW="${WORKFLOW:-docker.yml}"
-BASELINE_TAG="${BASELINE_TAG:-m001-baseline}"
-INCREMENT_TAG="${INCREMENT_TAG:-m001-increment}"
+BASELINE_TAG="${BASELINE_TAG:-latest-m001-baseline}"
+INCREMENT_TAG="${INCREMENT_TAG:-latest-m001-increment}"
 BASELINE_BEADS_VERSION="${BASELINE_BEADS_VERSION:-1.0.3}"
 INCREMENT_BEADS_VERSION="${INCREMENT_BEADS_VERSION:-1.0.2}"
 REPORT="${REPORT:-.gsd/milestones/M001/slices/S03/S03-VERIFICATION.md}"
@@ -31,12 +31,12 @@ need docker
 run_workflow() {
   local tag="$1"
   local beads_version="$2"
-  echo "Dispatching ${WORKFLOW}: verification_tag=${tag}, beads_version_override=${beads_version}" >&2
+  echo "Dispatching ${WORKFLOW}: latest_verification_tag=${tag}, latest_beads_version_override=${beads_version}" >&2
   gh workflow run "$WORKFLOW" \
     --repo "$REPO" \
     --ref master \
-    -f "verification_tag=${tag}" \
-    -f "beads_version_override=${beads_version}"
+    -f "latest_verification_tag=${tag}" \
+    -f "latest_beads_version_override=${beads_version}"
 
   local run_id=""
   for _ in {1..30}; do
@@ -175,8 +175,8 @@ lines.extend([
     "",
     "## Artifacts",
     "",
-    "- `/tmp/s03-manifest-m001-baseline.json`",
-    "- `/tmp/s03-manifest-m001-increment.json`",
+    f"- `/tmp/s03-manifest-{baseline_tag}.json`",
+    f"- `/tmp/s03-manifest-{increment_tag}.json`",
     "- `/tmp/s03-manifest-diff.json`",
     f"- `{baseline_pull_log}`",
     f"- `{increment_pull_log}`",

@@ -5,9 +5,10 @@
 
 set -e
 
-DOCKERFILE="Dockerfile"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+DOCKERFILE="$PROJECT_ROOT/Dockerfile"
+LAYERS_DIR="$PROJECT_ROOT/docker/layers"
 VERBOSE=false
 CACHE_DIR="/tmp/check-versions-cache"
 
@@ -69,9 +70,22 @@ fetch_github_release() {
     fi
 }
 
-# Parse current version from Dockerfile
+# Parse current version from shared layer env snippets.
 get_current_version() {
-    grep "^ARG ${1}=" "$PROJECT_ROOT/$DOCKERFILE" | cut -d'=' -f2
+    awk -F= -v name="$1" '
+        $1 ~ "^(export[[:space:]]+)?" name "$" {
+            value=$2
+            sub(/[[:space:]]*#.*/, "", value)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+            gsub(/^\"|\"$/, "", value)
+            if (value ~ /^\$\{[A-Za-z_][A-Za-z0-9_]*:-[^}]+\}$/) {
+                sub(/^\$\{[A-Za-z_][A-Za-z0-9_]*:-/, "", value)
+                sub(/\}$/, "", value)
+            }
+            print value
+            exit
+        }
+    ' "$LAYERS_DIR"/*.env
 }
 
 # Get latest versions from APIs
@@ -99,7 +113,7 @@ get_latest_zulu_package_version() {
 
 # Get current Ubuntu base image version from Dockerfile
 get_current_ubuntu() {
-    grep "^FROM ubuntu:" "$PROJECT_ROOT/$DOCKERFILE" | sed 's/FROM ubuntu://'
+    grep "^FROM ubuntu:" "$DOCKERFILE" | sed 's/FROM ubuntu://'
 }
 
 # Get latest Ubuntu LTS version from official Ubuntu meta-release
@@ -120,7 +134,7 @@ get_latest_jdk_lts() {
 
 # Get current Python major.minor version from Dockerfile (extracts from python3.XX)
 get_current_python() {
-    grep "python3\.[0-9]" "$PROJECT_ROOT/$DOCKERFILE" | grep -oE 'python3\.[0-9]+' | head -1 | sed 's/python//'
+    get_current_version PYTHON_VERSION
 }
 
 # Get latest Python stable version from endoflife.date API
@@ -246,7 +260,7 @@ check_version "rtk" "$(get_current_version RTK_VERSION)" "$(get_latest_github_re
 
 echo ""
 if [ $updates_available -eq 1 ]; then
-    echo -e "${YELLOW}Some updates are available. Edit Dockerfile ARGs to upgrade.${NC}"
+    echo -e "${YELLOW}Some updates are available. Edit docker/layers/*.env version snippets to upgrade.${NC}"
 else
     echo -e "${GREEN}All tools are up-to-date.${NC}"
 fi

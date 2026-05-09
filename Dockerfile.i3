@@ -1,65 +1,72 @@
-# Buntoolbox - Multi-language Development Environment
-# Base: Ubuntu 26.04 LTS (Resolute)
-# Languages: JS/TS (Bun, Node.js), Python 3.14, Java (Zulu 25)
-#
-# Layer order optimized for minimal pull on updates:
-# Stable layers first, frequently updated layers last
+# Buntoolbox i3 - browser-delivered desktop variant
+# Base: LinuxServer Webtop Ubuntu i3
+# This variant is intentionally a sibling of the root Dockerfile, not a child of
+# buntoolbox:latest, so that the existing terminal/TUI image remains unchanged.
 
-FROM ubuntu:26.04
+FROM lscr.io/linuxserver/webtop:ubuntu-i3
 
 LABEL maintainer="buntoolbox"
-LABEL description="Multi-language development environment with Bun, Node.js, Python, and Java"
+LABEL description="Buntoolbox browser-delivered i3 desktop variant"
+LABEL org.opencontainers.image.title="buntoolbox:i3"
+LABEL org.opencontainers.image.description="Buntoolbox toolchain on LinuxServer Webtop Ubuntu i3 with root-first desktop defaults"
+LABEL org.opencontainers.image.base.name="lscr.io/linuxserver/webtop:ubuntu-i3"
+LABEL org.buntoolbox.variant="i3"
+LABEL org.buntoolbox.webtop.root-first="true"
+LABEL org.buntoolbox.webtop.http-port="3200"
+LABEL org.buntoolbox.webtop.https-port="3201"
+LABEL org.buntoolbox.openvscode.port="3000"
+LABEL org.buntoolbox.ttyd.port="7681"
 
-# Prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=UTC
-ENV HOME=/root
+# Keep Webtop's /init GUI stack entrypoint.  Only root-first defaults and the
+# browser GUI ports are changed here; CUSTOM_WS_PORT is intentionally left unset
+# so the upstream-internal WebSocket default remains owned by Webtop.
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=UTC \
+    HOME=/root \
+    CUSTOM_USER=root \
+    CUSTOM_PORT=3200 \
+    CUSTOM_HTTPS_PORT=3201 \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
 
-# =============================================================================
-# 1. System Base + Essential Tools (very stable)
-# =============================================================================
+COPY docker/webtop/root-first-preflight.sh /opt/buntoolbox/webtop/root-first-preflight.sh
+COPY docker/webtop/root-first-patch.sh /opt/buntoolbox/webtop/root-first-patch.sh
+COPY docker/webtop/root-first-guard.sh /opt/buntoolbox/webtop/root-first-guard.sh
+
+RUN chmod +x \
+      /opt/buntoolbox/webtop/root-first-preflight.sh \
+      /opt/buntoolbox/webtop/root-first-patch.sh \
+      /opt/buntoolbox/webtop/root-first-guard.sh \
+    && /opt/buntoolbox/webtop/root-first-preflight.sh \
+    && /opt/buntoolbox/webtop/root-first-patch.sh \
+    && /opt/buntoolbox/webtop/root-first-guard.sh
+
+# Dockerfile.i3 consumes the same shared layer scripts as the root Dockerfile,
+# with point-of-use COPY/RUN boundaries to preserve cache granularity.
 COPY docker/layers/01-apt-base-packages.sh /tmp/buntoolbox-layers/01-apt-base-packages.sh
 RUN bash /tmp/buntoolbox-layers/01-apt-base-packages.sh
 
-# =============================================================================
-# 2. Azul Zulu JDK 25 headless (stable, large)
-# =============================================================================
 COPY docker/layers/02-jdk.env docker/layers/02-jdk.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/02-jdk.env && bash /tmp/buntoolbox-layers/02-jdk.sh
 
 ENV JAVA_HOME=/usr/lib/jvm/zulu25-ca-amd64
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-# =============================================================================
-# 3. Python 3.14 + pip (stable)
-# =============================================================================
 COPY docker/layers/03-python.env docker/layers/03-python.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/03-python.env && bash /tmp/buntoolbox-layers/03-python.sh
 
-# =============================================================================
-# 4. Maven (manual install for version control)
-# =============================================================================
 COPY docker/layers/04-maven.env docker/layers/04-maven.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/04-maven.env && bash /tmp/buntoolbox-layers/04-maven.sh
 
 ENV MAVEN_HOME=/opt/maven
 ENV PATH="${MAVEN_HOME}/bin:${PATH}"
 
-# =============================================================================
-# 5. GitHub CLI (stable)
-# =============================================================================
 COPY docker/layers/05-github-cli.sh /tmp/buntoolbox-layers/05-github-cli.sh
 RUN bash /tmp/buntoolbox-layers/05-github-cli.sh
 
-# =============================================================================
-# 6. Node.js LTS (stable)
-# =============================================================================
 COPY docker/layers/06-node.env docker/layers/06-node.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/06-node.env && bash /tmp/buntoolbox-layers/06-node.sh
 
-# =============================================================================
-# 7. Stable TUI Tools (low change frequency)
-# =============================================================================
 COPY docker/layers/07-eza.env docker/layers/07-eza.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/07-eza.env && bash /tmp/buntoolbox-layers/07-eza.sh
 
@@ -92,15 +99,11 @@ RUN . /tmp/buntoolbox-layers/07-ttyd.env && bash /tmp/buntoolbox-layers/07-ttyd.
 
 ENV HELIX_RUNTIME=/opt/helix-current/runtime
 
-# openvscode-server and ttyd wrappers
 COPY scripts/openvscode-start.sh /usr/local/bin/openvscode-start
 COPY scripts/ttyd-start.sh /usr/local/bin/ttyd-start
 COPY docker/layers/07-web-wrappers.sh /tmp/buntoolbox-layers/07-web-wrappers.sh
 RUN bash /tmp/buntoolbox-layers/07-web-wrappers.sh
 
-# =============================================================================
-# 8. Medium-frequency tools (5 updates each)
-# =============================================================================
 COPY docker/layers/08-gradle.env docker/layers/08-gradle.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/08-gradle.env && bash /tmp/buntoolbox-layers/08-gradle.sh
 
@@ -114,9 +117,6 @@ ENV GRADLE_HOME=/opt/gradle
 ENV BUN_INSTALL=/root/.bun
 ENV PATH="${GRADLE_HOME}/bin:${BUN_INSTALL}/bin:${PATH}"
 
-# =============================================================================
-# 9. High-frequency tools (independent layers)
-# =============================================================================
 COPY docker/layers/09-httpie.env docker/layers/09-httpie.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/09-httpie.env && bash /tmp/buntoolbox-layers/09-httpie.sh
 
@@ -132,30 +132,30 @@ RUN . /tmp/buntoolbox-layers/09-claude.env && bash /tmp/buntoolbox-layers/09-cla
 COPY docker/layers/09-rtk.env docker/layers/09-rtk.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/09-rtk.env && bash /tmp/buntoolbox-layers/09-rtk.sh
 
-# =============================================================================
-# 10. beads - most frequent (13 updates)
-# =============================================================================
 ARG BEADS_VERSION
 COPY docker/layers/10-beads.env docker/layers/10-beads.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/10-beads.env && bash /tmp/buntoolbox-layers/10-beads.sh
 
-# =============================================================================
-# 11. Final Configuration (tiny, last)
-# =============================================================================
-# Use C.UTF-8 locale (built-in to Ubuntu 26.04, no locales package needed)
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
-
 COPY docker/layers/11-root-shell-config.sh /tmp/buntoolbox-layers/11-root-shell-config.sh
 RUN bash /tmp/buntoolbox-layers/11-root-shell-config.sh
 
-# Append buntoolbox info to /etc/image-release
 COPY image-release.txt /tmp/image-release.txt
 COPY docker/layers/12-image-release.sh /tmp/buntoolbox-layers/12-image-release.sh
 RUN bash /tmp/buntoolbox-layers/12-image-release.sh
 
-# Expose SSH and ttyd ports
-EXPOSE 22 7681
+RUN set -eux; \
+    mkdir -p /root /workspace; \
+    printf '%s\n' \
+      'buntoolbox_variant=i3' \
+      'buntoolbox_base=lscr.io/linuxserver/webtop:ubuntu-i3' \
+      'buntoolbox_root_first=true' \
+      'buntoolbox_webtop_http_port=3200' \
+      'buntoolbox_webtop_https_port=3201' \
+      'buntoolbox_openvscode_port=3000' \
+      'buntoolbox_ttyd_port=7681' \
+      >> /etc/image-release
+
+EXPOSE 22 3000 3200 3201 7681
 
 WORKDIR /workspace
-CMD ["/bin/bash"]
+ENTRYPOINT ["/init"]

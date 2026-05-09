@@ -5,6 +5,18 @@
 # Base Image: Ubuntu 26.04 LTS (Resolute)
 # =============================================================================
 
+# Image Variants
+- latest: terminal/TUI development image
+  - Build file: Dockerfile
+  - Base image: ubuntu:26.04
+  - Primary ports: 22/tcp SSH, 3000/tcp openvscode-server, 7681/tcp ttyd
+  - Default workflow: root shell and terminal-first development tools
+- i3: browser-delivered i3 desktop image
+  - Build file: Dockerfile.i3
+  - Base image: lscr.io/linuxserver/webtop:ubuntu-i3
+  - Primary ports: 3200/tcp webtop GUI HTTP, 3201/tcp webtop GUI HTTPS, 3000/tcp openvscode-server, 7681/tcp ttyd
+  - Default workflow: root-first interactive desktop; an abc account may exist for upstream compatibility but is not the normal workflow
+
 # Languages & Runtimes
 - Java: Azul Zulu JDK 25 headless
 - Node.js: v24.15.0

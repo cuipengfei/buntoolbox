@@ -11,12 +11,20 @@ on:
       - master
   workflow_dispatch:
     inputs:
-      verification_tag:
-        description: 'Optional extra Docker tag to publish, e.g. m001-baseline'
+      latest_verification_tag:
+        description: 'Optional extra latest-image Docker tag to publish; must start with latest-, e.g. latest-m001-baseline'
         required: false
         type: string
-      beads_version_override:
-        description: 'Optional BEADS_VERSION build arg override for layer-delta verification'
+      i3_verification_tag:
+        description: 'Optional extra i3-image Docker tag to publish; must start with i3-, e.g. i3-m001-baseline'
+        required: false
+        type: string
+      latest_beads_version_override:
+        description: 'Optional latest-image BEADS_VERSION build arg override for layer-delta verification'
+        required: false
+        type: string
+      i3_beads_version_override:
+        description: 'Optional i3-image BEADS_VERSION build arg override for layer-delta verification'
         required: false
         type: string
 
@@ -40,6 +48,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Validate workflow_dispatch verification tags
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_tag='${{ inputs.latest_verification_tag }}'
+          i3_tag='${{ inputs.i3_verification_tag }}'
+
+          if [[ -n "$latest_tag" && ! "$latest_tag" =~ ^latest-[A-Za-z0-9_.-]+$ ]]; then
+            echo "latest_verification_tag must be empty or start with latest-" >&2
+            exit 1
+          fi
+
+          if [[ -n "$i3_tag" && ! "$i3_tag" =~ ^i3-[A-Za-z0-9_.-]+$ ]]; then
+            echo "i3_verification_tag must be empty or start with i3-" >&2
+            exit 1
+          fi
+
       - name: Log in to Docker Hub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -48,8 +74,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels)
-        id: meta
+      - name: Extract latest metadata (tags, labels)
+        id: latest_meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -58,16 +84,90 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=${{ inputs.verification_tag }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.verification_tag != '' }}
+            type=raw,value=${{ inputs.latest_verification_tag }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.latest_verification_tag != '' }}
 
-      - name: Build and push Docker image
+      - name: Build latest Docker image for tests
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          load: true
+          tags: buntoolbox:ci-latest-test
+          labels: ${{ steps.latest_meta.outputs.labels }}
+          build-args: ${{ github.event_name == 'workflow_dispatch' && inputs.latest_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.latest_beads_version_override) || '' }}
+          cache-from: type=gha,scope=latest
+          cache-to: type=gha,mode=max,scope=latest
+
+      - name: Test latest Docker image
+        run: bash ./scripts/test-image.sh --no-pull --variant latest buntoolbox:ci-latest-test
+
+      - name: Build and push latest Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: ${{ github.event_name == 'workflow_dispatch' && inputs.beads_version_override != '' && format('BEADS_VERSION={0}', inputs.beads_version_override) || '' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ${{ steps.latest_meta.outputs.tags }}
+          labels: ${{ steps.latest_meta.outputs.labels }}
+          build-args: ${{ github.event_name == 'workflow_dispatch' && inputs.latest_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.latest_beads_version_override) || '' }}
+          cache-from: type=gha,scope=latest
+          cache-to: type=gha,mode=max,scope=latest
+
+      - name: Extract i3 metadata (tags, labels)
+        id: i3_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern=i3-{{version}}
+            type=semver,pattern=i3-{{major}}.{{minor}}
+            type=raw,value=i3,enable={{is_default_branch}}
+            type=raw,value=${{ inputs.i3_verification_tag }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.i3_verification_tag != '' }}
+
+      - name: Build i3 Docker image for tests
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.i3
+          platforms: linux/amd64
+          load: true
+          tags: buntoolbox:ci-i3-test
+          labels: ${{ steps.i3_meta.outputs.labels }}
+          build-args: ${{ github.event_name == 'workflow_dispatch' && inputs.i3_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.i3_beads_version_override) || '' }}
+          cache-from: type=gha,scope=i3
+          cache-to: type=gha,mode=max,scope=i3
+
+      - name: Record i3 base provenance
+        run: |
+          set -euo pipefail
+          docker image inspect buntoolbox:ci-i3-test \
+            --format 'buntoolbox_i3_image={{.Id}}'
+          docker image inspect buntoolbox:ci-i3-test \
+            --format 'buntoolbox_i3_base={{ index .Config.Labels "org.opencontainers.image.base.name" }}'
+          docker buildx imagetools inspect lscr.io/linuxserver/webtop:ubuntu-i3
+          docker run --rm --entrypoint /bin/bash buntoolbox:ci-i3-test -lc '
+            set -euo pipefail
+            printf "webtop_build_version="
+            grep -E "^build_version=" /etc/image-release | head -1 || true
+            printf "webtop_revision="
+            grep -E "^(revision|org.opencontainers.image.revision)=" /etc/image-release | head -1 || true
+            grep -Ein "build|version|revision|webtop|linuxserver|selkies|base" /etc/image-release || true
+          '
+
+      - name: Test i3 Docker image
+        run: bash ./scripts/test-image.sh --no-pull --variant i3 buntoolbox:ci-i3-test
+
+      - name: Build and push i3 Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.i3
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.i3_meta.outputs.tags }}
+          labels: ${{ steps.i3_meta.outputs.labels }}
+          build-args: ${{ github.event_name == 'workflow_dispatch' && inputs.i3_beads_version_override != '' && format('BEADS_VERSION={0}', inputs.i3_beads_version_override) || '' }}
+          cache-from: type=gha,scope=i3
+          cache-to: type=gha,mode=max,scope=i3

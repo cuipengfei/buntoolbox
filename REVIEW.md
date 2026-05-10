@@ -30,6 +30,9 @@ Buntoolbox is already well-designed for this exact use case. The image provides:
 | **TUI Utilities** | bat, eza, delta, btop, htop, ripgrep, fd | Excellent CLI replacement tools |
 | **Networking** | curl, wget | Basic network tooling |
 | **CI Integration** | GitHub Actions workflow | Automated builds |
+| **API/HTTP Tools** | HTTPie, Claude Code, rtk | Modern HTTP testing, AI coding, token management |
+| **Remote Access** | openssh-server, ttyd, openvscode-server | SSH server, web terminal, browser-based VS Code |
+| **Browser Desktop** | `i3` / `kde` (LinuxServer Webtop) | Webtop :3200/:3201; VSCode :3000; ttyd :7681 |
 
 ### ⚠️ Gaps for WSL Replacement
 
@@ -39,7 +42,6 @@ Buntoolbox is already well-designed for this exact use case. The image provides:
 | **No language servers** | IDE features limited | Document LSP installation |
 | **No code formatters** | Style enforcement manual | Add popular formatters |
 | **Single architecture** | ARM users cannot use | Consider multi-arch builds |
-| **Root user only** | Security concern | Add non-root user option |
 
 ---
 
@@ -83,10 +85,6 @@ RUN apt-get install -y --no-install-recommends \
     mysql-client \
     redis-tools
 
-# SSH Server (for remote IDE connections)
-RUN apt-get install -y --no-install-recommends openssh-server \
-    && mkdir -p /run/sshd
-
 # Additional utilities
 RUN apt-get install -y --no-install-recommends \
     socat \
@@ -107,7 +105,6 @@ RUN npm install -g prettier eslint typescript
 RUN pipx install black isort ruff mypy
 
 # Additional TUI tools
-RUN pipx install httpie      # Better curl alternative
 RUN pipx install litecli     # SQLite TUI
 RUN pipx install pgcli       # PostgreSQL TUI  
 ```
@@ -194,9 +191,7 @@ services:
 - [ ] Document SSH/Git credential sharing for Windows Docker
 
 ### Phase 2: Enhanced Developer Experience
-- [ ] Add SSH server (optional layer or separate image)
 - [ ] Create docker-compose.yml template for multi-service dev
-- [ ] Add non-root user support
 - [ ] Document language server installation per language
 
 ### Phase 3: Enterprise Features
@@ -258,5 +253,5 @@ Buntoolbox is **well-positioned** to serve as a WSL replacement for enterprise W
 
 ---
 
-*Last Updated: January 2025*
-*Version: 1.0 - Initial Review*
+*Last Updated: 2026-05-10*
+*Version: 1.1 - Post-Webtop Refresh*

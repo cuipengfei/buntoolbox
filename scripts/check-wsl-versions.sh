@@ -241,7 +241,7 @@ get_local_version() {
         claude)
             local claude_bin
             claude_bin=$(command -v claude 2>/dev/null || true)
-            if [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && [ ! -L "$claude_bin" ]; then
+            if [ -n "$claude_bin" ] && [ -x "$claude_bin" ]; then
                 "$claude_bin" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             else
                 true
@@ -270,7 +270,7 @@ is_command_usable() {
         claude)
             local claude_bin
             claude_bin=$(command -v claude 2>/dev/null || true)
-            [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && [ ! -L "$claude_bin" ] && timeout 3 bash -c '"$0" --version >/dev/null 2>&1' "$claude_bin"
+            [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && timeout 3 bash -c '"$0" --version >/dev/null 2>&1' "$claude_bin"
             ;;
         *) command -v "$cmd" >/dev/null 2>&1 ;;
     esac
@@ -313,7 +313,7 @@ run_smoke_test() {
         claude)
             local claude_bin
             claude_bin=$(command -v claude 2>/dev/null || true)
-            [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && [ ! -L "$claude_bin" ] && timeout 8 bash -c '"$0" --help </dev/null >/dev/null 2>&1' "$claude_bin"
+            [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && timeout 8 bash -c '"$0" --help </dev/null >/dev/null 2>&1' "$claude_bin"
             ;;
         *) timeout 8 bash -c "$cmd --help >/dev/null 2>&1 || $cmd --version >/dev/null 2>&1" ;;
     esac

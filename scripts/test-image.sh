@@ -151,6 +151,7 @@ add_expected_version EXPECT_OPENVSCODE_VERSION "$(get_expected_version OPENVSCOD
 add_expected_version EXPECT_TTYD_VERSION "$(get_expected_version TTYD_VERSION)"
 add_expected_version EXPECT_CLAUDE_CODE_VERSION "$(get_expected_version CLAUDE_CODE_VERSION)"
 add_expected_version EXPECT_RTK_VERSION "$(get_expected_version RTK_VERSION)"
+add_expected_version EXPECT_PLANNOTATOR_VERSION "$(get_expected_version PLANNOTATOR_VERSION)"
 
 echo "=========================================="
 echo "Pulling image: $IMAGE_NAME"

@@ -132,6 +132,9 @@ RUN . /tmp/buntoolbox-layers/09-claude.env && bash /tmp/buntoolbox-layers/09-cla
 COPY docker/layers/09-rtk.env docker/layers/09-rtk.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/09-rtk.env && bash /tmp/buntoolbox-layers/09-rtk.sh
 
+COPY docker/layers/09-plannotator.env docker/layers/09-plannotator.sh /tmp/buntoolbox-layers/
+RUN . /tmp/buntoolbox-layers/09-plannotator.env && bash /tmp/buntoolbox-layers/09-plannotator.sh
+
 # =============================================================================
 # 10. beads - most frequent (13 updates)
 # =============================================================================

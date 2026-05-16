@@ -296,7 +296,9 @@
       "Bash(TMUX_PLUGIN_MANAGER_PATH=\"$HOME/.tmux/plugins/\" ~/.tmux/plugins/tpm/bin/install_plugins:*)",
       "mcp__context7__query-docs",
       "Bash(set +e)",
-      "Bash(bash -lc 'type -a claude; command -V claude; declare -f claude')"
+      "Bash(bash -lc 'type -a claude; command -V claude; declare -f claude')",
+      "Bash(witr --version)",
+      "Bash(rtk curl *)"
     ],
     "deny": [],
     "ask": [],

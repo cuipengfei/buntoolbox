@@ -48,3 +48,6 @@ vendor/
 coverage/
 .cache/
 tmp/
+.beads/
+.omo/
+omx_wiki/

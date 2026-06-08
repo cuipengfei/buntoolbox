@@ -161,3 +161,5 @@ bd show buntoolbox-xxx --json 2>/dev/null | jq .
 - **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.15.0`），安装方式为官方 tarball。
 - **WSL 目录约定**: 本地二进制安装优先放到 `~/.local/bin`，避开 nvm/sdkman 初始化带来的额外复杂度。
 - **会话关闭协议**: 宣称完成工作前：`git status` → `git add` → `git commit -m "<msg> (bd-xxx)"` → `git push`。提交信息**末尾带括号 issue ID**，方便 `bd doctor` / `bd orphans` 追溯；不存在 `bd sync` 命令，Dolt 同步靠 `bd hooks install`（一次性）或手动 `bd dolt commit`。
+
+@RTK.md

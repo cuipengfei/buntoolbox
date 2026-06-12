@@ -298,7 +298,13 @@
       "Bash(set +e)",
       "Bash(bash -lc 'type -a claude; command -V claude; declare -f claude')",
       "Bash(witr --version)",
-      "Bash(rtk curl *)"
+      "Bash(rtk curl *)",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_fetch_and_index",
+      "mcp__plugin_context-mode_context-mode__ctx_search",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file",
+      "Workflow(deep-research)",
+      "mcp__plugin_context-mode_context-mode__ctx_execute"
     ],
     "deny": [],
     "ask": [],

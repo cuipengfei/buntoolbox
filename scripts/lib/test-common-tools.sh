@@ -227,7 +227,6 @@ print_header
 check "vim" "vim --version | grep -oE 'Vi IMproved [0-9.]+' | grep -oE '[0-9.]+'" "printf 'ok\ngo-vim\n' > /tmp/vim-smoke.txt && vim -es -u NONE -c 'wq' /tmp/vim-smoke.txt && tail -1 /tmp/vim-smoke.txt" "go-vim" "Edit file in ex mode"
 check "nano" "nano --version | grep -oE '[0-9.]+' | head -1" "nano --help 2>&1 | head -1" "Usage:" "Show help"
 check_ver "helix" "hx --version | grep -oE '[0-9.]+' | head -1" "hx --health 2>&1 | head -1" "Config" "Health check" "EXPECT_HELIX_VERSION"
-check_ver "openvscode-server" "openvscode-server --version | head -1" "openvscode-server --help >/dev/null 2>&1 && echo ok" "ok" "Show help" "EXPECT_OPENVSCODE_VERSION"
 check_ver "ttyd" "ttyd --version | grep -oE '[0-9.]+' | head -1" "ttyd --version" "ttyd" "Verify installation" "EXPECT_TTYD_VERSION"
 
 echo ""
@@ -257,7 +256,6 @@ echo ""
 echo "=== Other Tools ==="
 print_header
 check_ver "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help | grep -qi 'beads' && echo ok" "ok" "Parse beads help output" "EXPECT_BEADS_VERSION"
-check_ver "claude" "claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'" "claude --help </dev/null 2>&1 | grep -q 'Usage: claude' && echo ok" "ok" "Parse CLI help output" "EXPECT_CLAUDE_CODE_VERSION"
 check_ver "rtk" "rtk --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "rtk --help 2>&1 | grep -q 'Usage:' && echo ok" "ok" "Show help" "EXPECT_RTK_VERSION"
 check_ver "plannotator" "plannotator --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "plannotator --help 2>&1 | grep -q 'Usage:' && echo ok" "ok" "Show help" "EXPECT_PLANNOTATOR_VERSION"
 check "gpg" "gpg --version | grep -oE '[0-9.]+' | head -1" "echo test | gpg --symmetric --batch --passphrase test -o /tmp/test.gpg && echo ok" "ok" "Symmetric encrypt"

@@ -3,4 +3,4 @@
 
 set -euo pipefail
 
-chmod +x /usr/local/bin/openvscode-start /usr/local/bin/ttyd-start
+chmod +x /usr/local/bin/ttyd-start

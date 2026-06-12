@@ -17,7 +17,6 @@ LABEL org.buntoolbox.variant="${BUNTOOLBOX_VARIANT}"
 LABEL org.buntoolbox.webtop.root-first="true"
 LABEL org.buntoolbox.webtop.http-port="3200"
 LABEL org.buntoolbox.webtop.https-port="3201"
-LABEL org.buntoolbox.openvscode.port="3000"
 LABEL org.buntoolbox.ttyd.port="7681"
 
 # Keep Webtop's /init GUI stack entrypoint.  Only root-first defaults and the
@@ -94,15 +93,11 @@ RUN . /tmp/buntoolbox-layers/07-procs.env && bash /tmp/buntoolbox-layers/07-proc
 COPY docker/layers/07-zellij.env docker/layers/07-zellij.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/07-zellij.env && bash /tmp/buntoolbox-layers/07-zellij.sh
 
-COPY docker/layers/07-openvscode.env docker/layers/07-openvscode.sh /tmp/buntoolbox-layers/
-RUN . /tmp/buntoolbox-layers/07-openvscode.env && bash /tmp/buntoolbox-layers/07-openvscode.sh
-
 COPY docker/layers/07-ttyd.env docker/layers/07-ttyd.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/07-ttyd.env && bash /tmp/buntoolbox-layers/07-ttyd.sh
 
 ENV HELIX_RUNTIME=/opt/helix-current/runtime
 
-COPY scripts/openvscode-start.sh /usr/local/bin/openvscode-start
 COPY scripts/ttyd-start.sh /usr/local/bin/ttyd-start
 COPY docker/layers/07-web-wrappers.sh /tmp/buntoolbox-layers/07-web-wrappers.sh
 RUN bash /tmp/buntoolbox-layers/07-web-wrappers.sh
@@ -129,9 +124,6 @@ RUN . /tmp/buntoolbox-layers/09-uv-pipx.env && bash /tmp/buntoolbox-layers/09-uv
 ENV UV_INSTALL_DIR=/root/.local/bin
 ENV PATH="${UV_INSTALL_DIR}:${PATH}"
 
-COPY docker/layers/09-claude.env docker/layers/09-claude.sh /tmp/buntoolbox-layers/
-RUN . /tmp/buntoolbox-layers/09-claude.env && bash /tmp/buntoolbox-layers/09-claude.sh
-
 COPY docker/layers/09-rtk.env docker/layers/09-rtk.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/09-rtk.env && bash /tmp/buntoolbox-layers/09-rtk.sh
 
@@ -157,11 +149,10 @@ RUN set -eux; \
       'buntoolbox_root_first=true' \
       'buntoolbox_webtop_http_port=3200' \
       'buntoolbox_webtop_https_port=3201' \
-      'buntoolbox_openvscode_port=3000' \
       'buntoolbox_ttyd_port=7681' \
       >> /etc/image-release
 
-EXPOSE 22 3000 3200 3201 7681
+EXPOSE 22 3200 3201 7681
 
 WORKDIR /workspace
 ENTRYPOINT ["/init"]

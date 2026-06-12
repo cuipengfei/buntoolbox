@@ -147,9 +147,7 @@ add_expected_version EXPECT_STARSHIP_VERSION "$(get_expected_version STARSHIP_VE
 add_expected_version EXPECT_PROCS_VERSION "$(get_expected_version PROCS_VERSION)"
 add_expected_version EXPECT_ZELLIJ_VERSION "$(get_expected_version ZELLIJ_VERSION)"
 add_expected_version EXPECT_DUF_VERSION "$(get_expected_version DUF_VERSION)"
-add_expected_version EXPECT_OPENVSCODE_VERSION "$(get_expected_version OPENVSCODE_VERSION)"
 add_expected_version EXPECT_TTYD_VERSION "$(get_expected_version TTYD_VERSION)"
-add_expected_version EXPECT_CLAUDE_CODE_VERSION "$(get_expected_version CLAUDE_CODE_VERSION)"
 add_expected_version EXPECT_RTK_VERSION "$(get_expected_version RTK_VERSION)"
 add_expected_version EXPECT_PLANNOTATOR_VERSION "$(get_expected_version PLANNOTATOR_VERSION)"
 

@@ -81,11 +81,6 @@ get_latest_node() {
     curl -fsSL --max-time 5 "https://nodejs.org/dist/index.json" 2>/dev/null | jq -r --arg v "$major" '[.[] | select(.version | startswith("v" + $v + "."))][0].version' | sed 's/^v//'
 }
 
-get_latest_claude() {
-    curl -fsSL --max-time 5 "https://registry.npmjs.org/@anthropic-ai/claude-code" 2>/dev/null | \
-        jq -r '.["dist-tags"].stable'
-}
-
 get_latest_jdk_lts() {
     curl -fsSL --max-time 5 "https://endoflife.date/api/azul-zulu.json" 2>/dev/null | \
         jq -r '[.[] | select(.lts == true)] | sort_by(.cycle | tonumber) | reverse | .[0].cycle'
@@ -238,25 +233,6 @@ get_local_version() {
             (bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \
             bd --help 2>&1 | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+' || true) | head -1
             ;;
-        claude)
-            local claude_bin
-            claude_bin=$(command -v claude 2>/dev/null || true)
-            if [ -n "$claude_bin" ] && [ -x "$claude_bin" ]; then
-                "$claude_bin" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
-            else
-                true
-            fi
-            ;;
-        openvscode-server)
-            # Try to extract version from binary path (e.g., openvscode-server-v1.106.3-linux-x64)
-            local ovs_bin
-            ovs_bin=$(which openvscode-server 2>/dev/null)
-            if [ -n "$ovs_bin" ]; then
-                local real_path
-                real_path=$(readlink -f "$ovs_bin" 2>/dev/null || echo "$ovs_bin")
-                echo "$real_path" | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | sed 's/^v//' | head -1
-            fi
-            ;;
         *)
             "$cmd" $version_flag 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?[a-z]?'
             ;;
@@ -266,14 +242,7 @@ get_local_version() {
 is_command_usable() {
     local cmd="$1"
 
-    case "$cmd" in
-        claude)
-            local claude_bin
-            claude_bin=$(command -v claude 2>/dev/null || true)
-            [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && timeout 3 bash -c '"$0" --version >/dev/null 2>&1' "$claude_bin"
-            ;;
-        *) command -v "$cmd" >/dev/null 2>&1 ;;
-    esac
+    command -v "$cmd" >/dev/null 2>&1
 }
 
 run_smoke_test() {
@@ -306,15 +275,9 @@ run_smoke_test() {
         procs) timeout 8 bash -c "procs 1 >/dev/null 2>&1" ;;
         zellij) timeout 8 bash -c "zellij setup --check >/dev/null 2>&1" ;;
         duf) timeout 8 bash -c "duf >/dev/null 2>&1" ;;
-        openvscode-server) timeout 8 bash -c "openvscode-server --help >/dev/null 2>&1" ;;
         ttyd) timeout 8 bash -c "ttyd --help >/dev/null 2>&1" ;;
         bd) timeout 8 bash -c "bd --help >/dev/null 2>&1" ;;
         rtk) timeout 8 bash -c "rtk --help >/dev/null 2>&1" ;;
-        claude)
-            local claude_bin
-            claude_bin=$(command -v claude 2>/dev/null || true)
-            [ -n "$claude_bin" ] && [ -x "$claude_bin" ] && timeout 8 bash -c '"$0" --help </dev/null >/dev/null 2>&1' "$claude_bin"
-            ;;
         *) timeout 8 bash -c "$cmd --help >/dev/null 2>&1 || $cmd --version >/dev/null 2>&1" ;;
     esac
 }
@@ -421,12 +384,10 @@ check_tool "delta" "delta" "$(expected_or_latest DELTA_VERSION get_latest_github
 check_tool "procs" "procs" "$(expected_or_latest PROCS_VERSION get_latest_github_release dalance/procs)"
 check_tool "zellij" "zellij" "$(expected_or_latest ZELLIJ_VERSION get_latest_github_release zellij-org/zellij)"
 check_tool "duf" "duf" "$(expected_or_latest DUF_VERSION get_latest_github_release muesli/duf)"
-check_tool "openvscode" "openvscode-server" "$(expected_or_latest OPENVSCODE_VERSION get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')"
 check_tool "ttyd" "ttyd" "$(expected_or_latest TTYD_VERSION get_latest_github_release tsl0922/ttyd)"
 echo ""
 echo "=== 其他工具 ==="
 check_tool "beads (bd)" "bd" "$(expected_or_latest BEADS_VERSION get_latest_github_release gastownhall/beads)"
-check_tool "claude" "claude" "$(expected_or_latest CLAUDE_CODE_VERSION get_latest_claude)"
 check_tool "rtk" "rtk" "$(expected_or_latest RTK_VERSION get_latest_github_release rtk-ai/rtk)"
 check_tool "plannotator" "plannotator" "$(expected_or_latest PLANNOTATOR_VERSION get_latest_github_release backnotprop/plannotator)"
 

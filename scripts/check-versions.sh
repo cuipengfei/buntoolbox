@@ -154,11 +154,6 @@ get_latest_httpie() {
         jq -r '.info.version'
 }
 
-get_latest_claude() {
-    curl -fsSL --max-time 5 "https://registry.npmjs.org/@anthropic-ai/claude-code" 2>/dev/null | \
-        jq -r '.["dist-tags"].stable'
-}
-
 # Get linux x86_64 assets only (no arm, no windows, no macos, no other archs)
 get_linux_assets() {
     local repo="$1"
@@ -250,12 +245,10 @@ check_version "delta" "$(get_current_version DELTA_VERSION)" "$(get_latest_githu
 check_version "procs" "$(get_current_version PROCS_VERSION)" "$(get_latest_github_release dalance/procs)" "dalance/procs" "procs-v$(get_current_version PROCS_VERSION)-x86_64-linux.zip"
 check_version "zellij" "$(get_current_version ZELLIJ_VERSION)" "$(get_latest_github_release zellij-org/zellij)" "zellij-org/zellij" "zellij-x86_64-unknown-linux-musl.tar.gz"
 check_version "duf" "$(get_current_version DUF_VERSION)" "$(get_latest_github_release muesli/duf)" "muesli/duf" "duf_$(get_current_version DUF_VERSION)_linux_amd64.deb"
-check_version "openvscode" "$(get_current_version OPENVSCODE_VERSION)" "$(get_latest_github_release gitpod-io/openvscode-server | sed 's/^openvscode-server-v//')" "gitpod-io/openvscode-server" "openvscode-server-v$(get_current_version OPENVSCODE_VERSION)-linux-x64.tar.gz"
 check_version "ttyd" "$(get_current_version TTYD_VERSION)" "$(get_latest_github_release tsl0922/ttyd)" "tsl0922/ttyd" "ttyd.x86_64"
 echo ""
 echo "=== 其他工具 ==="
 check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release gastownhall/beads)" "gastownhall/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
-check_version "claude" "$(get_current_version CLAUDE_CODE_VERSION)" "$(get_latest_claude)" "" ""
 check_version "rtk" "$(get_current_version RTK_VERSION)" "$(get_latest_github_release rtk-ai/rtk)" "rtk-ai/rtk" "rtk-$(get_current_version RTK_VERSION)-x86_64-unknown-linux-musl.tar.gz"
 check_version "plannotator" "$(get_current_version PLANNOTATOR_VERSION)" "$(get_latest_github_release backnotprop/plannotator)" "backnotprop/plannotator" "plannotator-linux-x64"
 

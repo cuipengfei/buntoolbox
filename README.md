@@ -6,16 +6,16 @@
 
 ## 包含组件
 
-- **运行时**: Bun, Node.js 24, Python 3.14 (pip/uv/pipx), HTTPie, Claude Code, rtk (Rust Token Killer)
+- **运行时**: Bun, Node.js 24, Python 3.14 (pip/uv/pipx), HTTPie, rtk (Rust Token Killer)
 - **JDK**: Azul Zulu 25 headless
 - **基础镜像**: Ubuntu 26.04 LTS
-- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, duf, HTTPie, Claude Code, rtk, zsh (oh-my-zsh), bd, sshd, openvscode-server, ttyd 等
+- **常用工具**: git, gh, jq, ripgrep, fd, fzf, tmux, zellij, lazygit, helix, bat, eza, delta, btop, starship, zoxide, procs, duf, HTTPie, rtk, zsh (oh-my-zsh), bd, sshd, ttyd 等
 
 ## 使用方式
 
 ### Image Variants
 
-- `cuipengfei/buntoolbox:latest` 是既有 terminal/TUI image，面向 shell、SSH、OpenVSCode Server 和 ttyd 等开发工作流。
+- `cuipengfei/buntoolbox:latest` 是既有 terminal/TUI image，面向 shell、SSH 和 ttyd 等开发工作流。
 - `cuipengfei/buntoolbox:i3` 是 browser-delivered i3 desktop image，面向需要在浏览器里打开 i3 desktop GUI 的场景。
 - `cuipengfei/buntoolbox:kde` 是 browser-delivered KDE desktop image，面向需要更接近传统桌面/Windows-like GUI 的场景。
 - `latest` 不包含 GUI desktop stack；需要浏览器桌面时请显式选择 `i3` 或 `kde` tag。
@@ -34,7 +34,6 @@ docker run -it cuipengfei/buntoolbox
 
 - `3200`: webtop GUI HTTP endpoint
 - `3201`: webtop GUI HTTPS endpoint
-- `3000`: OpenVSCode Server (`openvscode-start` 默认端口)
 - `7681`: ttyd web terminal
 
 ```powershell
@@ -42,7 +41,6 @@ docker run -d --name mydev-i3 `
   --shm-size=1gb `
   -p 3200:3200 `
   -p 3201:3201 `
-  -p 3000:3000 `
   -p 7681:7681 `
   -v ${PWD}:/workspace `
   cuipengfei/buntoolbox:i3
@@ -51,17 +49,16 @@ docker run -d --name mydev-i3 `
 #   http://localhost:3200
 #   https://localhost:3201
 # Optional developer services inside the same container:
-#   openvscode-start   # serves on http://localhost:3000 by default
 #   ttyd-start         # serves on http://localhost:7681 by default
 ```
 
 Desktop runtime note: keep at least `--shm-size=1gb` or an equivalent shared-memory setting for browser/desktop workloads. Without enough `/dev/shm`, Chromium- or desktop-heavy sessions may become unstable.
 
-Security note: treat the i3 desktop endpoint as local-only unless you add appropriate protection. Do not expose `3200`/`3201`, `3000`, or `7681` directly to the public internet without authentication, TLS/proxy controls, firewall rules, or another access-control layer.
+Security note: treat the i3 desktop endpoint as local-only unless you add appropriate protection. Do not expose `3200`/`3201` or `7681` directly to the public internet without authentication, TLS/proxy controls, firewall rules, or another access-control layer.
 
 Root-first note: `buntoolbox:i3` is designed for normal interactive workflows as `root` with `HOME=/root`. The LinuxServer/Webtop base may still contain an `abc` account for upstream compatibility, but `abc` is not the normal buntoolbox i3 desktop workflow.
 
-Validation note: CI builds and tests all variants before publishing. `latest` runs the common toolchain smoke tests; browser desktop variants run the same common tests plus checks for webtop on `3200`, OpenVSCode availability on `3000`, root-first session behavior, and absence of critical `abc` GUI processes.
+Validation note: CI builds and tests all variants before publishing. `latest` runs the common toolchain smoke tests; browser desktop variants run the same common tests plus checks for webtop on `3200`, root-first session behavior, and absence of critical `abc` GUI processes.
 
 ### Browser KDE Desktop Variant
 
@@ -69,7 +66,6 @@ Validation note: CI builds and tests all variants before publishing. `latest` ru
 
 - `3200`: webtop GUI HTTP endpoint
 - `3201`: webtop GUI HTTPS endpoint
-- `3000`: OpenVSCode Server (`openvscode-start` 默认端口)
 - `7681`: ttyd web terminal
 
 ```powershell
@@ -77,7 +73,6 @@ docker run -d --name mydev-kde `
   --shm-size=1gb `
   -p 3200:3200 `
   -p 3201:3201 `
-  -p 3000:3000 `
   -p 7681:7681 `
   -v ${PWD}:/workspace `
   cuipengfei/buntoolbox:kde
@@ -86,7 +81,6 @@ docker run -d --name mydev-kde `
 #   http://localhost:3200
 #   https://localhost:3201
 # Optional developer services inside the same container:
-#   openvscode-start   # serves on http://localhost:3000 by default
 #   ttyd-start         # serves on http://localhost:7681 by default
 ```
 
@@ -113,7 +107,6 @@ docker run --rm -d --name mydev-kde-gpu `
   -e DISABLE_DRI3=true `
   -p 3200:3200 `
   -p 3201:3201 `
-  -p 3000:3000 `
   -p 7681:7681 `
   -v ${PWD}:/workspace `
   cuipengfei/buntoolbox:kde
@@ -201,23 +194,6 @@ ssh -p 2222 root@localhost
 #     HostName localhost
 #     Port 2222
 #     User root
-```
-
-### OpenVSCode Server (Browser-based VS Code)
-
-```powershell
-# Quick start (default port 3000, no authentication)
-docker run -d -p 3000:3000 --name mydev-web cuipengfei/buntoolbox:latest openvscode-start
-
-# Custom port
-docker run -d -p 8080:8080 --name mydev-web cuipengfei/buntoolbox:latest openvscode-start 8080
-
-# With connection token for security
-docker run -d -p 3000:3000 --name mydev-web cuipengfei/buntoolbox:latest \
-  openvscode-server --host 0.0.0.0 --port 3000 --connection-token mypassword
-
-# Visit http://localhost:3000 in your browser
-# Full VS Code experience in the browser, no installation needed!
 ```
 
 ### ttyd Web Terminal (Lightweight Browser Terminal)

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Check versions of tools installed in local WSL environment
-# Compares against latest available versions (same sources as check-versions.sh)
+# Compares against project targets, apt candidates, or upstream fallbacks
+# depending on how each tool is managed.
 # Usage: ./scripts/check-wsl-versions.sh [-v|--verbose] [--smoke]
 
 set -e
@@ -289,7 +290,7 @@ run_smoke_test() {
 echo ""
 echo "Checking WSL tool versions..."
 echo ""
-printf "%-12s %-10s %-12s %-12s %-8s %s\n" "Tool" "Installed" "Local" "Latest" "Smoke" "Status"
+printf "%-12s %-10s %-12s %-12s %-8s %s\n" "Tool" "Installed" "Local" "Target" "Smoke" "Status"
 printf "%-12s %-10s %-12s %-12s %-8s %s\n" "----" "---------" "-----" "------" "-----" "------"
 
 updates_available=0

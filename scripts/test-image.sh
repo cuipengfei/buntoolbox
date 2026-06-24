@@ -150,6 +150,7 @@ add_expected_version EXPECT_DUF_VERSION "$(get_expected_version DUF_VERSION)"
 add_expected_version EXPECT_TTYD_VERSION "$(get_expected_version TTYD_VERSION)"
 add_expected_version EXPECT_RTK_VERSION "$(get_expected_version RTK_VERSION)"
 add_expected_version EXPECT_PLANNOTATOR_VERSION "$(get_expected_version PLANNOTATOR_VERSION)"
+add_expected_version EXPECT_HERDR_VERSION "$(get_expected_version HERDR_VERSION)"
 
 echo "=========================================="
 echo "Pulling image: $IMAGE_NAME"

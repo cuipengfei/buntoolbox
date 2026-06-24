@@ -258,6 +258,7 @@ print_header
 check_ver "bd" "bd --version | grep -oE '[0-9.]+' | head -1" "bd --help | grep -qi 'beads' && echo ok" "ok" "Parse beads help output" "EXPECT_BEADS_VERSION"
 check_ver "rtk" "rtk --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "rtk --help 2>&1 | grep -q 'Usage:' && echo ok" "ok" "Show help" "EXPECT_RTK_VERSION"
 check_ver "plannotator" "plannotator --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "plannotator --help 2>&1 | grep -q 'Usage:' && echo ok" "ok" "Show help" "EXPECT_PLANNOTATOR_VERSION"
+check_ver "herdr" "herdr --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1" "herdr --help 2>&1 | grep -q 'Usage:' && echo ok" "ok" "Show help" "EXPECT_HERDR_VERSION"
 check "gpg" "gpg --version | grep -oE '[0-9.]+' | head -1" "echo test | gpg --symmetric --batch --passphrase test -o /tmp/test.gpg && echo ok" "ok" "Symmetric encrypt"
 check "lsb_release" "lsb_release -rs" "lsb_release -a 2>&1" "Ubuntu" "Show distro info"
 

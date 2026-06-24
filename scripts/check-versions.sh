@@ -251,6 +251,7 @@ echo "=== 其他工具 ==="
 check_version "beads" "$(get_current_version BEADS_VERSION)" "$(get_latest_github_release gastownhall/beads)" "gastownhall/beads" "beads_$(get_current_version BEADS_VERSION)_linux_amd64.tar.gz"
 check_version "rtk" "$(get_current_version RTK_VERSION)" "$(get_latest_github_release rtk-ai/rtk)" "rtk-ai/rtk" "rtk-$(get_current_version RTK_VERSION)-x86_64-unknown-linux-musl.tar.gz"
 check_version "plannotator" "$(get_current_version PLANNOTATOR_VERSION)" "$(get_latest_github_release backnotprop/plannotator)" "backnotprop/plannotator" "plannotator-linux-x64"
+check_version "herdr" "$(get_current_version HERDR_VERSION)" "$(get_latest_github_release ogulcancelik/herdr)" "ogulcancelik/herdr" "herdr-linux-x86_64"
 
 echo ""
 if [ $updates_available -eq 1 ]; then

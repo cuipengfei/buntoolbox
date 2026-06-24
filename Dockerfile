@@ -128,6 +128,9 @@ RUN . /tmp/buntoolbox-layers/09-rtk.env && bash /tmp/buntoolbox-layers/09-rtk.sh
 COPY docker/layers/09-plannotator.env docker/layers/09-plannotator.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/09-plannotator.env && bash /tmp/buntoolbox-layers/09-plannotator.sh
 
+COPY docker/layers/09-herdr.env docker/layers/09-herdr.sh /tmp/buntoolbox-layers/
+RUN . /tmp/buntoolbox-layers/09-herdr.env && bash /tmp/buntoolbox-layers/09-herdr.sh
+
 # =============================================================================
 # 10. beads - most frequent (13 updates)
 # =============================================================================

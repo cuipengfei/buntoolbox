@@ -391,6 +391,7 @@ echo "=== 其他工具 ==="
 check_tool "beads (bd)" "bd" "$(expected_or_latest BEADS_VERSION get_latest_github_release gastownhall/beads)"
 check_tool "rtk" "rtk" "$(expected_or_latest RTK_VERSION get_latest_github_release rtk-ai/rtk)"
 check_tool "plannotator" "plannotator" "$(expected_or_latest PLANNOTATOR_VERSION get_latest_github_release backnotprop/plannotator)"
+check_tool "herdr" "herdr" "$(expected_or_latest HERDR_VERSION get_latest_github_release ogulcancelik/herdr)"
 
 echo ""
 echo "----------------------------------------"

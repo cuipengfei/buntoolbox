@@ -130,6 +130,9 @@ RUN . /tmp/buntoolbox-layers/09-rtk.env && bash /tmp/buntoolbox-layers/09-rtk.sh
 COPY docker/layers/09-plannotator.env docker/layers/09-plannotator.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/09-plannotator.env && bash /tmp/buntoolbox-layers/09-plannotator.sh
 
+COPY docker/layers/09-herdr.env docker/layers/09-herdr.sh /tmp/buntoolbox-layers/
+RUN . /tmp/buntoolbox-layers/09-herdr.env && bash /tmp/buntoolbox-layers/09-herdr.sh
+
 ARG BEADS_VERSION
 COPY docker/layers/10-beads.env docker/layers/10-beads.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/10-beads.env && bash /tmp/buntoolbox-layers/10-beads.sh

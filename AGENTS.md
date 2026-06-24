@@ -23,7 +23,7 @@ buntoolbox/
 | Task | Location | Notes |
 |------|----------|-------|
 | 工具版本更新 | `docker/layers/*.env`, `scripts/` | 修改共享版本 snippet 后，必须先运行 `check-versions.sh` 与 `check-wsl-versions.sh`；`latest`、`i3` 与 `kde` 共用这些版本来源。 |
-| CI 镜像构建 | `.github/workflows/` | Push / PR / v* tag 触发构建。PR build/test 但不 push；default branch 发布 `latest`、`i3` 和 `kde`；release tag 发布 semver、`i3-*` 与 `kde-*` tags。 |
+| CI 镜像构建 | `.github/workflows/` | Push to master / v* tag / workflow_dispatch 触发构建。push to master 只构建+推送 `latest`；release tag (v*) 构建并推送全部三个 variant (`latest`/`i3`/`kde`)，三个 job 并行；`workflow_dispatch` 可手动触发任意 variant。无 PR 触发。 |
 | 验证构建结果 | `scripts/test-image.sh`| CI 完成后验证镜像。`latest` 跑 common checks；`i3` / `kde` 跑 common checks + shared webtop/root-first runtime checks + desktop-specific checks。 |
 | 本地开发环境 | `scripts/check-wsl-versions.sh` | 检查并保证本地 WSL 工具与上游版本一致。 |
 | Issue 追踪 | bd (beads) 命令行工具 | `bd ready`, `bd create`, `bd close`。不要用 Markdown TODO 列表。 |
@@ -146,7 +146,7 @@ bd show buntoolbox-xxx --json 2>/dev/null | jq .
    - 脚本语法：`bash -n scripts/*.sh`（至少覆盖改动脚本）。
    - 版本检查：`./scripts/check-versions.sh`、`./scripts/check-wsl-versions.sh`。
    - 镜像验证：`./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest`、`./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3` 和 `./scripts/test-image.sh --variant kde --image cuipengfei/buntoolbox:kde`。
-   - 说明：若远端 `latest` / `i3` / `kde` 尚未由 CI 重建，`test-image.sh` 可能出现预期版本差异，属正常现象；此时先让 GitHub Actions 构建并发布三个 tags，再跑 post-push image tests。
+   - 说明：若远端 `latest` / `i3` / `kde` 尚未由 CI 重建，`test-image.sh` 可能出现预期版本差异，属正常现象；push to master 只发布 `latest`，tag v* 才发布全部三个，再跑 post-push image tests。
 
 7. **提交与推送**
    - `git add` 相关文件 → `git commit` → `git push`。
@@ -154,8 +154,8 @@ bd show buntoolbox-xxx --json 2>/dev/null | jq .
 
 8. **CI 收口**
    - `gh run watch` 监视 GitHub Actions 构建进度。
-   - CI 必须先测试 `buntoolbox:ci-latest-test`、`buntoolbox:ci-i3-test` 和 `buntoolbox:ci-kde-test`，再发布 `latest`、`i3` 与 `kde`。
-   - 构建完成后分别执行 `./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest`、`./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3` 与 `./scripts/test-image.sh --variant kde --image cuipengfei/buntoolbox:kde`，确保三个发布后镜像版本与功能检查全绿。
+   - CI 先测试 `buntoolbox:ci-latest-test` 再发布 `latest`；tag v* 时额外测试 `buntoolbox:ci-i3-test` 和 `buntoolbox:ci-kde-test` 再发布 `i3` 与 `kde`。
+   - 构建完成后执行 `./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest` 验证 latest；tag v* 发布后额外执行 `--variant i3` 和 `--variant kde` 验证。
 
 ## NOTES
 - **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.15.0`），安装方式为官方 tarball。

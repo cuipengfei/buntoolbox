@@ -239,7 +239,6 @@ check_version "zoxide" "$(get_current_version ZOXIDE_VERSION)" "$(get_latest_git
 echo ""
 echo "=== TUI 工具 ==="
 check_version "lazygit" "$(get_current_version LAZYGIT_VERSION)" "$(get_latest_github_release jesseduffield/lazygit)" "jesseduffield/lazygit" "lazygit_$(get_current_version LAZYGIT_VERSION)_linux_x86_64.tar.gz"
-check_version "helix" "$(get_current_version HELIX_VERSION)" "$(get_latest_github_release helix-editor/helix)" "helix-editor/helix" "helix-$(get_current_version HELIX_VERSION)-x86_64-linux.tar.xz"
 check_version "eza" "$(get_current_version EZA_VERSION)" "$(get_latest_github_release eza-community/eza)" "eza-community/eza" "eza_x86_64-unknown-linux-gnu.tar.gz"
 check_version "delta" "$(get_current_version DELTA_VERSION)" "$(get_latest_github_release dandavison/delta)" "dandavison/delta" "delta-$(get_current_version DELTA_VERSION)-x86_64-unknown-linux-musl.tar.gz"
 check_version "procs" "$(get_current_version PROCS_VERSION)" "$(get_latest_github_release dalance/procs)" "dalance/procs" "procs-v$(get_current_version PROCS_VERSION)-x86_64-linux.zip"

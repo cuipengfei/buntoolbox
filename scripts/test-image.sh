@@ -139,7 +139,6 @@ add_expected_version EXPECT_HTTPIE_VERSION "$(get_expected_version HTTPIE_VERSIO
 add_expected_version EXPECT_UV_VERSION "$(get_expected_version UV_VERSION)"
 add_expected_version EXPECT_BEADS_VERSION "$(get_expected_version BEADS_VERSION)"
 add_expected_version EXPECT_LAZYGIT_VERSION "$(get_expected_version LAZYGIT_VERSION)"
-add_expected_version EXPECT_HELIX_VERSION "$(get_expected_version HELIX_VERSION)"
 add_expected_version EXPECT_EZA_VERSION "$(get_expected_version EZA_VERSION)"
 add_expected_version EXPECT_DELTA_VERSION "$(get_expected_version DELTA_VERSION)"
 add_expected_version EXPECT_ZOXIDE_VERSION "$(get_expected_version ZOXIDE_VERSION)"

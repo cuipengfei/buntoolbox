@@ -81,9 +81,6 @@ RUN . /tmp/buntoolbox-layers/07-zoxide.env && bash /tmp/buntoolbox-layers/07-zox
 COPY docker/layers/07-duf.env docker/layers/07-duf.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/07-duf.env && bash /tmp/buntoolbox-layers/07-duf.sh
 
-COPY docker/layers/07-helix.env docker/layers/07-helix.sh /tmp/buntoolbox-layers/
-RUN . /tmp/buntoolbox-layers/07-helix.env && bash /tmp/buntoolbox-layers/07-helix.sh
-
 COPY docker/layers/07-starship.env docker/layers/07-starship.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/07-starship.env && bash /tmp/buntoolbox-layers/07-starship.sh
 
@@ -95,8 +92,6 @@ RUN . /tmp/buntoolbox-layers/07-zellij.env && bash /tmp/buntoolbox-layers/07-zel
 
 COPY docker/layers/07-ttyd.env docker/layers/07-ttyd.sh /tmp/buntoolbox-layers/
 RUN . /tmp/buntoolbox-layers/07-ttyd.env && bash /tmp/buntoolbox-layers/07-ttyd.sh
-
-ENV HELIX_RUNTIME=/opt/helix-current/runtime
 
 COPY scripts/ttyd-start.sh /usr/local/bin/ttyd-start
 COPY docker/layers/07-web-wrappers.sh /tmp/buntoolbox-layers/07-web-wrappers.sh

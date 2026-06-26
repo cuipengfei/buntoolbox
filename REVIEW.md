@@ -10,7 +10,7 @@ Buntoolbox is already well-designed for this exact use case. The image provides:
 - Comprehensive multi-language support (Java, Python, Node.js/Bun)
 - Modern CLI tools that match or exceed WSL developer experience
 - Solid foundation with Ubuntu 26.04 LTS
-- Good editor support (vim, nano, helix)
+- Good editor support (vim, nano)
 - Essential version control tooling (git, gh, lazygit)
 
 ---
@@ -25,7 +25,7 @@ Buntoolbox is already well-designed for this exact use case. The image provides:
 | **Build Tools** | Maven, Gradle 9.x, make, cmake, ninja | Complete JVM/C++ support |
 | **Package Managers** | npm, uv, uvx, pipx | Modern Python tooling with uv |
 | **Version Control** | git, git-lfs, gh, lazygit | Full Git workflow support |
-| **Editors** | vim, nano, helix | TUI editing covered |
+| **Editors** | vim, nano | TUI editing covered |
 | **Shell Enhancements** | starship, zoxide, direnv, fzf | Modern shell experience |
 | **TUI Utilities** | bat, eza, delta, btop, htop, ripgrep, fd | Excellent CLI replacement tools |
 | **Networking** | curl, wget | Basic network tooling |

@@ -206,9 +206,6 @@ get_local_version() {
         lazygit)
             lazygit --version 2>/dev/null | grep -oE 'version=[0-9]+\.[0-9]+\.[0-9]+' | head -1 | sed 's/version=//'
             ;;
-        hx)
-            hx --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
-            ;;
         eza)
             eza --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | sed 's/^v//'
             ;;
@@ -270,7 +267,6 @@ run_smoke_test() {
         zoxide) timeout 8 bash -c "zoxide add /tmp >/dev/null 2>&1 && zoxide query tmp >/dev/null 2>&1" ;;
         zsh) timeout 8 bash -c "zsh -c 'echo ok' >/dev/null" ;;
         lazygit) timeout 8 bash -c "lazygit --version >/dev/null 2>&1" ;;
-        hx) timeout 8 bash -c "hx --health >/dev/null 2>&1 || hx --version >/dev/null 2>&1" ;;
         eza) timeout 8 bash -c "eza -1 / >/dev/null 2>&1" ;;
         delta) timeout 8 bash -c "printf 'a\nb\n' | delta >/dev/null 2>&1" ;;
         procs) timeout 8 bash -c "procs 1 >/dev/null 2>&1" ;;
@@ -379,7 +375,6 @@ check_tool "zsh" "zsh" "$(get_latest_apt_candidate zsh)"
 echo ""
 echo "=== TUI 工具 ==="
 check_tool "lazygit" "lazygit" "$(expected_or_latest LAZYGIT_VERSION get_latest_github_release jesseduffield/lazygit)"
-check_tool "helix" "hx" "$(expected_or_latest HELIX_VERSION get_latest_github_release helix-editor/helix)"
 check_tool "eza" "eza" "$(expected_or_latest EZA_VERSION get_latest_github_release eza-community/eza)"
 check_tool "delta" "delta" "$(expected_or_latest DELTA_VERSION get_latest_github_release dandavison/delta)"
 check_tool "procs" "procs" "$(expected_or_latest PROCS_VERSION get_latest_github_release dalance/procs)"

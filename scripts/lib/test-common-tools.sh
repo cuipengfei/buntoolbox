@@ -226,7 +226,6 @@ echo "=== Editors ==="
 print_header
 check "vim" "vim --version | grep -oE 'Vi IMproved [0-9.]+' | grep -oE '[0-9.]+'" "printf 'ok\ngo-vim\n' > /tmp/vim-smoke.txt && vim -es -u NONE -c 'wq' /tmp/vim-smoke.txt && tail -1 /tmp/vim-smoke.txt" "go-vim" "Edit file in ex mode"
 check "nano" "nano --version | grep -oE '[0-9.]+' | head -1" "nano --help 2>&1 | head -1" "Usage:" "Show help"
-check_ver "helix" "hx --version | grep -oE '[0-9.]+' | head -1" "hx --health 2>&1 | head -1" "Config" "Health check" "EXPECT_HELIX_VERSION"
 check_ver "ttyd" "ttyd --version | grep -oE '[0-9.]+' | head -1" "ttyd --version" "ttyd" "Verify installation" "EXPECT_TTYD_VERSION"
 
 echo ""

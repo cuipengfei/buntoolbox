@@ -223,7 +223,6 @@ docker run -d -p 7681:7681 --name mydev-ttyd cuipengfei/buntoolbox:latest \
 
 ## Documentation
 
-- [REVIEW.md](REVIEW.md) - Detailed assessment for WSL replacement and tool recommendations
 - [CLAUDE.md](CLAUDE.md) - AI agent instructions and project overview
 - [AGENTS.md](AGENTS.md) - Issue tracking with bd (beads)
 

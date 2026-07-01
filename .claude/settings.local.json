@@ -309,7 +309,11 @@
       "mcp__jina__parallel_search_web",
       "mcp__plugin_context-mode_context-mode__ctx_index",
       "Bash(rtk ls *)",
-      "mcp__firecrawl__firecrawl_scrape"
+      "mcp__firecrawl__firecrawl_scrape",
+      "mcp__plugin_context-mode_context-mode__ctx_doctor",
+      "mcp__plugin_context-mode_context-mode__ctx_stats",
+      "mcp__headroom__headroom_stats",
+      "Bash(omp config *)"
     ],
     "deny": [],
     "ask": [],

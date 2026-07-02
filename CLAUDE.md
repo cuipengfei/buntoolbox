@@ -1,1 +1,1 @@
-/mnt/d/code/buntoolbox/AGENTS.md
+AGENTS.md

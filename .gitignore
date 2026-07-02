@@ -52,3 +52,4 @@ tmp/
 .omo/
 omx_wiki/
 docs/research/2026-06-06-proxy-bypass-techniques.md
+.claude/settings.local.json

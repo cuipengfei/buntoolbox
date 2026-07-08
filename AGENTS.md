@@ -26,7 +26,7 @@ buntoolbox/
 | CI 镜像构建 | `.github/workflows/` | Push to master / v* tag / workflow_dispatch 触发构建。push to master 只构建+推送 `latest`；release tag (v*) 构建并推送全部三个 variant (`latest`/`i3`/`kde`)，三个 job 并行；`workflow_dispatch` 可手动触发任意 variant。无 PR 触发。 |
 | 验证构建结果 | `scripts/test-image.sh`| CI 完成后验证镜像。`latest` 跑 common checks；`i3` / `kde` 跑 common checks + shared webtop/root-first runtime checks + desktop-specific checks。 |
 | 本地开发环境 | `scripts/check-wsl-versions.sh` | 检查并保证本地 WSL 工具与上游版本一致。 |
-| Issue 追踪 | bd (beads) 命令行工具 | `bd ready`, `bd create`, `bd close`。不要用 Markdown TODO 列表。 |
+| Issue 追踪 | GitHub Issues | 使用 `gh` CLI。详见 `docs/agents/issue-tracker.md`。 |
 
 ## CONVENTIONS
 - **交流语言**: 与用户交流主要用**中文**，代码与命令用英文。
@@ -36,7 +36,7 @@ buntoolbox/
 - **版本声明**: 工具版本以 `docker/layers/*.env` 作为共享来源，`Dockerfile` 与 `docker/webtop/Dockerfile` 在 point-of-use COPY/RUN 边界读取，避免 variants 漂移。
 
 ## ANTI-PATTERNS (THIS PROJECT)
-- ❌ **Markdown TODOs**: 禁用 Markdown 格式的任务列表，必须使用 `bd` 命令进行任务管理追踪。
+- ❌ **Markdown TODOs**: 禁用 Markdown 格式的任务列表，issue 追踪走 GitHub Issues（`gh` CLI）。
 - ❌ **删除关键底层目录**: 绝不允许删除 `/root/.local/share/uv` 或 `/usr/include/node` (分别影响 pipx 与原生模块编译)。
 - ❌ **未经确认自动 Commit**: 等待用户明确指令后方可 `git commit && git push`。
 - ❌ **覆盖 pip 安装**: 禁止使用 `pip install --upgrade pip` (PEP 668 限制，易破坏外部依赖记录)。
@@ -50,7 +50,6 @@ buntoolbox/
 - **浏览器桌面接入**: `cuipengfei/buntoolbox:i3` / `cuipengfei/buntoolbox:kde` 预置 Webtop browser desktop。Webtop HTTP/HTTPS 为 3200/3201；3000 保留给 `openvscode-start`；正常交互 root-first，`HOME=/root`。
 - **KDE GPU 接入边界**: Windows + Docker Desktop + WSL2 下，KDE flavor 的可操作、已实测 GPU 路径是 WSLg/Mesa D3D12 的 GUI app OpenGL：`--device /dev/dxg`、只读挂载完整 `/usr/lib/wsl`、`LD_LIBRARY_PATH=/usr/lib/wsl/lib`、`GALLIUM_DRIVER=d3d12`、`LIBVA_DRIVER_NAME=d3d12`，并在 Webtop 场景设置 `DISABLE_DRI3=true`。验证优先看 `glxinfo -B` / `eglinfo` / `glxgears -info` 的 `D3D12 (...)`、`Microsoft Corporation`、`Accelerated: yes`。不要把 `btop`、`nvidia-smi`、`--gpus all` 或 GPU 出现在系统监控里当作 KDE/KWin compositor GPU 证据；KWin compositor、Webtop/Selkies stream encoding、GUI app OpenGL 是三层不同问题。LinuxServer/Webtop 官方文档承诺的是 `/dev/dri`/NVIDIA 路径，不承诺 WSLg `/dev/dxg`；Webtop/WSL2 中按 KWin 仍使用软件 compositor 设计。若完全没有 WSL2 backend，则不要按 KDE GPU 可用设计。
 - **Selkies VAAPI 实验边界**: 当前 LinuxServer Webtop 的 Selkies 服务是 `--mode=websockets` / Pixelflux 路径，`SELKIES_ENCODER` 不接受 `vah264enc` / `nvh264enc` 这类 GStreamer element 名；可接受值是 Webtop encoder 名如 `x264enc`、`x264enc-striped`、`jpeg`。VAAPI knob 是 `SELKIES_DRI_NODE` / `DRI_NODE`，例如 `SELKIES_DRI_NODE=/dev/dri/renderD128`，并配合 `SELKIES_USE_CPU=false`。本机 PoC：`vainfo --display drm --device /dev/dri/renderD128` 可报告 D3D12 H.264 EncSlice，但 FFmpeg `h264_vaapi` 产出 0-byte stream，GStreamer VAAPI encode 不可靠；因此不要把 KDE image 默认切到 VAAPI stream encoding，除非端到端 browser session 证明稳定、非空码流、无画质回退。
-- **bd 任务认领**: 用 `bd update <id> --claim`（原子写入 assignee + status=in_progress + started_at），优于手动 `--status in_progress`。**绝不**用 `bd edit`（开 $EDITOR，agent 无法交互），改字段一律 `bd update <id> --description/--title/--notes/--acceptance`。
 
 ## COMMANDS
 ```bash
@@ -62,54 +61,7 @@ buntoolbox/
 ./scripts/test-image.sh
 ./scripts/test-image.sh --variant i3 --image cuipengfei/buntoolbox:i3
 ./scripts/test-image.sh --variant kde --image cuipengfei/buntoolbox:kde
-
-# bd 任务认领与流转（v1.0.2 起推荐用法）
-bd update buntoolbox-xxx --claim --json          # 原子认领
-bd comments add buntoolbox-xxx "进展说明"          # 评论用 positional，不是 -m
-bd close buntoolbox-xxx --reason "Done" --json
-
-# 解析 bd JSON 输出时，必须 2>/dev/null 抛掉 .beads 权限警告
-bd show buntoolbox-xxx --json 2>/dev/null | jq .
 ```
-
-## BD WORKFLOW: Main ↔ Sub-Agent (MECE 5 切片)
-
-主代理与子代理造 bd issue 沟通时的最低线约定。完整调研记录见 bd issue `vn7 / dh2 / iuw / 1ms / s0l`。
-
-### 1. Handoff（主代理建 issue）
-- Issue body 五段模板：`# Task / # Scope / # Acceptance / # Constraints / # Executor notes`。
-- 长内容一律 `bd create "..." --body-file=/tmp/x.md`；**不要** inline `-d`（backtick / `!` / 引号会炒 shell）。
-- 需提示执行参数时用 `metadata.execution_*`：`agent_type / suggested_model / reasoning_effort / mode / parallel_group`；没依据不填。
-- `-p 0..4` 反映真实紧急度；issue_type 默认 `task`。
-
-### 2. 子代理执行契约
-1. `bd show <id> --json 2>/dev/null` 先读，不靠记忆。
-2. `bd update <id> --claim --json` 原子认领。
-3. **永不** `bd edit`（开 $EDITOR，agent 无法交互）。
-4. Acceptance 逐字当合同读。
-5. 不越界（不改 issue 未要求的文件）。
-
-### 3. 结果回写
-- **默认单条结构化评论**：`## Result / ## Evidence (表格) / ## Verification / ## Limits / ## Next action`。
-- 多评论**仅**用于：partial 中转 / 外部 blocker / 修正之前评论。
-- 每条 claim 挂证据（命令+输出 / `path:line` / URL / hash）；未验证部分明说。
-- `--reason` ≤120 字符；长报告进评论，不进 reason。
-
-### 4. 失败 / 部分完成恢复
-- crash → 主代理加 `FAILED:` 评论，然后 `bd reopen --reason "..."`（已关）或 `bd update --status open --assignee ""`（未关）。
-- 僵尸 claim → `bd stale --days 1 --status in_progress --json` 找出重置。
-- **不要** `bd close` 失败任务（会从 `bd ready` 隐藏）；保持 open + 失败评论。
-- `bd doctor`：先 `--dry-run` 或 `--fix -i`；**不要** `--fix --yes`（参考 issue #1062 历史损坏）。
-- 同一 issue 上 retry；scope 变了才开新 issue。
-
-### 5. 并行 / 依赖
-- **硬阻塞** → `bd dep add <child> <parent>`（真不能并行才用）。
-- **关联** → `bd dep relate <a> <b>`（see also，不阻塞）。
-- **层级** → `bd create --parent <epic-id>`；hierarchy ≠ 自动阻塞。
-- 子代理选活唯一入口是 `bd ready`，**不用** `bd list`。
-- `metadata.execution_parallel_group` 只是 orchestrator 提示，**不**是阻塞机制。
-- 多 agent 冲突解决 / merge 用 `bd merge-slot acquire/release` 串行化。
-- 只读 worker 加 `--readonly`；禁 auto-sync 加 `--sandbox`。
 
 ## WORKFLOW: 新增工具 / 版本升级（标准流程）
 
@@ -160,6 +112,20 @@ bd show buntoolbox-xxx --json 2>/dev/null | jq .
 ## NOTES
 - **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.15.0`），安装方式为官方 tarball。
 - **WSL 目录约定**: 本地二进制安装优先放到 `~/.local/bin`，避开 nvm/sdkman 初始化带来的额外复杂度。
-- **会话关闭协议**: 宣称完成工作前：`git status` → `git add` → `git commit -m "<msg> (bd-xxx)"` → `git push`。提交信息**末尾带括号 issue ID**，方便 `bd doctor` / `bd orphans` 追溯；不存在 `bd sync` 命令，Dolt 同步靠 `bd hooks install`（一次性）或手动 `bd dolt commit`。
+- **会话关闭协议**: 宣称完成工作前：`git status` → `git add` → `git commit -m "<msg>"` → `git push`。提交信息遵循 conventional commits 格式（`feat:` / `fix:` / `chore:` 等）。
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues（使用 `gh` CLI）；外部 PR 不作为 triage 请求面。See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+使用默认五个 triage 标签映射（不覆盖）。See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+single-context：根目录 `CONTEXT.md` + `docs/adr/`。See `docs/agents/domain.md`.
 
 @RTK.md

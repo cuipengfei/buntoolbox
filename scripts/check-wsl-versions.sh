@@ -225,7 +225,13 @@ get_local_version() {
             duf --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'
             ;;
         tmux)
-            tmux -V 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?[a-z]?'
+            if command -v dpkg-query &>/dev/null; then
+                dpkg-query -W -f='${Version}\n' tmux 2>/dev/null \
+                    | sed 's/-.*//' \
+                    | head -1
+            else
+                tmux -V 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?[a-z]?'
+            fi
             ;;
         bd)
             (bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \

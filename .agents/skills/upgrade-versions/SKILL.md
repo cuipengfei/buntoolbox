@@ -92,10 +92,16 @@ buntoolbox 仓库的标准升级闭环：查 Docker 镜像依赖与 WSL 本机�
 1. `gh run list --commit <sha> --limit 5 --json databaseId,name,status,conclusion,url`
 2. `gh run watch <id> --exit-status`
 3. **解析 job/step**，尤其 image test 相关 step 的 PASS/FAIL —— 不要只看 workflow 绿就完
-4. CI 发布后按需跑：
+4. **必须读取 GitHub Actions job/step 的原始日志**，不能只看 run conclusion、job conclusion 或摘要。
+   - 构建日志必须明确出现本次每个升级项的实际版本：工具名、目标版本。
+   - `test-image` 必须有实际日志输出；必须从日志中确认镜像测试命令、测试项及 PASS/FAIL 结果。
+   - 日志缺少任一升级项版本，或缺少 `test-image` 实际测试输出，均视为未完成，即使 workflow 为绿色。
+   - 优先使用 `gh run view <run-id> --job <job-id> --log`；必要时用 `gh api repos/{owner}/{repo}/actions/jobs/{job-id}/logs` 获取原始日志。
+   - 最终报告必须列出：run URL、job/step 名、升级项及日志中的版本证据、`test-image` 日志关键行、PASS/FAIL 计数。
+5. CI 发布后按需跑：
    - master push：`./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest`
    - `v*` tag 发布后才加 i3/kde
-5. 失败：贴 run URL + 失败 step + 日志关键行；不宣称完成
+6. 失败：贴 run URL + 失败 job/step + 原始日志关键行；不宣称完成
 
 ## 输出合同
 

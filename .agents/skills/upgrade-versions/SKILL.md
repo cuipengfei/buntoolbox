@@ -3,7 +3,7 @@ name: upgrade-versions
 description: >
   当用户要求检查或应用 buntoolbox 的 Docker/WSL 工具版本更新、bump
   docker/layers 版本号、commit/push 版本升级、观看 GitHub Actions
-  镜像构建、或在 CI 后验证 test-image 结果时使用。触发语包括
+  镜像构建，或验收对应 push 的 CI `test-image` 日志时使用。触发语包括
   "check updates for both wsl and docker"、"version upgrade checks"、
   "upgrade all for docker"、"commit push and watch gh action"、
   "test image tests in the build"、"升级版本检查"、"docker 和 wsl 都查一下"。
@@ -13,132 +13,141 @@ description: >
 
 ## 概述
 
-buntoolbox 仓库的标准升级闭环：查 Docker 镜像依赖与 WSL 本机工具版本 →
-（可选）升级 → commit/push → 盯 GitHub Actions → 验证 image test 全绿。
+buntoolbox 的标准闭环：查 Docker/WSL 版本 →（授权时）升级 → commit/push → 等 GitHub Actions → 读取 CI 原始 `test-image` 日志 → 完成。
 
-权威来源顺序（高到低）：
+CI 已成功推送镜像、且 CI 原始 `test-image` 日志验收完成，就是完成。默认禁止本机运行 `test-image.sh`。
 
-1. `AGENTS.md` 的 `WORKFLOW: 新增工具 / 版本升级（标准流程）`
+权威来源顺序：
+
+1. `AGENTS.md` 的“新增工具 / 版本升级（标准流程）”
 2. 本 skill
-3. 历史 session 做法（仅参考，不能覆盖前两者）
+3. 历史 session（只能参考）
 
-## 何时用
+## 模式
 
-- 用户说"查 docker 和 wsl 更新"、"升级版本"、"commit push 看 gh action"
-- 需要确认 CI 构建后 image test 是否真的跑过且 PASS
-- bump `docker/layers/*.env` 版本号
+### full-auto
 
-## 何时不用
+用户明说“full auto”“全自动”“一路做到底”或“check upgrade commit push watch 一条龙”时，自动连续执行 A→D。
 
-- 非 buntoolbox 仓库
-- 只问某个工具官网最新版（直接查官网，不走本流程）
-- 一般依赖审计、不涉及镜像构建
+### step-by-step（默认）
 
-## 模式门闩（必读）
+每个 major step 前需授权：
 
-每次进入流程前，先识别用户授权模式：
+- check：只读，默认允许；
+- upgrade：改文件；
+- commit + push；
+- watch CI + 日志验收。
 
-### 模式 1：full-auto
+## A. Check
 
-用户明说"full auto"、"全自动"、"一路做到底"、"check upgrade commit push watch 一条龙"。
+运行：
 
-允许：check → upgrade → commit → push → watch CI → verify test-image，
-阶段间不停点确认。仍受红线约束（不本地 build、不越 scope）。
+```bash
+git status --short --branch
+./scripts/check-versions.sh
+./scripts/check-wsl-versions.sh
+```
 
-### 模式 2：step-by-step（默认）
-
-未明说 full-auto 时默认此模式。每个 major step 前需用户授权：
-
-- check（只读，默认允许）
-- upgrade（改文件，需授权）
-- commit + push（需授权）
-- watch CI + verify test-image（需授权）
-
-**判断规则**：模糊时按 step-by-step 走，不要擅自升级到 full-auto。
-
-## 阶段
-
-### A. Check（只读，默认允许）
-
-1. `git status --short --branch` —— 记录起始工作区状态
-2. `./scripts/check-versions.sh` —— Docker 镜像依赖版本
-3. `./scripts/check-wsl-versions.sh` —— WSL 本机工具版本
-4. 汇总表：Tool / Current / Latest / Side(Docker|WSL) / Status
-
-输出后**停**。无升级授权不改任何文件。
-
-### B. Upgrade（需授权）
-
-触发语例：`upgrade all for docker`、`upgrade these`、`把这几个 bump 一下`。
+输出表必须分开写 Docker、WSL。
 
 规则：
 
-1. Docker bump：只改对应 `docker/layers/*.env`
-2. WSL bump：按检查脚本/官方源升级本机，不动无关工具
-3. 按 `AGENTS.md` 同步：check 脚本、test 脚本、README、image-release.txt
-4. **禁止本地 `docker build`** —— 让 GitHub Actions 做
-5. 改完重跑两 check 脚本，确认目标项到预期状态
-6. variant 边界：默认假设工具同时出现在 latest/i3/kde；只某 variant 用的工具要在 Dockerfile/README/test 明确
+- `current != latest` 不自动等于本机旧；
+- WSL 本机版本高于 repo target 时，不降级；
+- fetch failed 单列为未验证；
+- 无升级授权时，不改文件。
 
-### C. Commit + push（需授权）
+## B. Upgrade
 
-1. 只 stage 本次 bump 相关文件（`git add <具体文件>`，不要 `git add -A`）
-2. conventional commit：`chore: bump <工具> <旧> -> <新>`
-3. `git push`
-4. 记录 commit SHA
+规则：
 
-### D. Watch CI + verify test-image（需授权）
+1. Docker 版本只改对应 `docker/layers/*.env`。
+2. WSL 只改用户明确要求升级的本机工具。
+3. 按 `AGENTS.md` 同步需要的 checker、test、README 和 metadata。
+4. 禁止本地 `docker build`。
+5. 改后重跑两份 checker。
+6. 默认工具覆盖 `latest`、`i3`、`kde`；仅某 variant 使用时，必须明确边界。
 
-1. `gh run list --commit <sha> --limit 5 --json databaseId,name,status,conclusion,url`
-2. `gh run watch <id> --exit-status`
-3. **解析 job/step**，尤其 image test 相关 step 的 PASS/FAIL —— 不要只看 workflow 绿就完
-4. **必须读取 GitHub Actions job/step 的原始日志**，不能只看 run conclusion、job conclusion 或摘要。
-   - 构建日志必须明确出现本次每个升级项的实际版本：工具名、目标版本。
-   - `test-image` 必须有实际日志输出；必须从日志中确认镜像测试命令、测试项及 PASS/FAIL 结果。
-   - 日志缺少任一升级项版本，或缺少 `test-image` 实际测试输出，均视为未完成，即使 workflow 为绿色。
-   - 优先使用 `gh run view <run-id> --job <job-id> --log`；必要时用 `gh api repos/{owner}/{repo}/actions/jobs/{job-id}/logs` 获取原始日志。
-   - 最终报告必须列出：run URL、job/step 名、升级项及日志中的版本证据、`test-image` 日志关键行、PASS/FAIL 计数。
-5. CI 发布后按需跑：
-   - master push：`./scripts/test-image.sh --variant latest --image cuipengfei/buntoolbox:latest`
-   - `v*` tag 发布后才加 i3/kde
-6. 失败：贴 run URL + 失败 job/step + 原始日志关键行；不宣称完成
+## C. Commit + push
 
-## 输出合同
+1. 只 stage 本次变更文件；不用 `git add -A`。
+2. 用 conventional commit。
+3. `git push`。
+4. 记录 commit SHA。
 
-每次阶段结束输出：
+## D. GitHub Actions 日志验收
 
-- 当前阶段（A/B/C/D）
-- 模式（full-auto / step-by-step）
-- 改动文件清单（或"未改文件"）
-- commit SHA / push 结果 / run URL（若到该阶段）
-- 证据命令（实际跑过的）
-- blocked / 未验证项
+1. 找到该 commit 的 run：
 
-## 常见失败模式（历史 session 踩过的坑）
+```bash
+gh run list --commit <sha> --limit 5 \
+  --json databaseId,name,status,conclusion,url,headSha
+```
 
-| 坑 | 真相 | 对策 |
-|---|---|---|
-| 摘要层把 `current != latest` 显示成 up-to-date | 脚本逻辑：`current == latest` 才 up-to-date；不等就有更新 | 读脚本原始输出，不信二手摘要 |
-| WSL local > repo target 显示 "update available" | 本机版本高于仓库 target，不等于本机旧 | 比对版本值，不迷信状态文字 |
-| `fetch failed`（如 httpie）被当成 up-to-date | fetch 失败时无法判断 | 单独标 "fetch failed"，不装成 up-to-date |
-| push 到 master 后期望 i3/kde 已发布 | master 只发 latest；i3/kde 要 `v*` tag | 按 AGENTS.md variant 规则 |
-| CI 总绿就宣称 test-image 全过 | workflow 绿 ≠ test step PASS | 必须解析 test step 的 PASS/FAIL |
-| 把"检查通过"说成"已升级" | check 是只读 | 区分 check / upgrade 语义 |
+2. 等待完成：
+
+```bash
+gh run watch <run-id> --exit-status
+```
+
+3. 读取成功 job 的原始日志：
+
+```bash
+gh run view <run-id> --job <job-id> --log
+```
+
+必要时使用 GitHub Actions job log API。
+
+4. **完成门槛：**
+
+   - 对应 push 的 workflow 成功；
+   - 镜像 build-and-push step 成功；
+   - 原始日志出现本次每个升级项的实际版本；
+   - 原始日志出现 `test-image` 的实际输出和 PASS/FAIL 汇总。
+
+5. **满足完成门槛后立即停止。**
+
+   - 不 pull 发布镜像；
+   - 不运行 `./scripts/test-image.sh`；
+   - 不启动或修复本机 Docker Desktop；
+   - 不以“再确认一次”为理由追加本机验证。
+
+   只有用户明确说“本机复验”时，才允许运行本机 `test-image.sh`。
+
+6. master push 只构建和发布 `latest`。`i3` / `kde` 未运行是预期，不是遗漏；只有 `v*` tag 或对应 workflow_dispatch 才覆盖它们。
+
+## 最终输出合同
+
+最终回复必须从 GitHub Actions 原始日志中确认本次升级项确实进入镜像，但**只展示本次 push 改动包的版本变化表**。不要粘贴整份原始日志，也不要展示测试项、PASS 行或无关步骤。
+
+| 必填项 | 必须说明 |
+| --- | --- |
+| Push | commit SHA、提交内容 |
+| CI | run URL、job 名、workflow 结论 |
+| 覆盖范围 | 本次 push 实际构建/发布的 variant；未覆盖 variant 是否预期 |
+| 本次版本变化 | 仅列本次 push 修改的包：`包名 | 旧版本 | 新版本`；新版本必须已在原始 CI 日志中确认 |
+| 本机复验 | 默认“未运行；CI 日志验收即完成”；若用户明确要求才说明本机结果 |
+
+原始 `test-image` 日志的测试输出、PASS/FAIL 汇总和完成标记是内部验收条件；完整日志与这些细节不进入最终回复正文。
+
+失败时必须给：run URL、失败 job/step、原始日志关键行。不得宣称完成。
 
 ## 红线
 
-- 无授权：不改 env、不升级本机、不 commit、不 push
-- 永不本地 `docker build`
-- 不把"检查通过"说成"已升级"
-- 不把 CI 总绿且未读 test step 说成 test-image 全过
-- 不扩 scope 到无关重构
-- 未验证就标"未验证"，不补脑
+- 无授权：不改 env、不升级本机、不 commit、不 push。
+- 永不本地 `docker build`。
+- 默认永不本机运行 `test-image.sh`。
+- 不把 checker 通过说成已升级。
+- 不把 workflow 总绿当作 `test-image` 通过。
+- 不读原始 job 日志，不得宣称 CI 验收完成。
+- 不扩 scope 到无关重构。
 
-## 验证清单（宣称完成前）
+## 验证清单
 
-- [ ] 两 check 脚本都跑过，退出码已知
-- [ ] 若 upgrade：改的 env 文件列出，重跑 check 确认
-- [ ] 若 push：commit SHA 记录
-- [ ] 若 watch CI：run URL + 关键 step 状态（不只 workflow conclusion）
-- [ ] 若 verify test-image：实际命令 + PASS/FAIL 计数
-- [ ] 未完成项明确标注，不藏
+- [ ] 两份 checker 都运行，退出码已知。
+- [ ] 若升级：目标 `.env` 已列出，checker 已重跑。
+- [ ] 若 push：commit SHA 已记录。
+- [ ] 若 watch CI：run URL、job、step 已记录。
+- [ ] 原始日志已确认本次升级项版本，最终回复只列 `包名 | 旧版本 | 新版本`。
+- [ ] 原始 `test-image` 日志已完成内部 PASS/FAIL 验收，不粘贴其测试细节。
+- [ ] 未本机运行 `test-image.sh`；除非用户明确要求本机复验。

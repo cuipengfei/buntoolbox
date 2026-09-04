@@ -7,6 +7,7 @@ description: >
   "check updates for both wsl and docker"、"version upgrade checks"、
   "upgrade all for docker"、"commit push and watch gh action"、
   "test image tests in the build"、"升级版本检查"、"docker 和 wsl 都查一下"。
+  也适用于诊断版本 checker 的 `fetch failed`、远端抓取失败或需要重试版本检查的请求。
 ---
 
 # 升级版本检查 + CI 验证
@@ -56,6 +57,19 @@ git status --short --branch
 - WSL 本机版本高于 repo target 时，不降级；
 - fetch failed 单列为未验证；
 - 无升级授权时，不改文件。
+
+### Fetch failure / incomplete run handling
+
+- 等待每个 checker 进程到达终端状态后再汇总；中间输出不是结果。
+- 记录两个 checker 的退出码。若某行是 `fetch failed`，不得把它当成
+  `up-to-date` 或 `update available`。
+- 立即重跑受影响的 checker 一次。重试成功时，采用第二次结果，并说明首次
+  是临时抓取失败；重试仍失败时，将该项保留为“未验证”，排除出升级列表。
+- 若 checker 将 stderr 丢弃，读取对应 fetch 函数和 URL，使用等价的
+  `curl --fail --show-error` 定向探针，保留原始 stderr、URL 和退出码；不要
+  用空值猜版本。
+- `-4`/IPv4 只能作为网络路径诊断对照。只有 IPv4 成功时，报告传输路径差异，
+  不要静默修改 checker 或把诊断选项当成永久修复。
 
 ## B. Upgrade
 
@@ -145,6 +159,8 @@ gh run view <run-id> --job <job-id> --log
 ## 验证清单
 
 - [ ] 两份 checker 都运行，退出码已知。
+- [ ] 每份 checker 都已到终端状态后再汇总。
+- [ ] 每个 `fetch failed` 都已重试；仍失败的项列为未验证且未进入升级列表。
 - [ ] 若升级：目标 `.env` 已列出，checker 已重跑。
 - [ ] 若 push：commit SHA 已记录。
 - [ ] 若 watch CI：run URL、job、step 已记录。

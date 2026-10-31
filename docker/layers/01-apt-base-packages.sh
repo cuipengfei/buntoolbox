@@ -47,6 +47,7 @@ apt-get install -y --no-install-recommends \
     file \
     lsof \
     psmisc \
+    postgresql-client \
     bc
 rm -rf /var/lib/apt/lists/*
 ln -sf /usr/bin/fdfind /usr/bin/fd

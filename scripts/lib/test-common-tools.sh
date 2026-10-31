@@ -288,6 +288,7 @@ check "killall" "killall -V 2>&1 | grep -oE '[0-9.]+'" "killall -V 2>&1" "killal
 check "fuser" "fuser -V 2>&1 | grep -oE '[0-9.]+'" "fuser -V 2>&1" "PSmisc" "Verify installation"
 check "pstree" "pstree -V 2>&1 | grep -oE '[0-9.]+'" "pstree 1 2>&1 | head -1" "" "Show process tree"
 check "bc" "bc --version 2>&1 | grep -oE '[0-9.]+' | head -1" "echo '2+2' | bc" "4" "Calculate 2+2=4"
+check "psql" "psql --version | grep -oE '[0-9]+\\.[0-9]+' | head -1" "psql --help | head -1" "PostgreSQL interactive terminal" "Show client help"
 
 echo ""
 echo "=== Image Metadata ==="

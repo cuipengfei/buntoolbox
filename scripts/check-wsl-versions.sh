@@ -237,6 +237,11 @@ get_local_version() {
             (bd --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || \
             bd --help 2>&1 | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+' || true) | head -1
             ;;
+        psql)
+            dpkg-query -W -f='${Version}\n' postgresql-client-18 2>/dev/null \
+                | sed 's/-.*//' \
+                | head -1
+            ;;
         *)
             "$cmd" $version_flag 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?[a-z]?'
             ;;
@@ -371,6 +376,7 @@ check_tool "fd" "fd" "$(get_latest_apt_candidate fd-find)"
 check_tool "fzf" "fzf" "$(get_latest_apt_candidate fzf)"
 check_tool "tmux" "tmux" "$(get_latest_apt_candidate tmux)"
 check_tool "btop" "btop" "$(get_latest_apt_candidate btop)"
+check_tool "psql" "psql" "$(get_latest_apt_candidate postgresql-client-18)"
 
 echo ""
 echo "=== Shell 增强 ==="

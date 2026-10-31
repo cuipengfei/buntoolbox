@@ -122,6 +122,35 @@ get_latest_ubuntu_lts() {
         grep -E "^Version:" | tail -1 | grep -oE '[0-9]+\.[0-9]+' | head -1
 }
 
+# Get the dist codename matching the Dockerfile Ubuntu version
+get_current_ubuntu_codename() {
+    curl -fsSL --max-time 10 "https://changelogs.ubuntu.com/meta-release" 2>/dev/null | \
+        awk -v version="$(get_current_ubuntu)" '
+            /^Dist: / { dist = $2 }
+            /^Version: / { if (index($0, version) > 0 && dist != "") { print dist; exit } }
+        '
+}
+
+# Get the archive version of an apt package shipped by the image base distro
+get_latest_apt_package() {
+    local pkg="$1"
+    local codename
+    codename=$(get_current_ubuntu_codename)
+    [ -n "$codename" ] || return 0
+
+    curl -fsSL --max-time 20 --retry 2 --retry-all-errors \
+        "http://archive.ubuntu.com/ubuntu/dists/${codename}/main/binary-amd64/Packages.gz" 2>/dev/null | \
+        gzip -dc 2>/dev/null | \
+        awk -v pkg="$pkg" '
+            BEGIN { RS = "\n\n"; FS = "\n" }
+            $1 == "Package: " pkg {
+                for (i = 1; i <= NF; i++) {
+                    if ($i ~ /^Version: /) { print substr($i, 10); exit }
+                }
+            }
+        '
+}
+
 # Get current JDK package version from Dockerfile
 get_current_jdk() {
     get_current_version JDK_PACKAGE_VERSION
@@ -210,6 +239,17 @@ check_version() {
     fi
 }
 
+check_apt_package() {
+    local name="$1" pkg="$2" version
+    version=$(get_latest_apt_package "$pkg")
+    if [ -z "$version" ]; then
+        printf "%-12s %-12s %-12s ${RED}%s${NC}\n" "$name" "unpinned" "?" "not found in archive"
+        updates_available=1
+    else
+        printf "%-12s %-12s %-12s ${GREEN}%s${NC}\n" "$name" "unpinned" "$version" "available"
+    fi
+}
+
 echo ""
 echo "=== 基础镜像 ==="
 check_version "Ubuntu" "$(get_current_ubuntu)" "$(get_latest_ubuntu_lts)" "" ""
@@ -230,6 +270,10 @@ echo ""
 echo "=== 包管理器 ==="
 check_version "httpie" "$(get_current_version HTTPIE_VERSION)" "$(get_latest_httpie)" "" ""
 check_version "uv" "$(get_current_version UV_VERSION)" "$(get_latest_github_release astral-sh/uv)" "astral-sh/uv" "uv-x86_64-unknown-linux-gnu.tar.gz"
+
+echo ""
+echo "=== APT 工具 ==="
+check_apt_package "psql" "postgresql-client"
 
 echo ""
 echo "=== Shell 增强 ==="

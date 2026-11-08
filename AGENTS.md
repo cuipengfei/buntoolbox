@@ -111,7 +111,7 @@ buntoolbox/
 
 ## NOTES
 - **Node.js 对齐**: Dockerfile 通过 `NODE_VERSION` ARG 锁定精确版本（如 `24.15.0`），安装方式为官方 tarball。
-- **WSL 目录约定**: 本地二进制安装优先放到 `~/.local/bin`，避开 nvm/sdkman 初始化带来的额外复杂度。
+- **WSL 目录约定**: 本地二进制安装优先放到 `~/.local/bin`，避开 nvm/sdkman 初始化带来的额外复杂度。Gradle 例外：`~/.sdkman/candidates/gradle/current` 也维护一个 `current` 符号链接，本机升级 Gradle 时需要同时更新 `~/.local/bin/gradle` 和 SDKMAN 的 `current` 两个入口，保持版本一致。
 - **会话关闭协议**: 宣称完成工作前：`git status` → `git add` → `git commit -m "<msg>"` → `git push`。提交信息遵循 conventional commits 格式（`feat:` / `fix:` / `chore:` 等）。
 
 ## Agent skills

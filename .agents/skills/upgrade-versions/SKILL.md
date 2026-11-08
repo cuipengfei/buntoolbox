@@ -18,17 +18,15 @@ buntoolbox 的标准闭环：查 Docker/WSL 版本 →（授权时）升级 → 
 
 CI 已成功推送镜像、且 CI 原始 `test-image` 日志验收完成，就是完成。默认禁止本机运行 `test-image.sh`。
 
-权威来源顺序：
-
-1. `AGENTS.md` 的“新增工具 / 版本升级（标准流程）”
-2. 本 skill
-3. 历史 session（只能参考）
+本 skill 是执行指南。每个 phase 的权威规则见 `AGENTS.md` 的“新增工具 / 版本升级（标准流程）”对应 section；CI 日志验收部分见本 skill D 节。本文档不重复 `AGENTS.md` 已写明的规则。
 
 ## 模式
 
 ### full-auto
 
 用户明说“full auto”“全自动”“一路做到底”或“check upgrade commit push watch 一条龙”时，自动连续执行 A→D。
+
+full auto 默认覆盖 A→D 全部阶段；其中 B 只覆盖 `docker/layers/*.env`，WSL 本机工具升级需要单独指令。
 
 ### step-by-step（默认）
 
@@ -57,6 +55,7 @@ git status --short --branch
 - WSL 本机版本高于 repo target 时，不降级；
 - fetch failed 单列为未验证；
 - 无升级授权时，不改文件。
+- Docker 侧只能升级「当前基础镜像 apt 归档或上游官方仓库可安装」的版本。上游最新版不等于可安装：checker 报 Python 3.15 时，先查 Ubuntu 26.04（resolute）归档中 `python3.15` 的已发布包；Release 与 Updates pocket 都为 0 时保持 3.14，并在结果中说明不可安装原因。
 
 ### Fetch failure / incomplete run handling
 
@@ -81,6 +80,7 @@ git status --short --branch
 4. 禁止本地 `docker build`。
 5. 改后重跑两份 checker。
 6. 默认工具覆盖 `latest`、`i3`、`kde`；仅某 variant 使用时，必须明确边界。
+7. 验证 GitHub 上游版本时优先使用 `gh api repos/<owner>/<repo>/releases/latest --jq .tag_name`，匿名 `curl` 容易触发限流。
 
 ## C. Commit + push
 

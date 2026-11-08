@@ -138,10 +138,105 @@ get_current_python() {
     get_current_version PYTHON_VERSION
 }
 
-# Get latest Python stable version from endoflife.date API
+# Get latest Python stable version from endoflife.date API.
+# If the latest cycle is not installable in the current Ubuntu base image,
+# annotate the latest string so the checker row reports "up-to-date" against
+# the installable version instead of the raw upstream cycle.
+
+# Map Ubuntu version to codename via Launchpad
+# Returns codename on success, empty on fetch failure
+get_ubuntu_codename() {
+    local ver="$1"
+    curl -fsSL --max-time 10 "https://api.launchpad.net/devel/ubuntu/series" 2>/dev/null | \
+        jq -r --arg v "$ver" '.entries[] | select(.version==$v) | .name' | head -1
+}
+
+# Check if pythonX.Y is published in the Ubuntu archive (Release or Updates pocket)
+# Returns "available", "missing", or "fetch failed"
+check_python_installable() {
+    local codename="$1" pyver="$2"
+    local arch_link total
+    arch_link=$(curl -fsSL --max-time 15 "https://api.launchpad.net/devel/ubuntu/${codename}/amd64" 2>/dev/null | jq -r '.self_link // empty' 2>/dev/null)
+    if [ -z "$arch_link" ]; then
+        echo "fetch failed"
+        return
+    fi
+    for pocket in Release Updates; do
+        total=$(curl -fsSL --max-time 15 --get "https://api.launchpad.net/devel/ubuntu/+archive/primary" \
+            --data-urlencode 'ws.op=getPublishedBinaries' \
+            --data-urlencode "binary_name=python${pyver}" \
+            --data-urlencode 'exact_match=true' \
+            --data-urlencode "distro_arch_series=${arch_link}" \
+            --data-urlencode 'status=Published' \
+            --data-urlencode "pocket=${pocket}" 2>/dev/null | jq -r '.total_size // empty' 2>/dev/null)
+        if [ -z "$total" ]; then
+            echo "fetch failed"
+            return
+        fi
+        if [ "$total" != "0" ]; then
+            echo "available"
+            return
+        fi
+    done
+    echo "missing"
+}
+
+# Return the installable Python version for the current Ubuntu base.
+#
+# Three outcomes:
+#   - upstream == current: return upstream (up-to-date path)
+#   - upstream installable: return upstream (normal update-available path)
+#   - upstream missing from archive: return current and note to stderr, so the
+#     checker row shows up-to-date against the installable version
+#   - any fetch failure: return empty, so the checker shows fetch failed
 get_latest_python() {
-    curl -fsSL --max-time 5 "https://endoflife.date/api/python.json" 2>/dev/null | \
-        jq -r '.[0].cycle'
+    local upstream
+    upstream=$(curl -fsSL --max-time 5 "https://endoflife.date/api/python.json" 2>/dev/null | \
+        jq -r '.[0].cycle')
+    if [ -z "$upstream" ]; then
+        echo ""
+        return
+    fi
+    local current base_ver codename status
+    current=$(get_current_python)
+    if [ "$upstream" = "$current" ]; then
+        echo "$upstream"
+        return
+    fi
+    base_ver=$(get_current_ubuntu)
+    codename=$(get_ubuntu_codename "$base_ver")
+    if [ -z "$codename" ]; then
+        echo ""
+        return
+    fi
+    status=$(check_python_installable "$codename" "$upstream")
+    case "$status" in
+        available)
+            echo "$upstream"
+            ;;
+        missing)
+            echo "Python $upstream not yet in Ubuntu $base_ver ($codename) archive; keeping $current" >&2
+            echo "$current"
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
+
+
+
+# Check whether a downloadable asset exists at the constructed URL
+# Returns "ok", "missing", or empty on fetch failure
+check_asset_exists() {
+    local url="$1"
+    local code
+    code=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 15 "$url" 2>/dev/null)
+    if [ "$code" = "200" ]; then
+        echo "ok"
+    elif [ -n "$code" ]; then
+        echo "missing"
+    fi
 }
 
 # Get latest Maven version from endoflife.date API
@@ -188,6 +283,33 @@ check_version() {
         updates_available=1
     fi
 
+    # Asset existence check: only when update is available and a selected asset pattern exists
+    if [ -n "$selected" ] && [ -n "$latest" ] && [ "$current" != "$latest" ]; then
+        local env_var upper current_ver latest_asset asset_url asset_status
+        env_var=$(echo "$name" | tr 'a-z' 'A-Z' | tr -d '. ')
+        upper="${env_var}_VERSION"
+        current_ver=$(get_current_version "$upper")
+        if [ -z "$current_ver" ]; then
+            current_ver="$current"
+        fi
+        latest_asset="${selected//${current_ver}/${latest}}"
+        case "$repo" in
+            oven-sh/bun)
+                asset_url="https://github.com/${repo}/releases/download/bun-v${latest}/${latest_asset}"
+                ;;
+            astral-sh/uv)
+                asset_url="https://github.com/${repo}/releases/download/${latest}/${latest_asset}"
+                ;;
+            *)
+                asset_url="https://github.com/${repo}/releases/download/v${latest}/${latest_asset}"
+                ;;
+        esac
+        asset_status=$(check_asset_exists "$asset_url")
+        if [ "$asset_status" = "missing" ]; then
+            echo -e "  ${RED}asset missing: ${latest_asset}${NC}"
+        fi
+    fi
+
     # Show available assets in verbose mode
     if [ "$VERBOSE" = true ] && [ -n "$repo" ]; then
         local assets
@@ -199,7 +321,6 @@ check_version() {
             echo -e "  ${DIM}使用: ${selected}${NC}"
             echo -e "  ${DIM}可选:${NC}"
             echo "$assets" | while read -r asset; do
-                # Simple exact match
                 if [ "$asset" = "$selected" ]; then
                     echo -e "    ${GREEN}→ $asset${NC}"
                 else

@@ -231,7 +231,7 @@ get_latest_python() {
 check_asset_exists() {
     local url="$1"
     local code
-    code=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 15 "$url" 2>/dev/null)
+    code=$(curl -sSL -I -o /dev/null -w '%{http_code}' --max-time 15 "$url" 2>/dev/null)
     if [ "$code" = "200" ]; then
         echo "ok"
     elif [ -n "$code" ]; then
@@ -285,7 +285,7 @@ check_version() {
 
     # Asset existence check: only when update is available and a selected asset pattern exists
     if [ -n "$selected" ] && [ -n "$latest" ] && [ "$current" != "$latest" ]; then
-        local env_var upper current_ver latest_asset asset_url asset_status
+        local env_var upper current_ver latest_asset asset_url asset_status tag
         env_var=$(echo "$name" | tr 'a-z' 'A-Z' | tr -d '. ')
         upper="${env_var}_VERSION"
         current_ver=$(get_current_version "$upper")
@@ -293,17 +293,11 @@ check_version() {
             current_ver="$current"
         fi
         latest_asset="${selected//${current_ver}/${latest}}"
-        case "$repo" in
-            oven-sh/bun)
-                asset_url="https://github.com/${repo}/releases/download/bun-v${latest}/${latest_asset}"
-                ;;
-            astral-sh/uv)
-                asset_url="https://github.com/${repo}/releases/download/${latest}/${latest_asset}"
-                ;;
-            *)
-                asset_url="https://github.com/${repo}/releases/download/v${latest}/${latest_asset}"
-                ;;
-        esac
+        tag=$(fetch_github_release "$repo" | jq -r '.tag_name // empty')
+        if [ -z "$tag" ]; then
+            tag="v${latest}"
+        fi
+        asset_url="https://github.com/${repo}/releases/download/${tag}/${latest_asset}"
         asset_status=$(check_asset_exists "$asset_url")
         if [ "$asset_status" = "missing" ]; then
             echo -e "  ${RED}asset missing: ${latest_asset}${NC}"
